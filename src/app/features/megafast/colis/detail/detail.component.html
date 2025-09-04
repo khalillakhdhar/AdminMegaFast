@@ -1,0 +1,324 @@
+<div class="container-fluid">
+  <!-- Page Title -->
+  <app-page-title title="Détail du Colis" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <div class="row" *ngIf="shipment$ | async as shipment; else loadingTemplate">
+    <!-- Main Card -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+              <h4 class="card-title">{{shipment.barcode}}</h4>
+              <span class="badge" [ngClass]="getStatusBadgeClass(shipment.status)">
+                {{getStatusLabel(shipment.status)}}
+              </span>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bx bx-dots-horizontal-rounded"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" (click)="editShipment()">
+                  <i class="bx bx-edit me-2"></i>Modifier</a></li>
+                <li><a class="dropdown-item" (click)="printShipment()">
+                  <i class="bx bx-printer me-2"></i>Imprimer</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li *ngIf="canMarkAsDelivered(shipment.status)">
+                  <a class="dropdown-item text-success" (click)="markAsDelivered()">
+                    <i class="bx bx-check me-2"></i>Marquer livré</a></li>
+                <li *ngIf="canCancel(shipment.status)">
+                  <a class="dropdown-item text-warning" (click)="cancelShipment()">
+                    <i class="bx bx-x me-2"></i>Annuler</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Basic Info -->
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="fw-semibold">Informations Client</h6>
+              <div class="table-responsive">
+                <table class="table table-borderless mb-0">
+                  <thead class="visually-hidden">
+                    <tr>
+                      <th>Propriété</th>
+                      <th>Valeur</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="fw-medium">Nom:</td>
+                      <td>{{shipment.clientName || 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Téléphone:</td>
+                      <td>{{shipment.clientPhone || 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Adresse:</td>
+                      <td>{{shipment.address || 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Ville:</td>
+                      <td>{{shipment.city || 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Délégation:</td>
+                      <td>{{shipment.delegation || 'N/A'}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-semibold">Détails Colis</h6>
+              <div class="table-responsive">
+                <table class="table table-borderless mb-0">
+                  <thead class="visually-hidden">
+                    <tr>
+                      <th>Propriété</th>
+                      <th>Valeur</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="fw-medium">Montant:</td>
+                      <td>
+                        <span class="fw-semibold">{{shipment.amount | currency:'TND'}}</span>
+                        <small class="text-muted ms-1">({{shipment.paymentMode?.toUpperCase()}})</small>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Poids:</td>
+                      <td>{{shipment.weight ? (shipment.weight + ' kg') : 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Volume:</td>
+                      <td>{{shipment.volume ? (shipment.volume + ' m³') : 'N/A'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Créé le:</td>
+                      <td>{{shipment.createdAt?.toDate() | date:'dd/MM/yyyy à HH:mm'}}</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-medium">Mis à jour:</td>
+                      <td>{{shipment.updatedAt?.toDate() | date:'dd/MM/yyyy à HH:mm'}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mt-4" *ngIf="shipment.notes">
+            <h6 class="fw-semibold">Notes</h6>
+            <p class="text-muted">{{shipment.notes}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Timeline -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Historique</h5>
+          <div class="timeline" *ngIf="shipment.history?.length; else noHistoryTemplate">
+            <div class="timeline-item" *ngFor="let entry of shipment.history; trackBy: trackByHistoryEntry">
+              <div class="timeline-marker" [ngClass]="getHistoryMarkerClass(entry.status)">
+                <i [ngClass]="getHistoryIcon(entry.status)"></i>
+              </div>
+              <div class="timeline-content">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1">{{getStatusLabel(entry.status)}}</h6>
+                    <p class="text-muted mb-1" *ngIf="entry.note">{{entry.note}}</p>
+                    <small class="text-muted">{{entry.at?.toDate() | date:'dd/MM/yyyy à HH:mm'}}</small>
+                  </div>
+                  <span class="badge" [ngClass]="getStatusBadgeClass(entry.status)">
+                    {{getStatusLabel(entry.status)}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noHistoryTemplate>
+            <div class="text-center p-4">
+              <i class="bx bx-history font-size-48 text-muted"></i>
+              <p class="text-muted mt-2">Aucun historique disponible</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Assignment Card -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Assignations</h5>
+
+          <!-- Driver Assignment -->
+          <div class="mb-3">
+            <div class="form-label">Livreur</div>
+            <div class="d-flex align-items-center">
+              <span *ngIf="shipment.assignedTo" class="badge bg-info me-2">
+                {{getDriverName(shipment.assignedTo)}}
+              </span>
+              <span *ngIf="!shipment.assignedTo" class="text-muted me-2">Non assigné</span>
+              <button class="btn btn-sm btn-outline-primary" (click)="openAssignDriverModal()">
+                <i class="bx bx-user-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Batch Assignment -->
+          <div class="mb-3">
+            <div class="form-label">Lot</div>
+            <div class="d-flex align-items-center">
+              <span *ngIf="shipment.batchId" class="badge bg-secondary me-2">
+                {{getBatchCode(shipment.batchId)}}
+              </span>
+              <span *ngIf="!shipment.batchId" class="text-muted me-2">Aucun lot</span>
+              <button class="btn btn-sm btn-outline-primary" (click)="openAssignBatchModal()">
+                <i class="bx bx-package"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-success btn-sm"
+                    *ngIf="canMarkAsDelivered(shipment.status)"
+                    (click)="markAsDelivered()"
+                    [title]="'Marquer livré'">
+              <i class="bx bx-check"></i>
+            </button>
+            <button class="btn btn-warning btn-sm"
+                    *ngIf="canCancel(shipment.status)"
+                    (click)="cancelShipment()"
+                    [title]="'Annuler'">
+              <i class="bx bx-x"></i>
+            </button>
+            <button class="btn btn-info btn-sm" 
+                    (click)="printShipment()"
+                    [title]="'Imprimer'">
+              <i class="bx bx-printer"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Card -->
+      <div class="card" *ngIf="shipment.geo">
+        <div class="card-body">
+          <h5 class="card-title">Localisation</h5>
+          <div class="d-flex align-items-center">
+            <i class="bx bx-map text-primary me-2"></i>
+            <span>{{shipment.geo.lat}}, {{shipment.geo.lng}}</span>
+          </div>
+          <button class="btn btn-outline-primary btn-sm mt-2" (click)="showOnMap()">
+            <i class="bx bx-map-pin me-1"></i> Voir sur la carte
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Statistiques</h5>
+          <div class="row text-center">
+            <div class="col-6">
+              <div class="border-end">
+                <h4 class="mb-1">{{daysSinceCreation}}</h4>
+                <p class="text-muted mb-0">Jours</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <h4 class="mb-1">{{shipment.history?.length || 0}}</h4>
+              <p class="text-muted mb-0">Événements</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="text-center p-5">
+    <div class="spinner-border text-primary spinner-border-lg">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Chargement du colis...</p>
+  </div>
+</ng-template>
+
+<!-- Assign Driver Modal -->
+<div #assignDriverModal class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Assigner un livreur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="assignDriverForm">
+          <div class="mb-3">
+            <label class="form-label" for="driverSelect">Sélectionner un livreur</label>
+            <ng-select id="driverSelect" formControlName="driverId" placeholder="Choisir un livreur...">
+              <ng-option *ngFor="let driver of drivers" [value]="driver.value">
+                {{driver.label}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary"
+                (click)="assignDriver()"
+                [disabled]="!assignDriverForm.get('driverId')?.value || isProcessing">
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+          Assigner
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Batch Modal -->
+<div #assignBatchModal class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Assigner au lot</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="assignBatchForm">
+          <div class="mb-3">
+            <label class="form-label" for="batchSelect">Sélectionner un lot</label>
+            <ng-select id="batchSelect" formControlName="batchId" placeholder="Choisir un lot...">
+              <ng-option *ngFor="let batch of batches" [value]="batch.id">
+                {{batch.code}} - {{batch.assignedTo}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary"
+                (click)="assignToBatch()"
+                [disabled]="!assignBatchForm.get('batchId')?.value || isProcessing">
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+          Assigner
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

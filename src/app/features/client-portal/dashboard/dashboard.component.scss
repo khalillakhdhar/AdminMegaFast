@@ -1,0 +1,345 @@
+/* Dashboard Styles - Thème Clair avec Bleu */
+.container-fluid {
+  background: #f8fafc;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+/* Page Title */
+.page-title-box {
+  margin-bottom: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.page-title-box h4 {
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.breadcrumb {
+  background: transparent;
+  margin-bottom: 0;
+}
+
+.breadcrumb-item.active {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+/* Stats Cards */
+.mini-stats-wid {
+  .card {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .mini-stat-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  }
+
+  .mini-stat-icon.bg-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  }
+
+  .mini-stat-icon.bg-info {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+  }
+
+  .mini-stat-icon.bg-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+  }
+
+  .mini-stat-icon.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  }
+
+  h4 {
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 2rem;
+  }
+
+  .text-muted {
+    color: #64748b !important;
+    font-weight: 500;
+  }
+}
+
+/* Quick Create Shipment Card */
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.05);
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 15px 15px 0 0;
+  padding: 1.5rem;
+}
+
+.card-header h4 {
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.card-header .text-muted {
+  color: #64748b !important;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Form Elements */
+.form-label {
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-label i {
+  font-size: 1rem;
+}
+
+.form-select,
+.form-control {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.form-select option {
+  padding: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+  transition: all 0.3s ease;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline-primary {
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.btn-outline-info {
+  color: #06b6d4;
+  border: 1px solid #06b6d4;
+  background: transparent;
+}
+
+.btn-outline-info:hover {
+  background: #06b6d4;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+}
+
+.btn-outline-secondary {
+  color: #64748b;
+  border: 1px solid #64748b;
+  background: transparent;
+}
+
+.btn-outline-secondary:hover {
+  background: #64748b;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
+}
+
+/* Alert */
+.alert {
+  border-radius: 10px;
+  border: none;
+  font-weight: 500;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  color: #1e40af;
+  border-left: 4px solid #3b82f6;
+}
+
+/* Table */
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.05);
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  color: #374151;
+  font-weight: 600;
+  border: none;
+  padding: 1rem;
+}
+
+.table tbody td {
+  padding: 1rem;
+  border-color: #f1f5f9;
+  color: #4b5563;
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.75em;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.badge-soft-secondary {
+  color: #6b7280;
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
+.badge-soft-warning {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.badge-soft-info {
+  color: #06b6d4;
+  background-color: rgba(6, 182, 212, 0.1);
+}
+
+.badge-soft-success {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.badge-soft-danger {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.badge-soft-dark {
+  color: #374151;
+  background-color: rgba(55, 65, 81, 0.1);
+}
+
+/* Links */
+.text-body {
+  color: #1e293b !important;
+  text-decoration: none;
+}
+
+.text-body:hover {
+  color: #3b82f6 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+
+  .page-title-box {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .mini-stats-wid .card-body {
+    padding: 1rem;
+  }
+
+  .mini-stats-wid h4 {
+    font-size: 1.5rem;
+  }
+}

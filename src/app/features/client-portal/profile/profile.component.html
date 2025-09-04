@@ -1,0 +1,206 @@
+<div class="container-fluid">
+  <!-- Page Title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Mon Profil</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a [routerLink]="['/client']">Client</a></li>
+            <li class="breadcrumb-item active">Mon Profil</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row" *ngIf="client$ | async as client">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Informations personnelles</h4>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label">Nom complet *</label>
+              <input type="text" class="form-control" id="name"
+                     formControlName="name"
+                     placeholder="Votre nom complet">
+              <div *ngIf="isFieldInvalid('name')" class="text-danger small mt-1">
+                Le nom est requis
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email"
+                     formControlName="email"
+                     placeholder="votre@email.com"
+                     readonly>
+              <small class="text-muted">L'email ne peut pas être modifié</small>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Téléphone</label>
+              <input type="tel" class="form-control" id="phone"
+                     formControlName="phone"
+                     placeholder="+216 XX XXX XXX">
+            </div>
+            <div class="col-md-6">
+              <label for="company" class="form-label">Entreprise</label>
+              <input type="text" class="form-control" id="company"
+                     formControlName="company"
+                     placeholder="Nom de votre entreprise">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="vatNumber" class="form-label">Matricule fiscal</label>
+              <input type="text" class="form-control" id="vatNumber"
+                     formControlName="vatNumber"
+                     placeholder="Votre matricule fiscal">
+            </div>
+          </div>
+
+          <!-- Address Section -->
+          <h5 class="font-size-14 mb-3 mt-4">Adresse</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="addressLine1" class="form-label">Adresse ligne 1</label>
+              <input type="text" class="form-control" id="addressLine1"
+                     formControlName="addressLine1"
+                     placeholder="Rue, numéro...">
+            </div>
+            <div class="col-md-6">
+              <label for="addressLine2" class="form-label">Adresse ligne 2</label>
+              <input type="text" class="form-control" id="addressLine2"
+                     formControlName="addressLine2"
+                     placeholder="Appartement, étage...">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="city" class="form-label">Ville</label>
+              <input type="text" class="form-control" id="city"
+                     formControlName="city"
+                     placeholder="Ville">
+            </div>
+            <div class="col-md-4">
+              <label for="delegation" class="form-label">Délégation</label>
+              <input type="text" class="form-control" id="delegation"
+                     formControlName="delegation"
+                     placeholder="Délégation">
+            </div>
+            <div class="col-md-4">
+              <label for="postalCode" class="form-label">Code postal</label>
+              <input type="text" class="form-control" id="postalCode"
+                     formControlName="postalCode"
+                     placeholder="Code postal">
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="country" class="form-label">Pays</label>
+              <input type="text" class="form-control" id="country"
+                     formControlName="country"
+                     placeholder="Pays">
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-12">
+              <label for="notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="notes" rows="3"
+                        formControlName="notes"
+                        placeholder="Notes additionnelles..."></textarea>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="row">
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary"
+                      [disabled]="profileForm.invalid || isSubmitting">
+                <i class="bx bx-save me-1" *ngIf="!isSubmitting"></i>
+                <i class="bx bx-loader-alt bx-spin me-1" *ngIf="isSubmitting"></i>
+                {{ isSubmitting ? 'Sauvegarde...' : 'Sauvegarder' }}
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Account Info -->
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Informations du compte</h4>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="avatar-sm me-3">
+            <div class="avatar-title rounded-circle bg-soft-primary text-primary">
+              <i class="bx bx-user font-size-16"></i>
+            </div>
+          </div>
+          <div>
+            <h6 class="mb-1">{{ client.name }}</h6>
+            <p class="text-muted mb-0">Client</p>
+          </div>
+        </div>
+
+        <div class="border-top pt-3">
+          <div class="row text-center">
+            <div class="col-6">
+              <div>
+                <p class="text-muted mb-1">Compte créé</p>
+                <h6 class="mb-0">{{ client.createdAt?.toDate() | date: 'MMM yyyy' }}</h6>
+              </div>
+            </div>
+            <div class="col-6">
+              <div>
+                <p class="text-muted mb-1">Statut</p>
+                <span class="badge" [ngClass]="client.isActive ? 'badge-soft-success' : 'badge-soft-danger'">
+                  {{ client.isActive ? 'Actif' : 'Inactif' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Sécurité</h4>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-primary" (click)="changePassword()">
+            <i class="bx bx-lock-alt me-1"></i>
+            Changer le mot de passe
+          </button>
+        </div>
+
+        <div class="mt-3" *ngIf="client.lastLoginAt">
+          <small class="text-muted">
+            Dernière connexion: {{ client.lastLoginAt?.toDate() | date: 'dd/MM/yyyy HH:mm' }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

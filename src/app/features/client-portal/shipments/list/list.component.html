@@ -1,0 +1,135 @@
+<div class="container-fluid">
+  <!-- Page Title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Mes Colis</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a [routerLink]="['/client']">Client</a></li>
+            <li class="breadcrumb-item active">Mes Colis</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h4 class="card-title mb-0">Liste de mes colis</h4>
+          </div>
+          <div class="col-md-6 text-end">
+            <a [routerLink]="['/client/shipments/create']" class="btn btn-primary">
+              <i class="bx bx-plus me-1"></i>
+              Nouveau Colis
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Search -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="bx bx-search"></i></span>
+              <input type="text" class="form-control" placeholder="Rechercher par code de suivi..."
+                     [(ngModel)]="searchTerm" (input)="onSearch()">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+              <option value="">Tous les statuts</option>
+              <option value="created">Créé</option>
+              <option value="assigned">Assigné</option>
+              <option value="in_transit">En Transit</option>
+              <option value="delivered">Livré</option>
+              <option value="returned">Retourné</option>
+              <option value="canceled">Annulé</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-nowrap align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Code de Suivi</th>
+                <th scope="col">Destinataire</th>
+                <th scope="col">Destination</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Date de Création</th>
+                <th scope="col">Montant</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let shipment of filteredShipments">
+                <td>
+                  <a href="javascript:void(0);" class="text-body fw-bold">
+                    {{ shipment.barcode }}
+                  </a>
+                </td>
+                <td>{{ shipment.clientName || 'Non spécifié' }}</td>
+                <td>
+                  <div>
+                    <strong>{{ shipment.city }}</strong><br>
+                    <small class="text-muted">{{ shipment.delegation }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(shipment.status)">
+                    {{ getStatusLabel(shipment.status) }}
+                  </span>
+                </td>
+                <td>{{ shipment.createdAt?.toDate() | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span *ngIf="shipment.amount">
+                    {{ shipment.amount | currency: 'TND' : 'symbol' : '1.2-2' }}
+                  </span>
+                  <span *ngIf="!shipment.amount" class="text-muted">-</span>
+                </td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-soft-info btn-sm" (click)="trackShipment(shipment)">
+                      <i class="bx bx-show-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredShipments.length === 0">
+                <td colspan="7" class="text-center text-muted py-4">
+                  <div>
+                    <i class="bx bx-package empty-state-icon"></i>
+                    <p class="mt-2 mb-0">Aucun colis trouvé</p>
+                    <p class="text-muted small">
+                      <a [routerLink]="['/client/shipments/create']" class="text-primary">
+                        Créer votre premier colis
+                      </a>
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="row mt-4" *ngIf="filteredShipments.length > 0">
+          <div class="col-sm-6">
+            <div>
+              <p class="mb-sm-0">
+                Affichage de {{ filteredShipments.length }} colis
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

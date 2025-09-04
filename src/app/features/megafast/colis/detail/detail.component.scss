@@ -1,0 +1,418 @@
+// Colis Detail Component Styles
+.colis-detail {
+  .main-card {
+    .card-title {
+      margin-bottom: 0.5rem;
+      color: var(--bs-gray-900);
+    }
+    
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .info-table {
+      .table {
+        tbody {
+          tr {
+            td {
+              padding: 0.5rem 0;
+              border: none;
+              
+              &.fw-medium {
+                color: var(--bs-gray-700);
+                width: 40%;
+              }
+              
+              &:last-child {
+                color: var(--bs-gray-900);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 0;
+    list-style: none;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 2rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--bs-gray-300);
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .timeline-marker {
+        position: absolute;
+        left: 1.25rem;
+        top: 0.25rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        z-index: 1;
+        
+        &.timeline-marker-primary {
+          background-color: var(--bs-primary);
+          color: white;
+        }
+        
+        &.timeline-marker-secondary {
+          background-color: var(--bs-secondary);
+          color: white;
+        }
+        
+        &.timeline-marker-success {
+          background-color: var(--bs-success);
+          color: white;
+        }
+        
+        &.timeline-marker-info {
+          background-color: var(--bs-info);
+          color: white;
+        }
+        
+        &.timeline-marker-warning {
+          background-color: var(--bs-warning);
+          color: var(--bs-dark);
+        }
+        
+        &.timeline-marker-danger {
+          background-color: var(--bs-danger);
+          color: white;
+        }
+      }
+      
+      .timeline-content {
+        margin-left: 4rem;
+        padding: 1rem;
+        background: var(--bs-gray-50);
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--bs-primary);
+        
+        h6 {
+          color: var(--bs-gray-900);
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+        
+        p {
+          color: var(--bs-gray-700);
+          margin-bottom: 0.5rem;
+          
+          &:last-of-type {
+            margin-bottom: 0;
+          }
+        }
+        
+        small {
+          color: var(--bs-gray-600);
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+
+  .assignment-card {
+    .form-label {
+      font-weight: 500;
+      color: var(--bs-gray-700);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      
+      &.bg-info {
+        background-color: var(--bs-info) !important;
+      }
+      
+      &.bg-secondary {
+        background-color: var(--bs-secondary) !important;
+      }
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .location-card {
+    .text-primary {
+      color: var(--bs-primary) !important;
+    }
+    
+    .coordinates {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--bs-gray-700);
+    }
+  }
+
+  .stats-card {
+    .border-end {
+      border-right: 1px solid var(--bs-gray-200) !important;
+    }
+    
+    h4 {
+      color: var(--bs-primary);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    p {
+      color: var(--bs-gray-600);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+  }
+
+  .loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-history {
+    padding: 2rem;
+    text-align: center;
+    
+    i {
+      font-size: 3rem;
+      color: var(--bs-gray-400);
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: var(--bs-gray-600);
+      margin: 0;
+    }
+  }
+}
+
+// Modal Styles
+.assign-modal {
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .form-label {
+    font-weight: 500;
+    color: var(--bs-gray-700);
+    margin-bottom: 0.5rem;
+  }
+  
+  .ng-select {
+    .ng-select-container {
+      border-color: var(--bs-gray-300);
+      border-radius: 0.375rem;
+      
+      &.ng-select-focused {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+      }
+    }
+    
+    .ng-select-placeholder {
+      color: var(--bs-gray-500);
+    }
+  }
+  
+  .modal-footer {
+    .btn {
+      &:not(:last-child) {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 992px) {
+  .colis-detail {
+    .timeline {
+      &::before {
+        left: 1.5rem;
+      }
+      
+      .timeline-item {
+        .timeline-marker {
+          left: 0.75rem;
+        }
+        
+        .timeline-content {
+          margin-left: 3rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .colis-detail {
+    .main-card {
+      .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        
+        .dropdown {
+          margin-top: 1rem;
+          align-self: flex-end;
+        }
+      }
+    }
+    
+    .timeline {
+      .timeline-item {
+        .timeline-content {
+          margin-left: 2.5rem;
+          padding: 0.75rem;
+        }
+      }
+    }
+    
+    .stats-card {
+      .row {
+        text-align: left !important;
+        
+        .col-6 {
+          margin-bottom: 1rem;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+        
+        .border-end {
+          border-right: none !important;
+          border-bottom: 1px solid var(--bs-gray-200) !important;
+          padding-bottom: 1rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .colis-detail {
+    .assignment-card {
+      .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        
+        .badge {
+          margin-bottom: 0.5rem;
+        }
+        
+        .btn-sm {
+          align-self: flex-end;
+        }
+      }
+    }
+  }
+}
+
+// Print Styles
+@media print {
+  .colis-detail {
+    .dropdown,
+    .btn,
+    .modal {
+      display: none !important;
+    }
+    
+    .card {
+      border: 1px solid #000 !important;
+      box-shadow: none !important;
+    }
+    
+    .timeline {
+      &::before {
+        background: #000 !important;
+      }
+      
+      .timeline-marker {
+        border: 1px solid #000 !important;
+      }
+    }
+  }
+}
+
+// Dark Mode Support
+@media (prefers-color-scheme: dark) {
+  .colis-detail {
+    .timeline {
+      &::before {
+        background: var(--bs-gray-600);
+      }
+      
+      .timeline-item {
+        .timeline-content {
+          background: var(--bs-gray-800);
+          border-left-color: var(--bs-primary);
+          
+          h6 {
+            color: var(--bs-light);
+          }
+          
+          p {
+            color: var(--bs-gray-300);
+          }
+          
+          small {
+            color: var(--bs-gray-400);
+          }
+        }
+      }
+    }
+    
+    .info-table {
+      .table {
+        tbody {
+          tr {
+            td {
+              &.fw-medium {
+                color: var(--bs-gray-400);
+              }
+              
+              &:last-child {
+                color: var(--bs-light);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

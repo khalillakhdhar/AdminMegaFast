@@ -1,0 +1,23 @@
+/* Create Colis specific styles */
+
+/* Limit column widths for inputs */
+.col-qty { inline-size: 110px; }
+.col-price { inline-size: 140px; }
+.col-weight { inline-size: 140px; }
+.col-actions { inline-size: 60px; }
+
+/* Wizard nav active state matches Skote look */
+.nav-pills .nav-link {
+  border-radius: 0.25rem;
+}
+
+.nav-pills .nav-link.active {
+  color: #fff;
+  background-color: var(--bs-primary, #556ee6);
+}
+
+/* Compact table cells */
+.table.align-middle td, .table.align-middle th { vertical-align: middle; }
+
+/* Spinners alignment inside buttons */
+.btn .spinner-border { vertical-align: text-bottom; }

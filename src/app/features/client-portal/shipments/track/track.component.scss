@@ -1,0 +1,204 @@
+// Track Shipment Styles - Harmonisé avec le dashboard principal
+.page-title-box {
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 1rem 2rem rgba(18, 38, 63, 0.08);
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.map-icon {
+  font-size: 3rem;
+}
+
+.badge-lg {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.badge-soft-secondary {
+  color: #6c757d;
+  background-color: rgba(108, 117, 125, 0.15);
+}
+
+.badge-soft-warning {
+  color: #f1b44c;
+  background-color: rgba(241, 180, 76, 0.15);
+}
+
+.badge-soft-info {
+  color: #39afd1;
+  background-color: rgba(57, 175, 209, 0.15);
+}
+
+.badge-soft-success {
+  color: #06a94d;
+  background-color: rgba(6, 169, 77, 0.15);
+}
+
+.badge-soft-danger {
+  color: #fd625e;
+  background-color: rgba(253, 98, 94, 0.15);
+}
+
+.badge-soft-dark {
+  color: #495057;
+  background-color: rgba(73, 80, 87, 0.15);
+}
+
+.font-size-14 {
+  font-size: 14px !important;
+}
+
+.font-size-18 {
+  font-size: 18px !important;
+}
+
+// Timeline harmonisé avec le style principal
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -22px;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.timeline-marker.bg-success {
+  border-color: #06a94d;
+  background-color: #06a94d;
+  color: white;
+}
+
+.timeline-marker.bg-info {
+  border-color: #39afd1;
+  background-color: #39afd1;
+  color: white;
+}
+
+.timeline-marker.bg-warning {
+  border-color: #f1b44c;
+  background-color: #f1b44c;
+  color: white;
+}
+
+.timeline-marker.bg-secondary {
+  border-color: #6c757d;
+  background-color: #6c757d;
+  color: white;
+}
+
+.timeline-marker.bg-primary {
+  border-color: #556ee6;
+  background-color: #556ee6;
+  color: white;
+}
+
+.timeline-content {
+  padding-left: 20px;
+}
+
+.input-group-lg .input-group-text {
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+// Styles de formulaire harmonisés
+.form-control {
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #74788d;
+  box-shadow: 0 0 0 0.2rem rgba(116, 120, 141, 0.25);
+}
+
+.form-label {
+  color: #495057;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.alert {
+  border: none;
+  border-radius: 8px;
+}
+
+.btn-soft-primary {
+  color: #556ee6;
+  background-color: rgba(85, 110, 230, 0.15);
+  border-color: transparent;
+}
+
+.btn-soft-primary:hover {
+  color: #4c63d2;
+  background-color: rgba(85, 110, 230, 0.25);
+}
+
+// État vide avec icône harmonisée
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  .empty-state-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state-description {
+    color: #74788d;
+  }
+}

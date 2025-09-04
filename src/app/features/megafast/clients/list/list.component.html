@@ -1,0 +1,493 @@
+<div class="container-fluid">
+  <app-page-title title="Gestion des Clients" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-1 ms-3">
+              <div class="d-flex align-items-center">
+                <h5 class="mb-0">{{ clients.length }}</h5>
+                <div class="avatar-sm ms-auto">
+                  <div class="avatar-title bg-primary-subtle text-primary rounded">
+                    <i class="bx bx-user font-size-18"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mb-0">Total Clients</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-1 ms-3">
+              <div class="d-flex align-items-center">
+                <h5 class="mb-0">{{ getActiveClientsCount() }}</h5>
+                <div class="avatar-sm ms-auto">
+                  <div class="avatar-title bg-success-subtle text-success rounded">
+                    <i class="bx bx-check-circle font-size-18"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mb-0">Clients Actifs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-1 ms-3">
+              <div class="d-flex align-items-center">
+                <h5 class="mb-0">{{ getNewClientsCount() }}</h5>
+                <div class="avatar-sm ms-auto">
+                  <div class="avatar-title bg-info-subtle text-info rounded">
+                    <i class="bx bx-user-plus font-size-18"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mb-0">Nouveaux (30j)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-1 ms-3">
+              <div class="d-flex align-items-center">
+                <h5 class="mb-0">{{ formatCurrency(getTotalValue()) }}</h5>
+                <div class="avatar-sm ms-auto">
+                  <div class="avatar-title bg-warning-subtle text-warning rounded">
+                    <i class="bx bx-wallet font-size-18"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="text-muted mb-0">Valeur Totale</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <!-- Search and Actions Bar -->
+          <div class="row mb-3">
+            <div class="col-sm-6">
+              <div class="search-box me-2 mb-2 d-inline-block">
+                <div class="position-relative">
+                  <input type="text"
+                         class="form-control"
+                         placeholder="Rechercher un client..."
+                         [value]="searchTerm"
+                         (input)="onSearch($event)">
+                  <i class="bx bx-search-alt search-icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="text-sm-end">
+                <div class="btn-group me-2">
+                  <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bx bx-export me-1"></i> Exporter
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" (click)="exportToExcel()"><i class="bx bx-file me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" (click)="exportToPDF()"><i class="bx bx-file-pdf me-2"></i>PDF</a></li>
+                  </ul>
+                </div>
+                <button type="button"
+                        class="btn btn-success btn-rounded waves-effect waves-light"
+                        (click)="openNewClientModal()">
+                  <i class="mdi mdi-plus me-1"></i> Nouveau Client
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clients Table -->
+          <div class="table-responsive">
+            <table class="table align-middle table-nowrap table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th (click)="onSort('name')" class="cursor-pointer">
+                    Nom
+                    <i class="bx bx-sort-alt-2 ms-1"></i>
+                  </th>
+                  <th>Contact</th>
+                  <th>Entreprise</th>
+                  <th>Statistiques</th>
+                  <th>Statut</th>
+                  <th>Compte</th>
+                  <th (click)="onSort('createdAt')" class="cursor-pointer">
+                    Date création
+                    <i class="bx bx-sort-alt-2 ms-1"></i>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading) {
+                  <tr>
+                    <td colspan="8" class="text-center py-4">
+                      <div class="spinner-border text-primary" aria-label="Chargement en cours">
+                        <span class="visually-hidden">Chargement...</span>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (client of getPaginatedClients(); track client.id) {
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="avatar-sm me-3">
+                            <div class="avatar-title bg-primary text-white rounded-circle">
+                              {{ client.name.charAt(0).toUpperCase() }}
+                            </div>
+                          </div>
+                          <div>
+                            <h6 class="mb-0">{{ client.name }}</h6>
+                            @if (client.vatNumber) {
+                              <small class="text-muted">{{ client.vatNumber }}</small>
+                            }
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (client.email) {
+                          <div class="text-muted small">
+                            <i class="bx bx-envelope me-1"></i>{{ client.email }}
+                          </div>
+                        }
+                        @if (client.phone) {
+                          <div class="text-muted small">
+                            <i class="bx bx-phone me-1"></i>{{ client.phone }}
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        @if (client.company) {
+                          <span class="fw-medium">{{ client.company }}</span>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        @if (clientStats[client.id!] && !loadingStats) {
+                          <div class="text-nowrap">
+                            <small class="d-block text-muted">
+                              {{ clientStats[client.id!].totalOrders }} commandes
+                            </small>
+                            <small class="d-block fw-medium text-success">
+                              {{ formatCurrency(clientStats[client.id!].totalValue) }}
+                            </small>
+                          </div>
+                        } @else {
+                          <div class="placeholder-glow">
+                            <small class="placeholder col-8"></small>
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        <span [class]="getStatusClass(client)">
+                          {{ getStatusText(client) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span [class]="getAccountStatusClass(client)">
+                          {{ getAccountStatusText(client) }}
+                        </span>
+                        @if (client.hasAccount && client.accountCreatedAt) {
+                          <div>
+                            <small class="text-muted">
+                              Créé le {{ client.accountCreatedAt?.toDate?.() || client.accountCreatedAt | date:'dd/MM/yyyy' }}
+                            </small>
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        <small class="text-muted">
+                          {{ client.createdAt?.toDate?.() || client.createdAt | date:'dd/MM/yyyy' }}
+                        </small>
+                      </td>
+                      <td>
+                        <div class="btn-group" aria-label="Actions du client">
+                          <button type="button"
+                                  class="btn btn-light btn-sm"
+                                  [routerLink]="['/megafast/clients', client.id]"
+                                  title="Voir détails">
+                            <i class="bx bx-show"></i>
+                          </button>
+                          <button type="button"
+                                  class="btn btn-light btn-sm"
+                                  (click)="openEditClientModal(client)"
+                                  title="Modifier">
+                            <i class="bx bx-edit-alt"></i>
+                          </button>
+                          
+                          <!-- Account Management Actions -->
+                          @if (!hasAccount(client) && client.email) {
+                            <button type="button"
+                                    class="btn btn-success btn-sm"
+                                    (click)="createAccountForClient(client.id!)"
+                                    title="Créer un compte utilisateur">
+                              <i class="bx bx-user-plus"></i>
+                            </button>
+                          }
+                          
+                          @if (hasAccount(client)) {
+                            <div class="btn-group" aria-label="Actions compte">
+                              <button type="button"
+                                      class="btn btn-warning btn-sm"
+                                      (click)="resetClientPassword(client.id!)"
+                                      title="Réinitialiser le mot de passe">
+                                <i class="bx bx-reset"></i>
+                              </button>
+                              @if (client.isActive) {
+                                <button type="button"
+                                        class="btn btn-secondary btn-sm"
+                                        (click)="disableClientAccount(client.id!)"
+                                        title="Désactiver le compte">
+                                  <i class="bx bx-user-x"></i>
+                                </button>
+                              } @else {
+                                <button type="button"
+                                        class="btn btn-success btn-sm"
+                                        (click)="enableClientAccount(client.id!)"
+                                        title="Réactiver le compte">
+                                  <i class="bx bx-user-check"></i>
+                                </button>
+                              }
+                            </div>
+                          }
+                          
+                          <button type="button"
+                                  class="btn btn-light btn-sm text-danger"
+                                  (click)="openDeleteModal(client.id!)"
+                                  title="Supprimer">
+                            <i class="bx bx-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="8" class="text-center py-4">
+                        <div class="text-muted">
+                          <i class="bx bx-search font-size-24 d-block mb-2"></i>
+                          Aucun client trouvé
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          @if (totalItems > itemsPerPage) {
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <div class="text-muted">
+                    Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
+                    {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} clients
+                  </div>
+                  <pagination
+                    [totalItems]="totalItems"
+                    [itemsPerPage]="itemsPerPage"
+                    [(ngModel)]="currentPage"
+                    (pageChanged)="pageChanged($event)"
+                    class="pagination-rounded">
+                  </pagination>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nouveau/Modifier Client -->
+<ng-template #newClientModal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      {{ isEditMode ? 'Modifier le client' : 'Nouveau client' }}
+    </h5>
+    <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="clientForm" (ngSubmit)="saveClient()">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="clientName" class="form-label">Nom <span class="text-danger">*</span></label>
+            <input type="text" id="clientName" class="form-control" formControlName="name"
+                   placeholder="Nom du client"
+                   [class.is-invalid]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+            @if (clientForm.get('name')?.invalid && clientForm.get('name')?.touched) {
+              <div class="invalid-feedback">Le nom est requis (min. 2 caractères)</div>
+            }
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="clientEmail" class="form-label">Email</label>
+            <input type="email" id="clientEmail" class="form-control" formControlName="email"
+                   placeholder="email@exemple.com"
+                   [class.is-invalid]="clientForm.get('email')?.invalid && clientForm.get('email')?.touched">
+            @if (clientForm.get('email')?.invalid && clientForm.get('email')?.touched) {
+              <div class="invalid-feedback">Email invalide</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="clientPhone" class="form-label">Téléphone</label>
+            <input type="tel" id="clientPhone" class="form-control" formControlName="phone" placeholder="+216 XX XXX XXX">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="clientCompany" class="form-label">Entreprise</label>
+            <input type="text" id="clientCompany" class="form-control" formControlName="company" placeholder="Nom de l'entreprise">
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="clientVatNumber" class="form-label">Matricule Fiscal</label>
+        <input type="text" id="clientVatNumber" class="form-control" formControlName="vatNumber" placeholder="1234567/A/M/000">
+      </div>
+
+      <!-- Adresse -->
+      <div formGroupName="address" class="border rounded p-3 mb-3">
+        <h6 class="mb-3">Adresse</h6>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="addressLine1" class="form-label">Ligne 1</label>
+              <input type="text" id="addressLine1" class="form-control" formControlName="line1" placeholder="Adresse principale">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="addressLine2" class="form-label">Ligne 2</label>
+              <input type="text" id="addressLine2" class="form-control" formControlName="line2" placeholder="Complément d'adresse">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="addressCity" class="form-label">Ville</label>
+              <input type="text" id="addressCity" class="form-control" formControlName="city" placeholder="Tunis">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="addressDelegation" class="form-label">Délégation</label>
+              <input type="text" id="addressDelegation" class="form-control" formControlName="delegation" placeholder="Centre-ville">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="addressPostalCode" class="form-label">Code Postal</label>
+              <input type="text" id="addressPostalCode" class="form-control" formControlName="postalCode" placeholder="1000">
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="addressCountry" class="form-label">Pays</label>
+          <input type="text" id="addressCountry" class="form-control" formControlName="country" placeholder="Tunisie">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="clientNotes" class="form-label">Notes</label>
+        <textarea id="clientNotes" class="form-control" rows="3" formControlName="notes" placeholder="Notes et commentaires..."></textarea>
+      </div>
+
+      <!-- Account Creation Option (only for new clients) -->
+      @if (!isEditMode) {
+        <div class="mb-4">
+          <div class="card border-info">
+            <div class="card-header bg-info-subtle">
+              <h6 class="card-title mb-0">
+                <i class="bx bx-user-plus me-2"></i>Compte Utilisateur
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="createAccount" formControlName="createAccount">
+                <label class="form-check-label" for="createAccount">
+                  <strong>Créer un compte utilisateur pour ce client</strong>
+                </label>
+              </div>
+              <div class="mt-2">
+                <small class="text-muted">
+                  <i class="bx bx-info-circle me-1"></i>
+                  Si activé, un compte sera créé et un email avec les informations de connexion sera envoyé au client.
+                  <strong>L'email est requis pour cette option.</strong>
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="text-end">
+        <button type="button" class="btn btn-light me-2" (click)="modalRef?.hide()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="clientForm.invalid">
+          {{ isEditMode ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Modal Suppression -->
+<ng-template #deleteClientModal>
+  <div class="modal-body px-4 py-5 text-center">
+    <button type="button" class="btn-close position-absolute end-0 top-0 m-3" (click)="modalRef?.hide()"></button>
+    <div class="avatar-sm mb-4 mx-auto">
+      <div class="avatar-title bg-primary text-primary bg-opacity-10 font-size-20 rounded-3">
+        <i class="mdi mdi-trash-can-outline"></i>
+      </div>
+    </div>
+    <p class="text-muted font-size-16 mb-4">
+      Êtes-vous sûr de vouloir supprimer ce client ?<br>
+      <strong>Cette action est irréversible.</strong>
+    </p>
+    <div class="hstack gap-2 justify-content-center mb-0">
+      <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+        Supprimer
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">
+        Annuler
+      </button>
+    </div>
+  </div>
+</ng-template>

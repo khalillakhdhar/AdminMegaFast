@@ -1,0 +1,76 @@
+// Profile Styles - Harmonisé avec le dashboard principal
+.page-title-box {
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 1rem 2rem rgba(18, 38, 63, 0.08);
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+}
+
+.avatar-title {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.bg-soft-primary {
+  background-color: rgba(116, 120, 242, 0.15) !important;
+}
+
+.text-primary {
+  color: #7478f2 !important;
+}
+
+.badge-soft-success {
+  color: #06a94d;
+  background-color: rgba(6, 169, 77, 0.15);
+}
+
+.badge-soft-danger {
+  color: #fd625e;
+  background-color: rgba(253, 98, 94, 0.15);
+}
+
+.form-control:read-only {
+  background-color: #f8f9fa;
+  opacity: 1;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.font-size-14 {
+  font-size: 14px !important;
+}
+
+.font-size-16 {
+  font-size: 16px !important;
+}
+
+.font-size-18 {
+  font-size: 18px !important;
+}

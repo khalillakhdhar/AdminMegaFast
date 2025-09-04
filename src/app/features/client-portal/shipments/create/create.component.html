@@ -1,0 +1,198 @@
+<div class="container-fluid">
+  <!-- Page Title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Nouveau Colis</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a [routerLink]="['/client']">Client</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/client/shipments']">Mes Colis</a></li>
+            <li class="breadcrumb-item active">Nouveau</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Créer un nouveau colis</h4>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()">
+
+          <!-- Informations de livraison -->
+          <div class="row">
+            <div class="col-12">
+              <h5 class="font-size-14 mb-3">Informations de livraison</h5>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="clientName" class="form-label">Nom du destinataire *</label>
+              <input type="text" class="form-control" id="clientName"
+                     formControlName="clientName"
+                     placeholder="Nom complet du destinataire">
+              <div *ngIf="isFieldInvalid('clientName')" class="text-danger small mt-1">
+                Le nom du destinataire est requis
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="clientPhone" class="form-label">Téléphone *</label>
+              <input type="tel" class="form-control" id="clientPhone"
+                     formControlName="clientPhone"
+                     placeholder="+216 XX XXX XXX">
+              <div *ngIf="isFieldInvalid('clientPhone')" class="text-danger small mt-1">
+                Le numéro de téléphone est requis
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-12">
+              <label for="address" class="form-label">Adresse complète *</label>
+              <textarea class="form-control" id="address" rows="2"
+                        formControlName="address"
+                        placeholder="Adresse complète de livraison"></textarea>
+              <div *ngIf="isFieldInvalid('address')" class="text-danger small mt-1">
+                L'adresse est requise
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="city" class="form-label">Ville *</label>
+              <input type="text" class="form-control" id="city"
+                     formControlName="city"
+                     placeholder="Ville de livraison">
+              <div *ngIf="isFieldInvalid('city')" class="text-danger small mt-1">
+                La ville est requise
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="delegation" class="form-label">Délégation</label>
+              <input type="text" class="form-control" id="delegation"
+                     formControlName="delegation"
+                     placeholder="Délégation">
+            </div>
+          </div>
+
+          <!-- Informations du colis -->
+          <div class="row">
+            <div class="col-12">
+              <h5 class="font-size-14 mb-3">Informations du colis</h5>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="weight" class="form-label">Poids (kg)</label>
+              <input type="number" class="form-control" id="weight"
+                     formControlName="weight"
+                     placeholder="0.0" step="0.1" min="0">
+            </div>
+            <div class="col-md-6">
+              <label for="volume" class="form-label">Volume (m³)</label>
+              <input type="number" class="form-control" id="volume"
+                     formControlName="volume"
+                     placeholder="0.0" step="0.01" min="0">
+            </div>
+          </div>
+
+          <!-- Paiement -->
+          <div class="row">
+            <div class="col-12">
+              <h5 class="font-size-14 mb-3">Informations de paiement</h5>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="paymentMode" class="form-label">Mode de paiement *</label>
+              <select class="form-select" id="paymentMode" formControlName="paymentMode">
+                <option value="">Sélectionner...</option>
+                <option value="cod">Contre remboursement (COD)</option>
+                <option value="invoice">Facturation</option>
+              </select>
+              <div *ngIf="isFieldInvalid('paymentMode')" class="text-danger small mt-1">
+                Le mode de paiement est requis
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="amount" class="form-label">Montant (TND)</label>
+              <input type="number" class="form-control" id="amount"
+                     formControlName="amount"
+                     placeholder="0.00" step="0.01" min="0"
+                     [disabled]="shipmentForm.get('paymentMode')?.value !== 'cod'">
+              <small class="text-muted">Requis uniquement pour le COD</small>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <label for="notes" class="form-label">Notes additionnelles</label>
+              <textarea class="form-control" id="notes" rows="3"
+                        formControlName="notes"
+                        placeholder="Instructions de livraison, notes spéciales..."></textarea>
+            </div>
+          </div>
+
+          <!-- Adresse de récupération -->
+          <div class="row">
+            <div class="col-12">
+              <h5 class="font-size-14 mb-3">Adresse de récupération (optionnel)</h5>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-12">
+              <label for="pickupAddress" class="form-label">Adresse de récupération</label>
+              <textarea class="form-control" id="pickupAddress" rows="2"
+                        formControlName="pickupAddress"
+                        placeholder="Si différente de votre adresse habituelle"></textarea>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="pickupCity" class="form-label">Ville de récupération</label>
+              <input type="text" class="form-control" id="pickupCity"
+                     formControlName="pickupCity"
+                     placeholder="Ville de récupération">
+            </div>
+            <div class="col-md-6">
+              <label for="pickupDelegation" class="form-label">Délégation de récupération</label>
+              <input type="text" class="form-control" id="pickupDelegation"
+                     formControlName="pickupDelegation"
+                     placeholder="Délégation de récupération">
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="row">
+            <div class="col-12">
+              <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-light" [routerLink]="['/client/shipments']">
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="shipmentForm.invalid || isSubmitting">
+                  <i class="bx bx-save me-1" *ngIf="!isSubmitting"></i>
+                  <i class="bx bx-loader-alt bx-spin me-1" *ngIf="isSubmitting"></i>
+                  {{ isSubmitting ? 'Création...' : 'Créer le colis' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

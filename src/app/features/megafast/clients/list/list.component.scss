@@ -1,0 +1,328 @@
+// Manual color variables to avoid Bootstrap conflicts
+$primary: #556ee6;
+$danger: #f46a6a;
+$success: #34c38f;
+$gray-100: #f8f9fa;
+$gray-200: #eff2f7;
+$gray-300: #f6f6f6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #74788d;
+$gray-700: #495057;
+$red: #f46a6a;
+
+// Search box styling
+.search-box {
+  .position-relative {
+    .search-icon {
+      position: absolute;
+      inset-inline-end: 12px;
+      inset-block-start: 50%;
+      transform: translateY(-50%);
+      color: $gray-500;
+      font-size: 18px;
+    }
+  }
+}
+
+// Table enhancements
+.table {
+  .cursor-pointer {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    
+    &:hover {
+      background-color: $gray-100;
+    }
+  }
+  
+  // Avatar styling
+  .avatar-sm {
+    inline-size: 38px;
+    block-size: 38px;
+    
+    .avatar-title {
+      inline-size: 100%;
+      block-size: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+  }
+  
+  // Status badges
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 8px;
+  }
+}
+
+// Statistics cards
+.card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  
+  &:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .avatar-title {
+    inline-size: 45px;
+    block-size: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+}
+
+// Action buttons
+.btn-group {
+  .btn {
+    padding: 4px 8px;
+    font-size: 14px;
+    border: 1px solid $gray-300;
+    
+    &:hover {
+      background-color: $gray-100;
+    }
+    
+    &.text-danger:hover {
+      background-color: rgba($red, 0.1);
+      border-color: $red;
+      color: $red;
+    }
+  }
+}
+
+// Modal enhancements
+.modal {
+  .modal-dialog {
+    max-inline-size: 700px;
+  }
+  
+  .modal-body {
+    max-block-size: 70vh;
+    overflow-y: auto;
+    
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+      inline-size: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: $gray-100;
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: $gray-400;
+      border-radius: 3px;
+      
+      &:hover {
+        background: $gray-500;
+      }
+    }
+  }
+  
+  // Form styling in modal
+  .form-label {
+    font-weight: 500;
+    color: $gray-700;
+    margin-block-end: 6px;
+    
+    .text-danger {
+      color: $red !important;
+    }
+  }
+  
+  .form-control {
+    border: 1px solid $gray-300;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    }
+    
+    &.is-invalid {
+      border-color: $red;
+      
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($red, 0.25);
+      }
+    }
+  }
+  
+  // Address section styling
+  .border.rounded {
+    background-color: #f8f9fa;
+    border-color: #dee2e6 !important;
+    
+    h6 {
+      color: $gray-700;
+      font-weight: 600;
+    }
+  }
+}
+
+// Loading states
+.placeholder-glow {
+  .placeholder {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba($primary, 0.1),
+      transparent
+    );
+    animation: placeholder-glow 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes placeholder-glow {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 14px;
+  }
+  
+  .btn-group {
+    .btn {
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+  }
+  
+  .card {
+    margin-block-end: 15px;
+    
+    .card-body {
+      padding: 15px;
+    }
+  }
+  
+  .modal-dialog {
+    margin: 10px;
+    max-inline-size: calc(100% - 20px);
+  }
+}
+
+// Animation for smooth transitions
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Dark theme support
+[data-bs-theme="dark"] {
+  .search-box {
+    .position-relative {
+      .search-icon {
+        color: #a6b0cf;
+      }
+    }
+  }
+  
+  .table {
+    .cursor-pointer:hover {
+      background-color: #2a3042;
+    }
+  }
+  
+  .card {
+    background-color: #2a3042;
+    border-color: #32394e;
+    
+    &:hover {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .btn-group {
+    .btn {
+      border-color: #32394e;
+      background-color: #2a3042;
+      color: #a6b0cf;
+      
+      &:hover {
+        background-color: #32394e;
+      }
+    }
+  }
+  
+  .modal-content {
+    background-color: #2a3042;
+    border-color: #32394e;
+  }
+  
+  .modal-body {
+    &::-webkit-scrollbar-track {
+      background: #32394e;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #32394e;
+      
+      &:hover {
+        background: #a6b0cf;
+      }
+    }
+  }
+  
+  .form-label {
+    color: #a6b0cf;
+  }
+  
+  .form-control {
+    background-color: #32394e;
+    border-color: #32394e;
+    color: #a6b0cf;
+    
+    &::placeholder {
+      color: rgba(166, 176, 207, 0.6);
+    }
+    
+    &:focus {
+      background-color: #32394e;
+      border-color: $primary;
+      color: #a6b0cf;
+    }
+  }
+  
+  .border.rounded {
+    background-color: #32394e;
+    border-color: #32394e !important;
+    
+    h6 {
+      color: #a6b0cf;
+    }
+  }
+}

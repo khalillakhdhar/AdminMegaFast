@@ -1,0 +1,97 @@
+<div class="vertical-menu light-sidebar">
+  <!-- Logo Section MegaFast uniquement -->
+  <div class="navbar-brand-box">
+    <a href="javascript:void(0);" class="logo logo-light">
+      <span class="logo-sm">
+        <div class="logo-container">
+          <span class="brand-icon">MF</span>
+        </div>
+      </span>
+      <span class="logo-lg">
+        <div class="logo-container">
+          <span class="brand-text-sidebar">MEGAFAST</span>
+          <span class="brand-subtitle">Express Delivery</span>
+        </div>
+      </span>
+    </a>
+  </div>
+
+  <!-- User Welcome Section (données Firebase) -->
+  <div class="user-welcome-section">
+    <div class="welcome-card" *ngIf="userProfile">
+      <div class="user-avatar">
+        <!-- Pas de photo - utiliser initiales -->
+        <div class="avatar-initials">
+          {{(userProfile.displayName || userProfile.name || userProfile.email).charAt(0).toUpperCase()}}
+        </div>
+        <div class="status-dot"></div>
+      </div>
+      <div class="welcome-text">
+        <h6>Bienvenue</h6>
+        <p>{{userProfile.displayName || userProfile.name}}</p>
+        <span class="user-badge">
+          Client Premium
+          <span *ngIf="userProfile.city"> - {{userProfile.city}}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <div class="sidebar-menu-scroll">
+    <div id="sidebar-menu">
+      <ul class="metismenu list-unstyled light-menu" id="side-menu">
+        <li *ngFor="let item of menuItems" [ngClass]="{'menu-title light-title': item.isTitle, 'menu-item': !item.isTitle}">
+          <!-- Section Title -->
+          <ng-container *ngIf="item.isTitle">
+            <span class="title-text">{{ item.label }}</span>
+            <div class="title-line"></div>
+          </ng-container>
+
+          <!-- Menu Item -->
+          <a *ngIf="!item.isTitle" [routerLink]="item.link" class="menu-link" routerLinkActive="active">
+            <div class="menu-icon-wrapper">
+              <i class="bx" [ngClass]="item.icon"></i>
+            </div>
+            <span class="menu-text">{{ item.label }}</span>
+            <div class="menu-indicator"></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <div class="action-card">
+      <div class="action-icon">
+        <i class="bx bx-rocket text-primary"></i>
+      </div>
+      <div class="action-content">
+        <h6>Expédition Express</h6>
+        <p>Livraison en 24h</p>
+        <small class="text-primary">Disponible en Tunisie</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Stats -->
+  <div class="sidebar-footer">
+    <div class="footer-stats">
+      <div class="stat-item">
+        <span class="stat-number text-primary">24</span>
+        <span class="stat-label">Colis Total</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number text-success">12</span>
+        <span class="stat-label">Livrés</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number text-warning">2</span>
+        <span class="stat-label">Transit</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,506 @@
+// Manual color variables to avoid Bootstrap conflicts
+$primary: #556ee6;
+$danger: #f46a6a;
+$success: #34c38f;
+$info: #50a5f1;
+$warning: #f1b44c;
+$secondary: #74788d;
+$gray-50: #f9fafb;
+$gray-100: #f8f9fa;
+$gray-200: #eff2f7;
+$gray-300: #f6f6f6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #74788d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$red: #f46a6a;
+
+// Dark theme colors
+$body-color-dark: #a6b0cf;
+$body-bg-dark: #161c2d;
+$body-secondary-bg-dark: #1e293b;
+$body-tertiary-bg-dark: #2a3447;
+$border-color-dark: #3a4556;
+
+// Statistics cards
+.card {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: $gray-800;
+    margin-block-end: 1rem;
+  }
+
+  // Statistics content styling
+  .d-flex.align-items-center {
+    h6 {
+      color: $gray-600;
+      font-weight: 500;
+      font-size: 13px;
+      margin-block-end: 0.25rem;
+    }
+
+    h4 {
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: $gray-800;
+      margin-block-end: 0.25rem;
+    }
+
+    .text-muted {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  }
+}
+
+// Avatar styling
+.avatar-sm {
+  inline-size: 40px;
+  block-size: 40px;
+
+  .avatar-title {
+    inline-size: 100%;
+    block-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+  }
+}
+
+.avatar-xs {
+  inline-size: 30px;
+  block-size: 30px;
+
+  .avatar-title {
+    inline-size: 100%;
+    block-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  // Top clients spacing
+  &.me-2 {
+    margin-inline-end: 0.75rem;
+  }
+}
+
+// Growth indicators
+.text-success {
+  color: $success !important;
+
+  .bx {
+    font-size: 14px;
+  }
+}
+
+.text-danger {
+  color: $danger !important;
+
+  .bx {
+    font-size: 14px;
+  }
+}
+
+// Action buttons
+.d-grid {
+  .btn {
+    margin-block-end: 0.75rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &.btn-primary {
+      background: linear-gradient(135deg, $primary, darken($primary, 8%));
+      border: none;
+    }
+
+    &.btn-light {
+      background-color: $gray-100;
+      border-color: $gray-200;
+      color: $gray-700;
+
+      &:hover {
+        background-color: $gray-200;
+        border-color: $gray-300;
+      }
+    }
+
+    &.btn-info {
+      background: linear-gradient(135deg, $info, darken($info, 8%));
+      border: none;
+    }
+
+    &.btn-warning {
+      background: linear-gradient(135deg, $warning, darken($warning, 8%));
+      border: none;
+    }
+  }
+}
+
+// Table styling
+.table {
+  th {
+    font-weight: 600;
+    color: $gray-700;
+    border-block-end: 1px solid $gray-200;
+    padding: 0.875rem 0.75rem;
+    font-size: 13px;
+    background-color: $gray-50;
+  }
+
+  td {
+    padding: 0.875rem 0.75rem;
+    vertical-align: middle;
+    border-block-end: 1px solid $gray-100;
+
+    h6 {
+      font-weight: 600;
+      margin-block-end: 0;
+      color: $gray-800;
+    }
+
+    small {
+      color: $gray-500;
+    }
+  }
+
+  &.table-hover tbody tr:hover {
+    background-color: rgba($primary, 0.04);
+  }
+}
+
+// Status badges
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.bg-success {
+    background-color: rgba($success, 0.1) !important;
+    color: $success !important;
+    border: 1px solid rgba($success, 0.2);
+  }
+
+  &.bg-info {
+    background-color: rgba($info, 0.1) !important;
+    color: $info !important;
+    border: 1px solid rgba($info, 0.2);
+  }
+
+  &.bg-primary {
+    background-color: rgba($primary, 0.1) !important;
+    color: $primary !important;
+    border: 1px solid rgba($primary, 0.2);
+  }
+
+  &.bg-warning {
+    background-color: rgba($warning, 0.1) !important;
+    color: darken($warning, 20%) !important;
+    border: 1px solid rgba($warning, 0.2);
+  }
+}
+
+// Charts styling
+.apx-chart {
+  border-radius: 8px;
+
+  .apexcharts-canvas {
+    border-radius: 8px;
+  }
+
+  .apexcharts-toolbar {
+    border-radius: 6px;
+  }
+}
+
+// Purple color for additional stats
+.bg-purple {
+  background-color: #6f42c1 !important;
+}
+
+// Loading state
+.spinner-border {
+  &.text-primary {
+    color: $primary !important;
+  }
+}
+
+// Dropdown styling
+.dropdown {
+  .btn-soft-secondary {
+    background-color: rgba($secondary, 0.1);
+    border-color: transparent;
+    color: $secondary;
+
+    &:hover {
+      background-color: rgba($secondary, 0.2);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .card {
+    margin-block-end: 1rem;
+
+    h4 {
+      font-size: 1.5rem !important;
+    }
+
+    h6 {
+      font-size: 12px !important;
+    }
+  }
+
+  .table-responsive {
+    font-size: 13px;
+  }
+
+  .d-grid .btn {
+    padding: 0.625rem 0.875rem;
+    font-size: 14px;
+  }
+
+  .avatar-sm {
+    inline-size: 35px;
+    block-size: 35px;
+  }
+
+  .avatar-xs {
+    inline-size: 28px;
+    block-size: 28px;
+
+    .avatar-title {
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .col-xl-3,
+  .col-md-6 {
+    margin-block-end: 1rem;
+  }
+
+  .table {
+    th,
+    td {
+      padding: 0.5rem;
+      font-size: 12px;
+    }
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
+
+// Animation classes
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Custom scrollbar
+.table-responsive {
+  &::-webkit-scrollbar {
+    block-size: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $gray-100;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-400;
+    border-radius: 3px;
+
+    &:hover {
+      background: $gray-500;
+    }
+  }
+}
+
+// Dark theme support
+[data-bs-theme="dark"] {
+  .card {
+    background-color: $body-secondary-bg-dark;
+    border-color: $border-color-dark;
+
+    .card-title {
+      color: $body-color-dark;
+    }
+
+    h4 {
+      color: $body-color-dark !important;
+    }
+
+    h6 {
+      color: rgba($body-color-dark, 0.8) !important;
+    }
+  }
+
+  .table {
+    th {
+      background-color: $body-tertiary-bg-dark;
+      color: $body-color-dark;
+      border-block-end-color: $border-color-dark;
+    }
+
+    td {
+      border-block-end-color: $border-color-dark;
+
+      h6 {
+        color: $body-color-dark !important;
+      }
+
+      small {
+        color: rgba($body-color-dark, 0.6) !important;
+      }
+    }
+
+    &.table-hover tbody tr:hover {
+      background-color: rgba($primary, 0.1);
+    }
+  }
+
+  .table-responsive {
+    &::-webkit-scrollbar-track {
+      background: $body-tertiary-bg-dark;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $border-color-dark;
+
+      &:hover {
+        background: rgba($body-color-dark, 0.4);
+      }
+    }
+  }
+
+  .btn-light {
+    background-color: $body-tertiary-bg-dark !important;
+    border-color: $border-color-dark !important;
+    color: $body-color-dark !important;
+
+    &:hover {
+      background-color: rgba($body-color-dark, 0.1) !important;
+      border-color: $border-color-dark !important;
+    }
+  }
+
+  .btn-soft-secondary {
+    background-color: rgba($body-color-dark, 0.1) !important;
+    color: $body-color-dark !important;
+
+    &:hover {
+      background-color: rgba($body-color-dark, 0.2) !important;
+    }
+  }
+
+  .text-muted {
+    color: rgba($body-color-dark, 0.6) !important;
+  }
+
+  .dropdown-menu {
+    background-color: $body-secondary-bg-dark;
+    border-color: $border-color-dark;
+
+    .dropdown-item {
+      color: $body-color-dark;
+
+      &:hover {
+        background-color: $body-tertiary-bg-dark;
+      }
+    }
+  }
+}
+
+// Spacing utilities
+.mb-4 {
+  margin-block-end: 1.5rem !important;
+}
+
+.mb-3 {
+  margin-block-end: 1rem !important;
+}
+
+.mb-0 {
+  margin-block-end: 0 !important;
+}
+
+.ms-1 {
+  margin-inline-start: 0.25rem !important;
+}
+
+.ms-3 {
+  margin-inline-start: 1rem !important;
+}
+
+.me-1 {
+  margin-inline-end: 0.25rem !important;
+}
+
+.me-2 {
+  margin-inline-end: 0.5rem !important;
+}

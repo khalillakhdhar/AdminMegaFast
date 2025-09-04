@@ -1,0 +1,158 @@
+<header id="page-topbar">
+  <div class="navbar-header">
+    <div class="d-flex">
+      <!-- LOGO -->
+      <div class="navbar-brand-box">
+        <a routerLink="/" class="logo logo-dark">
+          <span class="logo-sm">
+            <img src="assets/images/logo.svg" alt="" height="22">
+          </span>
+          <span class="logo-lg">
+            <img src="assets/images/logo-dark.png" alt="" height="17">
+          </span>
+        </a>
+
+        <a routerLink="/" class="logo logo-light">
+          <span class="logo-sm">
+            <img src="assets/images/logo-light.svg" alt="" height="22">
+          </span>
+          <span class="logo-lg">
+            <img src="assets/images/logo-light.png" alt="" height="19">
+          </span>
+        </a>
+      </div>
+
+      <button type="button" class="btn btn-sm px-3 font-size-16 header-item" [ngClass]="{ 'd-none': theme === 'horizontal' }" id="vertical-menu-btn" (click)="toggleMobileMenu($event)">
+        <i class="fa fa-fw fa-bars"></i>
+      </button>
+
+      <!-- App Search-->
+
+    </div>
+
+    <div class="d-flex">
+      <!-- Mobile search removed -->
+      <!-- Language dropdown removed -->
+      <!-- Mega menu removed -->
+
+      <div class="dropdown d-none d-lg-inline-block ms-1">
+        <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen" (click)="fullscreen()">
+          <i class="bx bx-fullscreen"></i>
+        </button>
+      </div>
+
+      <div class="dropdown d-inline-block" dropdown>
+        <button type="button" class="btn header-item noti-icon" id="page-header-notifications-dropdown" dropdownToggle>
+          <i class="bx bx-bell bx-tada"></i>
+          <span class="badge bg-danger rounded-pill">3</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown" *dropdownMenu>
+          <div class="p-3">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="m-0">Notifications</h6>
+              </div>
+              <div class="col-auto">
+                <a href="javascript: void(0);" class="small">Voir tout</a>
+              </div>
+            </div>
+          </div>
+          <ngx-simplebar class="notification-scroll">
+            <a href="javascript: void(0);" class="text-reset notification-item">
+              <div class="d-flex">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title bg-primary rounded-circle font-size-16">
+                    <i class="bx bx-cart"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">Votre commande est passée</h6>
+                  <div class="font-size-12 text-muted">
+                    <p class="mb-1">Si plusieurs langues fusionnent la grammaire</p>
+                    <p class="mb-0"><i class="mdi mdi-clock-outline"></i>
+                      Il y a 3 min</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <a href="javascript: void(0);" class="text-reset notification-item">
+              <div class="d-flex">
+                <img src="assets/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">Jacques Lemire</h6>
+                  <div class="font-size-12 text-muted">
+                    <p class="mb-1">La langue sera plus simple et régulière</p>
+                    <p class="mb-0"><i class="mdi mdi-clock-outline"></i>Il y a 1 heure</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <a href="javascript: void(0);" class="text-reset notification-item">
+              <div class="d-flex">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title bg-success rounded-circle font-size-16">
+                    <i class="bx bx-badge-check"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">Votre article est expédié</h6>
+                  <div class="font-size-12 text-muted">
+                    <p class="mb-1">Ce sera comme un Européen simplifié</p>
+                    <p class="mb-0"><i class="mdi mdi-clock-outline"></i>Il y a 3 heures</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <a href="javascript: void(0);" class="text-reset notification-item">
+              <div class="d-flex">
+                <img src="assets/images/users/avatar-4.jpg" class="me-3 rounded-circle avatar-xs" alt="user-pic">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">Sophie Dupont</h6>
+                  <div class="font-size-12 text-muted">
+                    <p class="mb-1">Une société scientifique récente recommande</p>
+                    <p class="mb-0"><i class="mdi mdi-clock-outline"></i>Il y a 10 heures</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </ngx-simplebar>
+          <div class="p-2 border-top d-grid">
+            <a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)">
+              <i class="mdi mdi-arrow-right-circle me-1"></i> <span>Charger plus</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="dropdown d-inline-block" dropdown>
+        <button type="button" class="btn header-item" dropdownToggle id="page-header-user-dropdown">
+          <div class="rounded-circle header-profile-user bg-primary text-white user-avatar">
+            {{userFirstLetter}}
+          </div>
+          <span class="d-none d-xl-inline-block ms-1">{{username}}</span>
+          <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end" *dropdownMenu>
+          <!-- item-->
+          <a class="dropdown-item" routerLink="/contacts/profile"><i class="bx bx-user font-size-16 align-middle me-1"></i>
+            Profil</a>
+          <a class="dropdown-item" routerLink="/crypto/wallet" href="javascript: void(0);"><i class="bx bx-wallet font-size-16 align-middle me-1"></i>Mon portefeuille</a>
+          <a class="dropdown-item d-block" href="javascript: void(0);"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i>
+            Paramètres </a>
+          <a class="dropdown-item" routerLink="/pages/lock-screen-1"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i>
+            Verrouiller l'écran</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item text-danger" href="javascript: void(0);" (click)="logout()"><i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i>
+            Déconnexion</a>
+        </div>
+      </div>
+
+      <div class="dropdown d-inline-block">
+        <button type="button" class="btn header-item noti-icon right-bar-toggle" (click)="toggleRightSidebar()">
+          <i class="bx bx-cog bx-spin"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</header>

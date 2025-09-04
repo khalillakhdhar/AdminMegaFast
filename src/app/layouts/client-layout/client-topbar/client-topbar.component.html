@@ -1,0 +1,119 @@
+<header id="page-topbar" class="light-topbar">
+  <div class="navbar-header">
+    <div class="d-flex align-items-center">
+      <!-- LOGO MegaFast uniquement -->
+      <div class="navbar-brand-box">
+        <a href="javascript:void(0);" class="logo logo-light">
+          <span class="logo-sm">
+            <div class="logo-container">
+              <span class="brand-text">MF</span>
+            </div>
+          </span>
+          <span class="logo-lg">
+            <div class="logo-container">
+              <span class="brand-text">MEGAFAST</span>
+              <span class="brand-subtitle">Express Delivery</span>
+            </div>
+          </span>
+        </a>
+      </div>
+
+      <!-- Menu toggle button -->
+      <button type="button" class="btn btn-light-blue px-3 font-size-16 header-item" id="vertical-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <!-- Notifications avec badge -->
+      <div class="notification-bell me-3">
+        <button type="button" class="btn btn-light-outline header-item position-relative">
+          <i class="fas fa-bell text-primary"></i>
+          <span class="badge bg-primary" *ngIf="notificationsCount > 0">{{notificationsCount}}</span>
+        </button>
+      </div>
+
+      <!-- Quick stats display (from Firebase) -->
+      <div class="quick-stats me-3 d-none d-lg-flex" *ngIf="userProfile?.stats">
+        <div class="stat-item">
+          <span class="stat-value text-primary">{{userProfile.stats.totalPackages}}</span>
+          <span class="stat-label">Colis</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value text-success">{{userProfile.stats.deliveredPackages}}</span>
+          <span class="stat-label">Livrés</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value text-warning">{{userProfile.stats.inTransitPackages}}</span>
+          <span class="stat-label">Transit</span>
+        </div>
+      </div>
+
+      <!-- User dropdown light theme (données Firebase) -->
+      <div class="dropdown d-inline-block user-dropdown">
+        <button type="button" class="btn header-item user-btn" id="page-header-user-dropdown"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class="user-avatar">
+            <!-- Pas de photo - utiliser initiales -->
+            <div class="avatar-initials" *ngIf="userProfile">
+              {{(userProfile.displayName || userProfile.email).charAt(0).toUpperCase()}}
+            </div>
+            <div class="status-indicator online"></div>
+          </div>
+          <div class="user-info d-none d-xl-block" *ngIf="userProfile">
+            <span class="user-name">{{userProfile.displayName || userProfile.name}}</span>
+            <span class="user-role">
+              Client Premium
+              <span *ngIf="userProfile.city"> - {{userProfile.city}}</span>
+            </span>
+          </div>
+          <i class="fas fa-chevron-down user-arrow"></i>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-light dropdown-menu-end">
+          <div class="dropdown-header" *ngIf="userProfile">
+            <div class="user-details">
+              <h6>{{userProfile.displayName || userProfile.name}}</h6>
+              <p>
+                Client Premium
+                <span *ngIf="userProfile.city"> - {{userProfile.city}}</span>
+              </p>
+            </div>
+          </div>
+
+          <a class="dropdown-item dropdown-item-light" href="javascript:void(0);">
+            <i class="fas fa-user-circle me-2 text-primary"></i>
+            <span>Mon Profil</span>
+          </a>
+
+          <a class="dropdown-item dropdown-item-light" href="javascript:void(0);">
+            <i class="fas fa-package me-2 text-info"></i>
+            <span>Mes Colis</span>
+          </a>
+
+          <a class="dropdown-item dropdown-item-light" href="javascript:void(0);">
+            <i class="fas fa-history me-2 text-secondary"></i>
+            <span>Historique</span>
+          </a>
+
+          <a class="dropdown-item dropdown-item-light" href="javascript:void(0);">
+            <i class="fas fa-cog me-2 text-dark"></i>
+            <span>Paramètres</span>
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item dropdown-item-light text-danger"
+             href="javascript:void(0);"
+             (click)="logout()"
+             role="button">
+            <i class="fas fa-power-off me-2"></i>
+            <span>Déconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

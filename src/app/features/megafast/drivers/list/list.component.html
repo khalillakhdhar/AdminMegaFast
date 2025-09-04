@@ -1,0 +1,157 @@
+<div class="container-fluid">
+  <app-page-title title="Gestion des Livreurs" [breadcrumbItems]="[{label:'Livreurs', active:true}]"></app-page-title>
+
+  <div class="row mb-3">
+    <div class="col-lg-8 d-flex flex-wrap gap-2">
+      <div class="search-box me-2">
+        <div class="position-relative">
+          <input class="form-control" type="text" placeholder="Recherche (nom, tel, email)" [(ngModel)]="q" (ngModelChange)="applyFilters()">
+          <i class="bx bx-search-alt search-icon"></i>
+        </div>
+      </div>
+      <select class="form-select w-auto" [(ngModel)]="status" (ngModelChange)="applyFilters()">
+        <option value="all">Tous</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Inactifs</option>
+      </select>
+  <ng-select class="w-auto"
+         [items]="cities"
+         [multiple]="true"
+         [closeOnSelect]="false"
+         bindLabel=""
+         placeholder="Filtrer par villes"
+         [(ngModel)]="selectedZones"
+         (change)="applyFilters()">
+  </ng-select>
+    </div>
+    <div class="col-lg-4 text-lg-end mt-2 mt-lg-0">
+      <a class="btn btn-success" [routerLink]="['/megafast/drivers/create']"><i class="mdi mdi-plus me-1"></i> Nouveau</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle table-nowrap table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Driver</th>
+              <th>Contact</th>
+              <th>Zones</th>
+              <th>KPIs</th>
+              <th>Statut</th>
+              <th>Compte</th>
+              <th>Date création</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="8" class="text-center py-4">
+                <div class="spinner-border text-primary" aria-label="Chargement"><span class="visually-hidden">Chargement...</span></div>
+              </td>
+            </tr>
+            <tr *ngFor="let d of getPage(); trackBy: trackById">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm me-3">
+                    <div class="avatar-title bg-primary text-white rounded-circle">{{ (d.displayName || d.name || '?')[0] }}</div>
+                  </div>
+                  <div>
+                    <a [routerLink]="['/megafast/drivers', d.id]" class="text-body fw-medium">{{ d.displayName || d.name }}</a>
+                    <div class="text-muted small">ID: {{ d.id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="text-muted small">{{ d.phone }}</div>
+                <div class="text-muted small">{{ d.email }}</div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark me-1" *ngFor="let z of d.zones || []">{{ z }}</span>
+              </td>
+              <td>
+                <div class="d-flex gap-2 flex-wrap small">
+                  <span class="badge bg-success-subtle text-success">Livrés: {{ kpis.get(d.id!)?.delivered || 0 }}</span>
+                  <span class="badge bg-warning-subtle text-warning">En cours: {{ kpis.get(d.id!)?.inProgress || 0 }}</span>
+                  <span class="badge bg-danger-subtle text-danger">Retours: {{ kpis.get(d.id!)?.returned || 0 }}</span>
+                  <span class="badge bg-primary-subtle text-primary">COD: {{ (kpis.get(d.id!)?.cod || 0) | number:'1.0-0' }} TND</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="d.active ? 'bg-success' : 'bg-secondary'">{{ d.active ? 'Actif' : 'Inactif' }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getAccountStatusClass(d)">{{ getAccountStatusText(d) }}</span>
+              </td>
+              <td>
+                <span class="text-muted small">{{ (d.createdAt?.toDate?.() || d.createdAt) | date:'short' }}</span>
+              </td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Actions
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" [routerLink]="['/megafast/drivers', d.id]">
+                      <i class="bx bx-show-alt me-2"></i>Voir détails
+                    </a></li>
+
+                    <!-- Account Management -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="dropdown-header">Gestion du compte</li>
+
+                    <li *ngIf="!hasAccount(d) && d.email">
+                      <a class="dropdown-item" href="#" (click)="$event.preventDefault(); createAccountForDriver(d.id!)">
+                        <i class="bx bx-user-plus me-2"></i>Créer un compte
+                      </a>
+                    </li>
+
+                    <li *ngIf="hasAccount(d)">
+                      <a class="dropdown-item" href="#" (click)="$event.preventDefault(); resetDriverPassword(d.id!)">
+                        <i class="bx bx-reset me-2"></i>Réinitialiser mot de passe
+                      </a>
+                    </li>
+
+                    <li *ngIf="hasAccount(d) && d.isActive">
+                      <a class="dropdown-item text-warning" href="#" (click)="$event.preventDefault(); disableDriverAccount(d.id!)">
+                        <i class="bx bx-user-x me-2"></i>Désactiver compte
+                      </a>
+                    </li>
+
+                    <li *ngIf="hasAccount(d) && !d.isActive">
+                      <a class="dropdown-item text-success" href="#" (click)="$event.preventDefault(); enableDriverAccount(d.id!)">
+                        <i class="bx bx-user-check me-2"></i>Réactiver compte
+                      </a>
+                    </li>
+
+                    <!-- Driver Status -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a class="dropdown-item" href="#" (click)="$event.preventDefault(); toggleActive(d)"
+                         [ngClass]="d.active ? 'text-danger' : 'text-success'">
+                        <i class="bx me-2" [ngClass]="d.active ? 'bx-user-x' : 'bx-user-check'"></i>
+                        {{ d.active ? 'Désactiver livreur' : 'Activer livreur' }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!loading && totalItems === 0">
+              <td colspan="8" class="text-center text-muted py-4">Aucun livreur</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <div class="text-muted small">{{ totalItems }} éléments</div>
+        <div class="btn-group">
+          <button class="btn btn-light btn-sm" (click)="prevPage()" [disabled]="currentPage===1">Précédent</button>
+          <button class="btn btn-light btn-sm" (click)="nextPage()" [disabled]="currentPage*pageSize>=totalItems">Suivant</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

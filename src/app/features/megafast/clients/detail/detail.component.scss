@@ -1,0 +1,442 @@
+// Manual color variables to avoid Bootstrap conflicts
+$primary: #556ee6;
+$danger: #f46a6a;
+$success: #34c38f;
+$gray-100: #f8f9fa;
+$gray-200: #eff2f7;
+$gray-300: #f6f6f6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #74788d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$red: #f46a6a;
+$white: #fff;
+
+// Dark theme colors
+$body-color-dark: #a6b0cf;
+$body-bg-dark: #161c2d;
+$body-secondary-bg-dark: #1e293b;
+$body-tertiary-bg-dark: #2a3447;
+$border-color-dark: #3a4556;
+
+// Profile section styling
+.profile-user-wid {
+  inline-size: 75px;
+  block-size: 75px;
+  
+  .avatar-title {
+    inline-size: 100%;
+    block-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+}
+
+// Mini stats cards
+.mini-stats-wid {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .avatar-sm {
+    inline-size: 40px;
+    block-size: 40px;
+    
+    .avatar-title {
+      inline-size: 100%;
+      block-size: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+// Cards styling
+.card {
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+  
+  .card-title {
+    font-weight: 600;
+    color: $gray-800;
+    margin-block-end: 1rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  // Chart containers
+  .apx-chart {
+    .apexcharts-canvas {
+      border-radius: 6px;
+    }
+  }
+}
+
+// Action buttons
+.d-grid {
+  .btn {
+    margin-block-end: 0.5rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.btn-primary {
+      background: linear-gradient(135deg, $primary, darken($primary, 10%));
+      border: none;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($primary, 5%), darken($primary, 15%));
+      }
+    }
+    
+    &.btn-danger {
+      background: linear-gradient(135deg, $danger, darken($danger, 10%));
+      border: none;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($danger, 5%), darken($danger, 15%));
+      }
+    }
+  }
+}
+
+// Status badges
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Table styling
+.table {
+  th {
+    font-weight: 600;
+    color: $gray-700;
+    border-block-end: 1px solid $gray-200;
+    padding: 0.75rem 0.5rem;
+    font-size: 13px;
+  }
+  
+  td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    border-block-end: 1px solid $gray-100;
+  }
+  
+  .table-light {
+    background-color: #f8f9fa;
+    
+    th {
+      border-block-end: 1px solid $gray-200;
+    }
+  }
+  
+  &.table-hover tbody tr:hover {
+    background-color: rgba($primary, 0.05);
+  }
+}
+
+// Table responsive scrollbar
+.table-responsive {
+  &::-webkit-scrollbar {
+    block-size: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $gray-100;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $gray-400;
+    border-radius: 3px;
+    
+    &:hover {
+      background: $gray-500;
+    }
+  }
+}
+
+// Profile image section
+.bg-primary-subtle {
+  background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
+  border-start-start-radius: 8px;
+  border-start-end-radius: 8px;
+  
+  .text-primary {
+    color: $primary !important;
+  }
+  
+  h5 {
+    font-weight: 600;
+    margin-block-end: 0.5rem;
+  }
+  
+  p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-block-end: 0;
+  }
+}
+
+// Loading states
+.spinner-border {
+  &.text-primary {
+    color: $primary !important;
+  }
+}
+
+// Error state
+.bx-error-circle {
+  color: $danger;
+  font-size: 3rem !important;
+}
+
+// Form styling in modals
+.modal {
+  .modal-dialog {
+    max-inline-size: 600px;
+  }
+  
+  .form-label {
+    font-weight: 500;
+    color: $gray-700;
+    margin-block-end: 0.5rem;
+    font-size: 14px;
+    
+    .text-danger {
+      color: $danger !important;
+    }
+  }
+  
+  .form-control {
+    border: 1px solid $gray-300;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    }
+    
+    &.is-invalid {
+      border-color: $danger;
+      
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba($danger, 0.25);
+      }
+    }
+    
+    &::placeholder {
+      color: $gray-500;
+      font-size: 13px;
+    }
+  }
+  
+  .form-check {
+    .form-check-input {
+      &:checked {
+        background-color: $primary;
+        border-color: $primary;
+      }
+      
+      &:focus {
+        border-color: $primary;
+        box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+      }
+    }
+    
+    .form-check-label {
+      font-weight: 500;
+      color: $gray-700;
+    }
+  }
+}
+
+// Address formatting
+.text-muted {
+  p {
+    margin-block-end: 0.25rem;
+    line-height: 1.5;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .mini-stats-wid {
+    margin-block-end: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 13px;
+  }
+  
+  .modal-dialog {
+    margin: 0.5rem;
+    max-inline-size: calc(100% - 1rem);
+  }
+  
+  .d-grid .btn {
+    padding: 0.625rem 0.875rem;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .row {
+    > .col-md-4 {
+      margin-block-end: 1rem;
+    }
+  }
+  
+  .btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 11px;
+  }
+}
+
+// Animation classes
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Dark theme support
+[data-bs-theme="dark"] {
+  .card {
+    background-color: $body-secondary-bg-dark;
+    border-color: $border-color-dark;
+    
+    .card-title {
+      color: $body-color-dark;
+    }
+  }
+  
+  .bg-primary-subtle {
+    background: linear-gradient(135deg, rgba($primary, 0.2), rgba($primary, 0.1));
+  }
+  
+  .table {
+    th {
+      color: $body-color-dark;
+      border-block-end-color: $border-color-dark;
+    }
+    
+    td {
+      border-block-end-color: $border-color-dark;
+    }
+    
+    .table-light {
+      background-color: $body-tertiary-bg-dark;
+      
+      th {
+        border-block-end-color: $border-color-dark;
+      }
+    }
+    
+    &.table-hover tbody tr:hover {
+      background-color: rgba($primary, 0.1);
+    }
+  }
+  
+  .table-responsive {
+    &::-webkit-scrollbar-track {
+      background: $body-tertiary-bg-dark;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: $border-color-dark;
+      
+      &:hover {
+        background: $body-color-dark;
+      }
+    }
+  }
+  
+  .modal-content {
+    background-color: $body-secondary-bg-dark;
+    border-color: $border-color-dark;
+  }
+  
+  .form-label {
+    color: $body-color-dark;
+  }
+  
+  .form-control {
+    background-color: $body-tertiary-bg-dark;
+    border-color: $border-color-dark;
+    color: $body-color-dark;
+    
+    &::placeholder {
+      color: rgba($body-color-dark, 0.6);
+    }
+    
+    &:focus {
+      background-color: $body-tertiary-bg-dark;
+      border-color: $primary;
+      color: $body-color-dark;
+    }
+  }
+  
+  .form-check-label {
+    color: $body-color-dark;
+  }
+  
+  .text-muted {
+    color: rgba($body-color-dark, 0.7) !important;
+  }
+}

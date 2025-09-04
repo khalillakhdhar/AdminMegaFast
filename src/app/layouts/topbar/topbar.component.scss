@@ -1,0 +1,13 @@
+.user-avatar {
+  inline-size: 36px;
+  block-size: 36px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-scroll {
+  position: relative;
+  block-size: 230px;
+}

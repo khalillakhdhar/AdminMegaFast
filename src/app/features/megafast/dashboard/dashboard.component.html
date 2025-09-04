@@ -1,0 +1,315 @@
+<div class="container-fluid">
+  <app-page-title title="Dashboard Logistique" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <!-- KPIs Overview -->
+  <div class="row">
+    <div class="col-xl-3 col-md-6">
+      <div class="card mini-stats-wid">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-grow-1">
+              <p class="text-muted fw-medium">Total Colis</p>
+              <h4 class="mb-0">{{dashboardStats.totalShipments}}</h4>
+              <p class="text-muted mt-1">
+                <span class="text-success">
+                  <i class="bx bx-up-arrow-alt"></i> {{dashboardStats.shipmentGrowth}}%
+                </span>
+                ce mois
+              </p>
+            </div>
+            <div class="flex-shrink-0 align-self-center">
+              <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
+                <span class="avatar-title">
+                  <i class="bx bx-package font-size-16"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+      <div class="card mini-stats-wid">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-grow-1">
+              <p class="text-muted fw-medium">Taux de Livraison</p>
+              <h4 class="mb-0">{{dashboardStats.deliveryRate}}%</h4>
+              <p class="text-muted mt-1">
+                <span class="text-success">
+                  <i class="bx bx-up-arrow-alt"></i> +{{dashboardStats.deliveryRateImprovement}}%
+                </span>
+                vs mois dernier
+              </p>
+            </div>
+            <div class="flex-shrink-0 align-self-center">
+              <div class="mini-stat-icon avatar-sm rounded-circle bg-success">
+                <span class="avatar-title">
+                  <i class="bx bx-check-double font-size-16"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card mini-stats-wid">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-grow-1">
+              <p class="text-muted fw-medium">COD Collecté</p>
+              <h4 class="mb-0">{{dashboardStats.totalCOD | currency:'TND'}}</h4>
+              <p class="text-muted mt-1">
+                <span class="text-success">
+                  <i class="bx bx-up-arrow-alt"></i> {{dashboardStats.codGrowth}}%
+                </span>
+                ce mois
+              </p>
+            </div>
+            <div class="flex-shrink-0 align-self-center">
+              <div class="mini-stat-icon avatar-sm rounded-circle bg-warning">
+                <span class="avatar-title">
+                  <i class="bx bx-dollar font-size-16"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card mini-stats-wid">
+        <div class="card-body">
+          <div class="d-flex">
+            <div class="flex-grow-1">
+              <p class="text-muted fw-medium">Lots Actifs</p>
+              <h4 class="mb-0">{{dashboardStats.activeBatches}}</h4>
+              <p class="text-muted mt-1">
+                <span class="text-info">
+                  <i class="bx bx-truck"></i> {{dashboardStats.driversActive}}
+                </span>
+                livreurs en route
+              </p>
+            </div>
+            <div class="flex-shrink-0 align-self-center">
+              <div class="mini-stat-icon avatar-sm rounded-circle bg-info">
+                <span class="avatar-title">
+                  <i class="bx bx-list-ul font-size-16"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row">
+    <div class="col-xl-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="clearfix">
+            <div class="float-end">
+              <div class="input-group input-group-sm">
+                <select class="form-select" [(ngModel)]="selectedPeriod" (change)="updateCharts()">
+                  <option value="7">7 jours</option>
+                  <option value="30">30 jours</option>
+                  <option value="90">3 mois</option>
+                </select>
+              </div>
+            </div>
+            <h4 class="card-title mb-4">Performance des Livraisons</h4>
+          </div>
+          
+          <!-- Chart Placeholder -->
+          <div class="text-center p-5 bg-light rounded">
+            <i class="bx bx-line-chart font-size-48 text-muted"></i>
+            <p class="text-muted mt-3 mb-0">Graphique des performances</p>
+            <small class="text-muted">Affichage des tendances de livraison sur la période sélectionnée</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Répartition par Statut</h4>
+          
+          <!-- Status Distribution -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Livrés</span>
+              <span class="fw-medium">{{statusDistribution.delivered}}%</span>
+            </div>
+            <div class="progress mb-3" style="height: 8px;">
+              <div class="progress-bar bg-success" [style.width.%]="statusDistribution.delivered"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">En transit</span>
+              <span class="fw-medium">{{statusDistribution.inTransit}}%</span>
+            </div>
+            <div class="progress mb-3" style="height: 8px;">
+              <div class="progress-bar bg-primary" [style.width.%]="statusDistribution.inTransit"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">En attente</span>
+              <span class="fw-medium">{{statusDistribution.pending}}%</span>
+            </div>
+            <div class="progress mb-3" style="height: 8px;">
+              <div class="progress-bar bg-warning" [style.width.%]="statusDistribution.pending"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Retournés</span>
+              <span class="fw-medium">{{statusDistribution.returned}}%</span>
+            </div>
+            <div class="progress mb-3" style="height: 8px;">
+              <div class="progress-bar bg-danger" [style.width.%]="statusDistribution.returned"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity & Top Performers -->
+  <div class="row">
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title">Activité Récente</h4>
+            <a href="/megafast/colis" class="btn btn-outline-primary btn-sm">
+              Voir tout
+            </a>
+          </div>
+          
+          <div class="activity-timeline">
+            <div class="activity-item" *ngFor="let activity of recentActivities; trackBy: trackByActivity">
+              <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
+                <i [ngClass]="getActivityIcon(activity.type)"></i>
+              </div>
+              <div class="activity-content">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1">{{activity.title}}</h6>
+                    <p class="text-muted mb-0">{{activity.description}}</p>
+                  </div>
+                  <small class="text-muted">{{activity.timestamp | date:'HH:mm'}}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Top Livreurs</h4>
+          
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle">
+              <thead>
+                <tr>
+                  <th>Livreur</th>
+                  <th>Livraisons</th>
+                  <th>Taux</th>
+                  <th>COD</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let driver of topDrivers; trackBy: trackByDriver">
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-3">
+                        <div class="avatar-title rounded-circle bg-primary-subtle text-primary">
+                          {{getDriverInitials(driver.name)}}
+                        </div>
+                      </div>
+                      <div>
+                        <h6 class="mb-0">{{driver.name}}</h6>
+                        <small class="text-muted">{{driver.deliveries}} livraisons</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="fw-medium">{{driver.deliveries}}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getPerformanceBadgeClass(driver.rate)">
+                      {{driver.rate}}%
+                    </span>
+                  </td>
+                  <td>
+                    <span class="fw-medium">{{driver.cod | currency:'TND'}}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Actions Rapides</h4>
+          <div class="row">
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="d-grid">
+                <button class="btn btn-primary" (click)="router.navigate(['/megafast/colis/create'])">
+                  <i class="bx bx-plus me-2"></i>
+                  Nouveau Colis
+                </button>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="d-grid">
+                <button class="btn btn-success" (click)="router.navigate(['/megafast/batches/create'])">
+                  <i class="bx bx-package me-2"></i>
+                  Créer Lot
+                </button>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="d-grid">
+                <button class="btn btn-info" (click)="optimizeAllRoutes()">
+                  <i class="bx bx-map me-2"></i>
+                  Optimiser Routes
+                </button>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="d-grid">
+                <button class="btn btn-warning" (click)="generateReport()">
+                  <i class="bx bx-download me-2"></i>
+                  Rapport Global
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

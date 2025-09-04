@@ -1,0 +1,82 @@
+// Shipments List Styles - Harmonisé avec le dashboard principal
+.page-title-box {
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 1rem 2rem rgba(18, 38, 63, 0.08);
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-soft-info {
+  color: #39afd1;
+  background-color: rgba(57, 175, 209, 0.15);
+  border-color: transparent;
+}
+
+.btn-soft-info:hover {
+  color: #2c8aa6;
+  background-color: rgba(57, 175, 209, 0.25);
+}
+
+// Badge styles matching main dashboard
+.badge-soft-secondary {
+  color: #6c757d;
+  background-color: rgba(108, 117, 125, 0.15);
+}
+
+.badge-soft-warning {
+  color: #f1b44c;
+  background-color: rgba(241, 180, 76, 0.15);
+}
+
+.badge-soft-info {
+  color: #39afd1;
+  background-color: rgba(57, 175, 209, 0.15);
+}
+
+.badge-soft-success {
+  color: #06a94d;
+  background-color: rgba(6, 169, 77, 0.15);
+}
+
+.badge-soft-danger {
+  color: #fd625e;
+  background-color: rgba(253, 98, 94, 0.15);
+}
+
+.badge-soft-dark {
+  color: #495057;
+  background-color: rgba(73, 80, 87, 0.15);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.table-responsive {
+  border-radius: 8px;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.font-size-18 {
+  font-size: 18px !important;
+}

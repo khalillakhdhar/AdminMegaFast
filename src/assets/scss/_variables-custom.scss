@@ -1,0 +1,156 @@
+// Variables personnalisées Skote
+// Seulement les variables personnalisées, sans les variables Bootstrap standard
+
+//
+// Color system - Base colors (must be defined first)
+//
+
+// scss-docs-start gray-color-variables
+$white:    #fff;
+$gray-100: #f8f9fa;
+$gray-200: #eff2f7;
+$gray-300: #f6f6f6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #74788d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black:    #000;
+// scss-docs-end gray-color-variables
+
+// scss-docs-start color-variables
+$blue:    #556ee6;
+$indigo:  #564ab1;
+$purple:  #6f42c1;
+$pink:    #e83e8c;
+$red:     #f46a6a;
+$orange:  #f1734f;
+$yellow:  #f1b44c;
+$green:   #34c38f;
+$teal:    #050505;
+$cyan:    #50a5f1;
+// scss-docs-end color-variables
+
+// scss-docs-start theme-color-variables
+$primary:       $blue;
+$secondary:     $gray-600;
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-200;
+$dark:          $gray-800;
+// scss-docs-end theme-color-variables
+
+//
+// Prefix for :root CSS variables (must be defined early)
+//
+
+$variable-prefix:             bs-; // Deprecated in v5.2.0 for the shorter `$prefix`
+$prefix:                      $variable-prefix;
+
+//
+// Options to enable/disable features
+//
+
+$enable-gradients:            false;
+$enable-shadows:              false;
+$enable-negative-margins:     true;
+
+//
+// custom-variables
+//
+
+// Vertical Sidebar  Light
+$sidebar-bg:                                          #ffffff;
+$sidebar-menu-item-color:                             #545a6d;
+$sidebar-menu-sub-item-color:                         #545a6d;
+$sidebar-menu-item-icon-color:                        #7f8387;
+$sidebar-menu-item-hover-color:                       #383c40;
+$sidebar-menu-item-active-color:                      #556ee6;
+$sidebar-width:                                       250px;
+$sidebar-collapsed-width:                             70px;
+$sidebar-width-sm:                                    160px;
+
+// Vertical Sidebar - Dark
+$sidebar-dark-bg:                                     #2a3042; //2c313a
+$sidebar-dark-menu-item-color:                        #a6b0cf;
+$sidebar-dark-menu-sub-item-color:                    #79829c;
+$sidebar-dark-menu-item-icon-color:                   #6a7187;
+$sidebar-dark-menu-item-hover-color:                  #ffffff;
+$sidebar-dark-menu-item-active-color:                 #ffffff;
+
+// Topbar - Default Light
+$header-height:                                       70px;
+$header-bg:                                           $white;
+$header-item-color:                                   #555b6d;
+
+// Topbar - Dark
+$header-dark-bg:                                      #2a3042;
+$header-dark-item-color:                              #e9ecef;
+
+// Topbar Search
+$topbar-search-bg:                                    #f3f3f9;
+
+// Footer
+$footer-height:                                       60px;
+$footer-bg:                                           #f2f2f5;
+$footer-color:                                        #74788d;
+
+// Horizontal nav
+$topnav-bg:                                           $white;
+
+$menu-item-color:                                     #545a6d;
+$menu-item-active-color:                              #556ee6;
+
+// Right Sidebar
+$rightbar-width:                                      280px;
+
+// Display
+$display-none:                                        none;
+$display-block:                                       block;
+
+// Brand 
+$navbar-brand-box-width:                             250px;
+
+// Boxed layout width
+$boxed-layout-width:                                 1300px;
+$boxed-body-bg:                                     #ebebf4;
+
+// apex charts
+$apex-grid-color:                                   var(--#{$prefix}border-color);
+
+// table
+$table-head-bg:                                     $gray-100;
+$table-border-color:                                $gray-300;
+$table-border-width:                                1px;
+$table-dark-border-color:                           #495057;
+
+// Body
+$body-bg:                   #f8f8fb;
+$body-color:                $gray-900;
+
+// Dark theme colors
+$body-color-dark:           #a6b0cf;
+$body-bg-dark:              #161c2d;
+$body-secondary-bg-dark:    #1e293b;
+
+// Typography
+$font-family-sans-serif:      'Poppins', sans-serif;
+$font-size-base:              0.8125rem;
+$font-weight-bold:            600;
+
+// Box shadows
+$box-shadow:                  0 0.75rem 1.5rem rgba(18,38,63,.03);
+
+// Spacers (required for Bootstrap utilities)
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * .25,
+  2: $spacer * .5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+);

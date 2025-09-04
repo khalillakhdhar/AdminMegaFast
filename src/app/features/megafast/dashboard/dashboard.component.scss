@@ -1,0 +1,333 @@
+// Dashboard Styles
+.mini-stats-wid {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .mini-stat-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Progress bars customization
+.progress {
+  &.mb-3 {
+    height: 8px !important;
+  }
+  
+  .progress-bar {
+    border-radius: 4px;
+  }
+}
+
+// Charts section
+.chart-placeholder {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+// Activity timeline
+.activity-timeline {
+  max-height: 400px;
+  overflow-y: auto;
+  
+  .activity-item {
+    display: flex;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      
+      i {
+        font-size: 16px;
+      }
+    }
+    
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+      
+      h6 {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      p {
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Top drivers table
+.table-borderless {
+  th {
+    border: none;
+    color: var(--bs-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 0.75rem;
+  }
+  
+  td {
+    border: none;
+    padding: 0.75rem 0;
+    vertical-align: middle;
+  }
+  
+  .avatar-sm {
+    width: 32px;
+    height: 32px;
+    
+    .avatar-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+}
+
+// Badge variants
+.badge-soft-success {
+  background-color: rgba(var(--bs-success-rgb), 0.1);
+  color: var(--bs-success);
+}
+
+.badge-soft-warning {
+  background-color: rgba(var(--bs-warning-rgb), 0.1);
+  color: var(--bs-warning);
+}
+
+.badge-soft-danger {
+  background-color: rgba(var(--bs-danger-rgb), 0.1);
+  color: var(--bs-danger);
+}
+
+// Quick actions
+.quick-actions {
+  .btn {
+    min-height: 48px;
+    font-weight: 500;
+    
+    i {
+      font-size: 18px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .mini-stats-wid {
+    margin-bottom: 1rem;
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .mini-stat-icon {
+      width: 50px;
+      height: 50px;
+    }
+  }
+  
+  .activity-timeline {
+    max-height: 300px;
+    
+    .activity-item {
+      .activity-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 0.75rem;
+        
+        i {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  
+  .table-responsive {
+    font-size: 0.85rem;
+    
+    .avatar-sm {
+      width: 28px;
+      height: 28px;
+      
+      .avatar-title {
+        font-size: 0.7rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .mini-stats-wid {
+    .d-flex {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .mini-stat-icon {
+      margin-bottom: 1rem;
+      align-self: center;
+    }
+  }
+  
+  .quick-actions {
+    .btn {
+      min-height: 40px;
+      font-size: 0.85rem;
+      
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Dark mode support
+[data-bs-theme="dark"] {
+  .activity-timeline {
+    .activity-item {
+      border-bottom-color: var(--bs-border-color);
+    }
+  }
+  
+  .chart-placeholder {
+    background-color: var(--bs-dark) !important;
+    color: var(--bs-light);
+  }
+  
+  .mini-stats-wid {
+    .card {
+      background-color: var(--bs-dark);
+      border-color: var(--bs-border-color);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .quick-actions,
+  .activity-timeline {
+    display: none !important;
+  }
+  
+  .mini-stats-wid {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+}
+
+// Loading state
+.loading-state {
+  opacity: 0.6;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Chart container
+.chart-container {
+  position: relative;
+  height: 300px;
+  
+  .chart-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bs-secondary);
+  }
+}
+
+// Status distribution styling
+.status-distribution {
+  .progress {
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .status-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .status-percentage {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+}
+
+// Hover effects
+.card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  transition: transform 0.15s ease-in-out;
+}
+
+// Animation for stats cards
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mini-stats-wid {
+  animation: fadeInUp 0.6s ease-out;
+  
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+}

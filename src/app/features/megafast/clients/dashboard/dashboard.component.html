@@ -1,0 +1,396 @@
+<div class="container-fluid">
+
+  @if (loading) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-3 text-muted">Chargement du tableau de bord...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else if (stats) {
+    <!-- Statistics Cards -->
+    <div class="row">
+      <div class="col-xl-3 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-primary text-white rounded-circle">
+                  <i class="bx bx-group font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Total Clients</h6>
+                <h4 class="mt-1 mb-1">{{ stats.totalClients }}</h4>
+                <p class="text-muted mb-0">
+                  <span [class]="getGrowthClass(stats.clientsGrowth)">
+                    <i [class]="'bx ' + getGrowthIcon(stats.clientsGrowth) + ' me-1'"></i>
+                    {{ formatPercentage(stats.clientsGrowth) }}
+                  </span>
+                  <span class="ms-1">vs mois dernier</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-success text-white rounded-circle">
+                  <i class="bx bx-check-circle font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Clients Actifs</h6>
+                <h4 class="mt-1 mb-1">{{ stats.activeClients }}</h4>
+                <p class="text-muted mb-0">
+                  <span class="text-success">
+                    {{ ((stats.activeClients / stats.totalClients) * 100).toFixed(1) }}%
+                  </span>
+                  <span class="ms-1">du total</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-info text-white rounded-circle">
+                  <i class="bx bx-user-plus font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Nouveaux ce mois</h6>
+                <h4 class="mt-1 mb-1">{{ stats.newClientsThisMonth }}</h4>
+                <p class="text-muted mb-0">
+                  <span [class]="getGrowthClass(stats.clientsGrowth)">
+                    <i [class]="'bx ' + getGrowthIcon(stats.clientsGrowth) + ' me-1'"></i>
+                    {{ formatPercentage(stats.clientsGrowth) }}
+                  </span>
+                  <span class="ms-1">vs mois dernier</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-warning text-white rounded-circle">
+                  <i class="bx bx-wallet font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Chiffre d'Affaires</h6>
+                <h4 class="mt-1 mb-1">{{ formatCurrency(stats.totalRevenue) }}</h4>
+                <p class="text-muted mb-0">
+                  <span [class]="getGrowthClass(stats.revenueGrowth)">
+                    <i [class]="'bx ' + getGrowthIcon(stats.revenueGrowth) + ' me-1'"></i>
+                    {{ formatPercentage(stats.revenueGrowth) }}
+                  </span>
+                  <span class="ms-1">vs mois dernier</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="row">
+      <div class="col-xl-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-purple text-white rounded-circle">
+                  <i class="bx bx-money font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Valeur Moyenne Commande</h6>
+                <h4 class="mt-1 mb-1">{{ formatCurrency(stats.avgOrderValue) }}</h4>
+                <p class="text-muted mb-0">Par commande client</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-secondary text-white rounded-circle">
+                  <i class="bx bx-user-check font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Taux d'Activité</h6>
+                <h4 class="mt-1 mb-1">{{ ((stats.activeClients / stats.totalClients) * 100).toFixed(1) }}%</h4>
+                <p class="text-muted mb-0">Clients actifs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-dark text-white rounded-circle">
+                  <i class="bx bx-trending-up font-size-18"></i>
+                </span>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0">Croissance</h6>
+                <h4 class="mt-1 mb-1 {{ getGrowthClass(stats.clientsGrowth) }}">
+                  {{ formatPercentage(stats.clientsGrowth) }}
+                </h4>
+                <p class="text-muted mb-0">Ce mois-ci</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+      <div class="col-xl-8">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <h4 class="card-title mb-0">Croissance des Clients</h4>
+              <div class="dropdown">
+                <button type="button" class="btn btn-soft-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                  6 derniers mois
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">3 derniers mois</a></li>
+                  <li><a class="dropdown-item" href="#">6 derniers mois</a></li>
+                  <li><a class="dropdown-item" href="#">12 derniers mois</a></li>
+                </ul>
+              </div>
+            </div>
+            <apx-chart
+              [series]="clientsGrowthChart.series"
+              [chart]="clientsGrowthChart.chart"
+              [xaxis]="clientsGrowthChart.xaxis"
+              [yaxis]="clientsGrowthChart.yaxis"
+              [colors]="clientsGrowthChart.colors"
+              [fill]="clientsGrowthChart.fill"
+              [stroke]="clientsGrowthChart.stroke"
+              [grid]="clientsGrowthChart.grid">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Actions Rapides</h4>
+            <div class="d-grid gap-2">
+              <a routerLink="/clients/new" class="btn btn-primary">
+                <i class="bx bx-plus me-1"></i> Nouveau Client
+              </a>
+              <a routerLink="/clients" class="btn btn-light">
+                <i class="bx bx-list-ul me-1"></i> Liste des Clients
+              </a>
+              <button type="button" class="btn btn-info">
+                <i class="bx bx-download me-1"></i> Exporter Données
+              </button>
+              <button type="button" class="btn btn-warning">
+                <i class="bx bx-chart me-1"></i> Rapport Détaillé
+              </button>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="card-title mb-3">Top Clients</h5>
+            <div class="mb-3">
+              <div class="d-flex align-items-center">
+                <div class="avatar-xs me-2">
+                  <div class="avatar-title bg-primary rounded-circle">A</div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0">Ahmed Ben Ali</h6>
+                  <small class="text-muted">45 commandes</small>
+                </div>
+                <div class="text-end">
+                  <span class="text-success">12,500 TND</span>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex align-items-center">
+                <div class="avatar-xs me-2">
+                  <div class="avatar-title bg-success rounded-circle">S</div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0">Société TechCorp</h6>
+                  <small class="text-muted">32 commandes</small>
+                </div>
+                <div class="text-end">
+                  <span class="text-success">9,800 TND</span>
+                </div>
+              </div>
+            </div>
+            <div class="mb-0">
+              <div class="d-flex align-items-center">
+                <div class="avatar-xs me-2">
+                  <div class="avatar-title bg-info rounded-circle">F</div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0">Fatma Trabelsi</h6>
+                  <small class="text-muted">28 commandes</small>
+                </div>
+                <div class="text-end">
+                  <span class="text-success">7,650 TND</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue and Orders Charts -->
+    <div class="row">
+      <div class="col-xl-6">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Chiffre d'Affaires par Mois</h4>
+            <apx-chart
+              [series]="revenueChart.series"
+              [chart]="revenueChart.chart"
+              [xaxis]="revenueChart.xaxis"
+              [yaxis]="revenueChart.yaxis"
+              [colors]="revenueChart.colors"
+              [plotOptions]="revenueChart.plotOptions"
+              [grid]="revenueChart.grid">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-6">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Évolution des Commandes</h4>
+            <apx-chart
+              [series]="ordersChart.series"
+              [chart]="ordersChart.chart"
+              [xaxis]="ordersChart.xaxis"
+              [yaxis]="ordersChart.yaxis"
+              [colors]="ordersChart.colors"
+              [stroke]="ordersChart.stroke"
+              [markers]="ordersChart.markers"
+              [grid]="ordersChart.grid">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <h4 class="card-title mb-0">Activité Récente</h4>
+              <a href="#" class="btn btn-light btn-sm">Voir tout</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-nowrap align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Client</th>
+                    <th>Action</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-xs me-2">
+                          <div class="avatar-title bg-primary rounded-circle font-size-12">A</div>
+                        </div>
+                        <div>
+                          <h6 class="mb-0">Ahmed Ben Ali</h6>
+                          <small class="text-muted">ahmed&#64;email.com</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Nouvelle commande #CMD-001</td>
+                    <td>Il y a 2 heures</td>
+                    <td><span class="badge bg-success">Complétée</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-xs me-2">
+                          <div class="avatar-title bg-success rounded-circle font-size-12">S</div>
+                        </div>
+                        <div>
+                          <h6 class="mb-0">Société TechCorp</h6>
+                          <small class="text-muted">contact&#64;techcorp.tn</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Mise à jour profil</td>
+                    <td>Il y a 4 heures</td>
+                    <td><span class="badge bg-info">Information</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-xs me-2">
+                          <div class="avatar-title bg-warning rounded-circle font-size-12">M</div>
+                        </div>
+                        <div>
+                          <h6 class="mb-0">Mohamed Sassi</h6>
+                          <small class="text-muted">mohamed&#64;email.com</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Inscription nouveau client</td>
+                    <td>Hier</td>
+                    <td><span class="badge bg-primary">Nouveau</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

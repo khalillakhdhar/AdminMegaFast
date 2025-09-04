@@ -1,0 +1,126 @@
+.app-wrapper {
+  display: flex;
+  height: 100vh;
+  background-color: #f8fafc;
+  overflow: hidden;
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 260px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+
+    &.collapsed {
+      width: 70px;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    margin-left: 260px;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+    min-height: 100vh;
+
+    &.sidebar-collapsed {
+      margin-left: 70px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 24px;
+      background-color: #f8fafc;
+      min-height: calc(100vh - 70px);
+      overflow-y: auto;
+    }
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    .loading-spinner {
+      text-align: center;
+      color: #3b82f6;
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .app-wrapper {
+    .sidebar {
+      width: 260px;
+      transform: translateX(-100%);
+
+      &.collapsed {
+        width: 260px;
+        transform: translateX(0);
+      }
+    }
+
+    .main-content {
+      margin-left: 0;
+
+      &.sidebar-collapsed {
+        margin-left: 0;
+      }
+
+      .page-content {
+        padding: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .app-wrapper {
+    .page-content {
+      padding: 12px !important;
+    }
+  }
+}

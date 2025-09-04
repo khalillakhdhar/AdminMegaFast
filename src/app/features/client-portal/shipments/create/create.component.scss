@@ -1,0 +1,140 @@
+// Create Shipment Styles - Harmonisé avec le dashboard principal
+.page-title-box {
+  margin-bottom: 2rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 1rem 2rem rgba(18, 38, 63, 0.08);
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.form-control:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+}
+
+.font-size-14 {
+  font-size: 14px !important;
+  color: #495057;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.font-size-18 {
+  font-size: 18px !important;
+}
+
+.text-danger.small {
+  font-size: 0.875rem;
+}
+
+.btn-light {
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+}
+
+.btn-light:hover {
+  background-color: #e9ecef;
+  border-color: #dae0e5;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.form-control,
+.form-select {
+  border-color: #ced4da;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #74788d;
+  box-shadow: 0 0 0 0.2rem rgba(116, 120, 141, 0.25);
+}
+
+.d-flex.gap-2 {
+  gap: 0.5rem !important;
+}
+
+// Styles harmonisés avec le dashboard principal
+.required {
+  color: #fd625e;
+}
+
+.wizard-tab {
+  .nav-pills {
+    .nav-link {
+      color: #6c757d;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link.active {
+      color: #fff;
+      background-color: #556ee6;
+    }
+
+    .nav-link:hover:not(.active) {
+      background-color: #e9ecef;
+    }
+  }
+}
+
+.tab-content {
+  .tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert {
+  border: none;
+  border-radius: 8px;
+}
+
+.btn-soft-primary {
+  color: #556ee6;
+  background-color: rgba(85, 110, 230, 0.15);
+  border-color: transparent;
+}
+
+.btn-soft-primary:hover {
+  color: #4c63d2;
+  background-color: rgba(85, 110, 230, 0.25);
+}
+
+.btn-soft-secondary {
+  color: #6c757d;
+  background-color: rgba(108, 117, 125, 0.15);
+  border-color: transparent;
+}
+
+.btn-soft-secondary:hover {
+  color: #545b62;
+  background-color: rgba(108, 117, 125, 0.25);
+}
