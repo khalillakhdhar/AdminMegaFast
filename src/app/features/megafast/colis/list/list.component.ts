@@ -10,13 +10,13 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 
-import { ShipmentService, ShipmentListFilters } from 'src/app/core/services/shipment.service';
-import { ShipmentPrintService } from 'src/app/core/services/shipment-print.service';
-import { ClientService } from 'src/app/core/services/client.service';
-import { BatchService } from 'src/app/core/services/batch.service';
-import { DriverService } from 'src/app/core/services/driver.service';
-import { Shipment, ShipmentStatus } from 'src/app/core/models/shipment.model';
-import { PageTitleComponent } from 'src/app/shared/ui/pagetitle/pagetitle.component';
+import { ShipmentService, ShipmentListFilters } from '../../../../core/services/shipment.service';
+import { ShipmentPrintService } from '../../../../core/services/shipment-print.service';
+import { ClientService } from '../../../../core/services/client.service';
+import { BatchService } from '../../../../core/services/batch.service';
+import { DriverService } from '../../../../core/services/driver.service';
+import { Shipment, ShipmentStatus } from '../../../../core/models/shipment.model';
+import { PageTitleComponent } from '../../../../shared/ui/pagetitle/pagetitle.component';
 
 interface StatusOption {
   value: ShipmentStatus;

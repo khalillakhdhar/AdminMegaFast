@@ -20,6 +20,7 @@ export class ShipmentsListComponent implements OnInit {
   filteredShipments: Shipment[] = [];
   searchTerm: string = '';
   statusFilter: string = '';
+  expandedShipment: string | null = null;
 
   constructor(
     private clientShipmentService: ClientShipmentService
@@ -97,5 +98,52 @@ export class ShipmentsListComponent implements OnInit {
       canceled: 'badge-soft-dark'
     };
     return statusClasses[status] || 'badge-soft-secondary';
+  }
+
+  getStatusColor(status: string): string {
+    const statusColors: Record<string, string> = {
+      created: 'secondary',
+      assigned: 'warning',
+      in_transit: 'info',
+      delivered: 'success',
+      returned: 'danger',
+      canceled: 'dark'
+    };
+    return statusColors[status] || 'secondary';
+  }
+
+  trackByShipmentId(index: number, shipment: Shipment): string {
+    return shipment.id || index.toString();
+  }
+
+  toggleExpand(shipmentId: string): void {
+    this.expandedShipment = this.expandedShipment === shipmentId ? null : shipmentId;
+  }
+
+  viewDetails(shipment: Shipment): void {
+    // Implementation for details modal or navigation
+    console.log('Viewing details for shipment:', shipment.barcode);
+    // Could navigate to details page or open modal
+  }
+
+  getShipmentMeta(shipment: Shipment): any {
+    // Try to extract metadata from notes field with META: prefix
+    if (shipment.notes && shipment.notes.includes('META:')) {
+      try {
+        const metaStart = shipment.notes.indexOf('META:') + 5;
+        const metaString = shipment.notes.substring(metaStart);
+        return JSON.parse(metaString);
+      } catch (e) {
+        console.warn('Failed to parse shipment metadata:', e);
+      }
+    }
+
+    // Return empty meta structure
+    return {
+      items: [],
+      fees: null,
+      subtotal: 0,
+      grandTotal: shipment.amount || 0
+    };
   }
 }

@@ -83,13 +83,39 @@ export class ShipmentPrintService {
         },
 
         ...(meta ? [
+          // Section des produits si disponibles
+          ...(meta.items && meta.items.length > 0 ? [
+            { text: 'Produits', style: 'h3', margin: [0, 15, 0, 5] },
+            {
+              table: {
+                widths: ['*', 'auto', 'auto', 'auto'],
+                body: [
+                  [
+                    { text: 'Produit', style: 'th' },
+                    { text: 'Qté', style: 'th' },
+                    { text: 'Prix unitaire', style: 'th' },
+                    { text: 'Total', style: 'th' }
+                  ],
+                  ...meta.items.map((item: any) => [
+                    item.description || item.name || 'Produit',
+                    (item.qty || 0).toString(),
+                    this.money(item.unitPrice || 0),
+                    this.money((item.qty || 0) * (item.unitPrice || 0))
+                  ])
+                ]
+              },
+              layout: 'lightHorizontalLines'
+            }
+          ] : []),
+
           { text: 'Tarification', style: 'h3', margin: [0, 15, 0, 5] },
           {
             table: {
               widths: ['*', 'auto'],
               body: [
                 [{ text: 'Sous-total Produits' }, { text: this.money(meta.subtotal) }],
-                [{ text: 'Frais de livraison' }, { text: this.money(meta.fees?.feeTotal) }]
+                [{ text: 'Frais de livraison' }, { text: this.money(meta.fees?.feeTotal) }],
+                [{ text: 'Total', style: 'th' }, { text: this.money((meta.subtotal || 0) + (meta.fees?.feeTotal || 0)), style: 'th' }]
               ]
             },
             layout: 'lightHorizontalLines'
@@ -228,7 +254,7 @@ export class ShipmentPrintService {
   }
 
   // --- Extraction META (compat: feePayment || feeCod)
-  private extractMeta(sh: Shipment): { subtotal?: number; fees?: { feeBase?: number; feeWeight?: number; feePayment?: number; feeDiscount?: number; feeTotal?: number } } | null {
+  private extractMeta(sh: Shipment): { subtotal?: number; items?: any[]; fees?: { feeBase?: number; feeWeight?: number; feePayment?: number; feeDiscount?: number; feeTotal?: number } } | null {
     const notes = sh?.notes || '';
     const idx = notes.indexOf('META:');
     if (idx === -1) return null;
@@ -243,7 +269,11 @@ export class ShipmentPrintService {
         feeDiscount: feesIn.feeDiscount,
         feeTotal: feesIn.feeTotal,
       };
-      return { subtotal: meta?.subtotal, fees };
+      return {
+        subtotal: meta?.subtotal,
+        items: meta?.items || [],
+        fees
+      };
     } catch {
       return null;
     }

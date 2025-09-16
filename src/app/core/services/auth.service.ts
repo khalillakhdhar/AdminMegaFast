@@ -3,7 +3,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 import { getFirebaseBackend } from '../../authUtils';
-import { User } from 'src/app/store/Authentication/auth.models';
+import { User } from '../../store/Authentication/auth.models';
 import { from, map, switchMap, of } from 'rxjs';
 
 export interface UserRole {

@@ -122,6 +122,52 @@ import { DriverService } from '../../../core/services/driver-portal.service';
             </div>
           </div>
 
+          <!-- Products and Metadata -->
+          <div class="info-section" *ngIf="getShipmentMeta(shipment)?.items?.length">
+            <h4><i class="fas fa-box"></i> Produits</h4>
+            <div class="products-table">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-end">Prix Unit.</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of getShipmentMeta(shipment)?.items">
+                    <td>{{ item.description }}</td>
+                    <td class="text-center">{{ item.qty || item.quantity }}</td>
+                    <td class="text-end">{{ formatCurrency(item.unitPrice || 0) }}</td>
+                    <td class="text-end">
+                      {{ formatCurrency((item.qty || item.quantity) * (item.unitPrice || 0)) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Fees and Totals -->
+          <div class="info-section" *ngIf="getShipmentMeta(shipment)?.fees">
+            <h4><i class="fas fa-calculator"></i> Frais et Totaux</h4>
+            <div class="fees-grid">
+              <div class="fee-item" *ngIf="getShipmentMeta(shipment)?.subtotal">
+                <label>Sous-total produits:</label>
+                <span>{{ formatCurrency(getShipmentMeta(shipment)?.subtotal) }}</span>
+              </div>
+              <div class="fee-item" *ngIf="getShipmentMeta(shipment)?.fees?.feeTotal">
+                <label>Frais de livraison:</label>
+                <span>{{ formatCurrency(getShipmentMeta(shipment)?.fees?.feeTotal) }}</span>
+              </div>
+              <div class="fee-item" *ngIf="getShipmentMeta(shipment)?.grandTotal" class="total-row">
+                <label><strong>Total général:</strong></label>
+                <span><strong>{{ formatCurrency(getShipmentMeta(shipment)?.grandTotal) }}</strong></span>
+              </div>
+            </div>
+          </div>
+
           <!-- Notes -->
           <div class="info-section" *ngIf="shipment.notes">
             <h4><i class="fas fa-sticky-note"></i> Notes</h4>
@@ -411,6 +457,71 @@ import { DriverService } from '../../../core/services/driver-portal.service';
       }
     }
 
+    .products-table {
+      background: #f8fafc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 1rem;
+
+      table {
+        width: 100%;
+        margin: 0;
+        background: white;
+        border-collapse: collapse;
+
+        th,
+        td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+          background: #f3f4f6;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .text-end {
+          text-align: right;
+        }
+      }
+    }
+
+    .fees-grid {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+
+      .fee-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 6px;
+
+        &.total-row {
+          background: #e0f2fe;
+          border: 1px solid #0ea5e9;
+        }
+
+        label {
+          color: #374151;
+          margin: 0;
+        }
+
+        span {
+          font-weight: 500;
+          color: #111827;
+        }
+      }
+    }
+
     .history-timeline {
       .history-item {
         display: flex;
@@ -556,6 +667,27 @@ export class ShipmentDetailModalComponent {
       'canceled': 'fa-times-circle'
     };
     return icons[status] || 'fa-circle';
+  }
+
+  getShipmentMeta(shipment: Shipment): any {
+    // Try to extract metadata from notes field with META: prefix
+    if (shipment.notes && shipment.notes.includes('META:')) {
+      try {
+        const metaStart = shipment.notes.indexOf('META:') + 5;
+        const metaString = shipment.notes.substring(metaStart);
+        return JSON.parse(metaString);
+      } catch (e) {
+        console.warn('Failed to parse shipment metadata:', e);
+      }
+    }
+
+    // Return empty meta structure
+    return {
+      items: [],
+      fees: null,
+      subtotal: 0,
+      grandTotal: shipment.amount || 0
+    };
   }
 
   getPaymentModeLabel(mode: string): string {

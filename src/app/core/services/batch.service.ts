@@ -39,6 +39,42 @@ getById(id: string) {
   }
 
   /**
+   * Trouve ou cr\u00e9e le batch du jour automatiquement
+   */
+  async findOrCreateDailyBatch(): Promise<string> {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    const batchCode = `BATCH-${todayStr}`;
+
+    // Chercher le batch existant pour aujourd'hui
+    const existingQuery = await this.afs.collection<Batch>('batches')
+      .ref.where('code', '==', batchCode)
+      .limit(1)
+      .get();
+
+    if (!existingQuery.empty) {
+      // Batch du jour existe d\u00e9j\u00e0
+      return existingQuery.docs[0].id;
+    }
+
+    // Cr\u00e9er un nouveau batch pour aujourd'hui
+    const batchData: Batch = {
+      code: batchCode,
+      assignedTo: '',
+      shipmentIds: [],
+      status: 'planned',
+      createdAt: today,
+      totalAmount: 0,
+      totalShipments: 0,
+      deliveredShipments: 0,
+      notes: `Batch automatique cr\u00e9\u00e9 pour le ${todayStr}`
+    } as Batch;
+
+    const batchRef = await this.create(batchData);
+    return batchRef.id;
+  }
+
+  /**
    * Recalcule et met à jour:
    * - totalAmount (COD livré)
    * - totalShipments

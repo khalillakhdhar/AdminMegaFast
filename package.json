@@ -42,7 +42,7 @@
     "ngx-bootstrap": "^12.0.0",
     "ngx-cookie-service": "^18.0.0",
     "ngx-slick-carousel": "^17.0.0",
-    "ngx-toastr": "^19.0.0",
+    "ngx-toastr": "^19.1.0",
     "pdfmake": "^0.2.20",
     "resize-observer-polyfill": "^1.5.1",
     "rxjs": "^7.8.1",

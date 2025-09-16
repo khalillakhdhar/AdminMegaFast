@@ -53,69 +53,168 @@
           </div>
         </div>
 
-        <!-- Table -->
-        <div class="table-responsive">
-          <table class="table table-nowrap align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th scope="col">Code de Suivi</th>
-                <th scope="col">Destinataire</th>
-                <th scope="col">Destination</th>
-                <th scope="col">Statut</th>
-                <th scope="col">Date de Création</th>
-                <th scope="col">Montant</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let shipment of filteredShipments">
-                <td>
-                  <a href="javascript:void(0);" class="text-body fw-bold">
-                    {{ shipment.barcode }}
-                  </a>
-                </td>
-                <td>{{ shipment.clientName || 'Non spécifié' }}</td>
-                <td>
-                  <div>
-                    <strong>{{ shipment.city }}</strong><br>
-                    <small class="text-muted">{{ shipment.delegation }}</small>
+        <!-- Enhanced Card View -->
+        <div class="row">
+          <div class="col-12" *ngFor="let shipment of filteredShipments; trackBy: trackByShipmentId">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <!-- Code de suivi et statut -->
+                  <div class="col-md-3">
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm bg-light rounded me-3">
+                        <i class="mdi mdi-package-variant-closed text-primary font-size-18"></i>
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bold text-primary">{{ shipment.barcode }}</h6>
+                        <span class="badge badge-soft-{{ getStatusColor(shipment.status) }}">
+                          {{ getStatusLabel(shipment.status) }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </td>
-                <td>
-                  <span class="badge" [ngClass]="getStatusClass(shipment.status)">
-                    {{ getStatusLabel(shipment.status) }}
-                  </span>
-                </td>
-                <td>{{ shipment.createdAt?.toDate() | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td>
-                  <span *ngIf="shipment.amount">
-                    {{ shipment.amount | currency: 'TND' : 'symbol' : '1.2-2' }}
-                  </span>
-                  <span *ngIf="!shipment.amount" class="text-muted">-</span>
-                </td>
-                <td>
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-soft-info btn-sm" (click)="trackShipment(shipment)">
-                      <i class="bx bx-show-alt"></i>
-                    </button>
+
+                  <!-- Destinataire et adresse -->
+                  <div class="col-md-4">
+                    <h6 class="mb-1">{{ shipment.clientName || 'Non spécifié' }}</h6>
+                    <p class="text-muted mb-0">
+                      <i class="mdi mdi-phone me-1"></i>{{ shipment.clientPhone || 'N/A' }}
+                    </p>
+                    <p class="text-muted mb-0">
+                      <i class="mdi mdi-map-marker me-1"></i>
+                      {{ shipment.city }}{{ shipment.delegation ? ', ' + shipment.delegation : '' }}
+                    </p>
+                    <small class="text-muted">{{ shipment.address }}</small>
                   </div>
-                </td>
-              </tr>
-              <tr *ngIf="filteredShipments.length === 0">
-                <td colspan="7" class="text-center text-muted py-4">
-                  <div>
-                    <i class="bx bx-package empty-state-icon"></i>
-                    <p class="mt-2 mb-0">Aucun colis trouvé</p>
-                    <p class="text-muted small">
-                      <a [routerLink]="['/client/shipments/create']" class="text-primary">
-                        Créer votre premier colis
-                      </a>
+
+                  <!-- Détails du colis -->
+                  <div class="col-md-3">
+                    <div class="row">
+                      <div class="col-6">
+                        <p class="text-muted mb-1">Poids</p>
+                        <h6 class="mb-0">{{ shipment.weight || 0 }} kg</h6>
+                      </div>
+                      <div class="col-6">
+                        <p class="text-muted mb-1">Montant</p>
+                        <h6 class="mb-0">
+                          <span *ngIf="shipment.amount">
+                            {{ shipment.amount | currency: 'TND' : 'symbol' : '1.2-2' }}
+                          </span>
+                          <span *ngIf="!shipment.amount" class="text-muted">-</span>
+                        </h6>
+                      </div>
+                    </div>
+                    <p class="text-muted mb-0 mt-2">
+                      <small>{{ shipment.createdAt?.toDate() | date: 'dd/MM/yyyy HH:mm' }}</small>
                     </p>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+                  <!-- Actions -->
+                  <div class="col-md-2 text-end">
+                    <div class="d-flex flex-column gap-2">
+                      <button class="btn btn-primary btn-sm" (click)="viewDetails(shipment)">
+                        <i class="mdi mdi-eye me-1"></i>Détails
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" (click)="trackShipment(shipment)">
+                        <i class="mdi mdi-map-marker-path me-1"></i>Suivre
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Informations supplémentaires (collapsibles) -->
+                <div class="row mt-3" *ngIf="expandedShipment === shipment.id">
+                  <div class="col-12">
+                    <hr class="my-3">
+                    <div class="row">
+                      <!-- Produits -->
+                      <div class="col-md-6" *ngIf="getShipmentMeta(shipment)?.items?.length">
+                        <h6 class="text-primary">Produits</h6>
+                        <div class="table-responsive">
+                          <table class="table table-sm">
+                            <thead>
+                              <tr>
+                                <th>Description</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-end">Prix Unit.</th>
+                                <th class="text-end">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let item of getShipmentMeta(shipment)?.items">
+                                <td>{{ item.description }}</td>
+                                <td class="text-center">{{ item.qty || item.quantity }}</td>
+                                <td class="text-end">{{ (item.unitPrice || 0) | currency: 'TND' : 'symbol' : '1.2-2' }}</td>
+                                <td class="text-end">
+                                  {{ ((item.qty || item.quantity) * (item.unitPrice || 0)) | currency: 'TND' : 'symbol' : '1.2-2' }}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <!-- Adresses détaillées -->
+                      <div class="col-md-6">
+                        <h6 class="text-primary">Adresses</h6>
+                        <div class="mb-3" *ngIf="shipment.pickupAddress">
+                          <small class="text-muted">Enlèvement:</small>
+                          <p class="mb-1">{{ shipment.pickupAddress }}</p>
+                          <p class="text-muted mb-0">
+                            {{ shipment.pickupCity }}{{ shipment.pickupDelegation ? ', ' + shipment.pickupDelegation : '' }}
+                          </p>
+                        </div>
+                        <div>
+                          <small class="text-muted">Livraison:</small>
+                          <p class="mb-1">{{ shipment.address }}</p>
+                          <p class="text-muted mb-0">
+                            {{ shipment.city }}{{ shipment.delegation ? ', ' + shipment.delegation : '' }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Totaux et frais -->
+                    <div class="row mt-3" *ngIf="getShipmentMeta(shipment)?.fees">
+                      <div class="col-md-6 offset-md-6">
+                        <div class="table-responsive">
+                          <table class="table table-sm">
+                            <tr *ngIf="getShipmentMeta(shipment)?.subtotal">
+                              <td>Sous-total produits:</td>
+                              <td class="text-end">{{ getShipmentMeta(shipment)?.subtotal | currency: 'TND' : 'symbol' : '1.2-2' }}</td>
+                            </tr>
+                            <tr *ngIf="getShipmentMeta(shipment)?.fees?.feeTotal">
+                              <td>Frais de livraison:</td>
+                              <td class="text-end">{{ getShipmentMeta(shipment)?.fees?.feeTotal | currency: 'TND' : 'symbol' : '1.2-2' }}</td>
+                            </tr>
+                            <tr *ngIf="getShipmentMeta(shipment)?.grandTotal" class="fw-bold">
+                              <td>Total général:</td>
+                              <td class="text-end">{{ getShipmentMeta(shipment)?.grandTotal | currency: 'TND' : 'symbol' : '1.2-2' }}</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <button class="btn btn-light btn-sm" (click)="toggleExpand(shipment.id)">
+                        <i class="mdi mdi-chevron-up me-1"></i>Réduire
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bouton d'expansion -->
+                <div class="row mt-2" *ngIf="expandedShipment !== shipment.id">
+                  <div class="col-12">
+                    <button class="btn btn-link btn-sm p-0" (click)="toggleExpand(shipment.id)">
+                      <i class="mdi mdi-chevron-down me-1"></i>Voir plus de détails
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Pagination -->

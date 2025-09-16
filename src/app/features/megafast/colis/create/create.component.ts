@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -77,18 +77,19 @@ export class CreateComponent implements OnInit, OnDestroy {
 
   private sub?: Subscription;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly router: Router,
-    private readonly toastr: ToastrService,
-    private readonly cdr: ChangeDetectorRef,
-    private readonly shipmentService: ShipmentService,
-    private readonly batchService: BatchService,
-    private readonly driverService: DriverService,
-    private readonly clientService: ClientService,
-    private readonly tunisiaService: TunisiaLocationsService,
-    private readonly printService: ShipmentPrintService,
-  ) {
+  // Services injectés
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly shipmentService = inject(ShipmentService);
+  private readonly batchService = inject(BatchService);
+  private readonly driverService = inject(DriverService);
+  private readonly clientService = inject(ClientService);
+  private readonly tunisiaService = inject(TunisiaLocationsService);
+  private readonly printService = inject(ShipmentPrintService);
+
+  constructor() {
     this.form = this.fb.group({
       // Step 1: Client (Sender) - Mode selection
       clientMode: ['existing'], // 'existing' | 'new'
@@ -472,7 +473,7 @@ export class CreateComponent implements OnInit, OnDestroy {
     return { payload, v };
   }
 
-  private async handleBatchAndDriver(newId: string, v: any) {
+  private async handleBatchAndDriver(newId: string, v: any): Promise<string | undefined> {
     if (v.batchMode === 'existing' && v.batchId) {
       await this.shipmentService.assignToBatch(newId, v.batchId);
       if (v.driverId) {
@@ -488,6 +489,7 @@ export class CreateComponent implements OnInit, OnDestroy {
       } else {
         await this.batchService.recomputeStats(v.batchId);
       }
+      return v.batchId;
     } else if (v.batchMode === 'create') {
       const batchData: Partial<Batch> = {
         code: v.batchCode || undefined,
@@ -500,10 +502,37 @@ export class CreateComponent implements OnInit, OnDestroy {
       const batchId = bref.id;
       await this.shipmentService.assignToBatch(newId, batchId);
       await this.batchService.recomputeStats(batchId);
+      return batchId;
+    } else {
+      // Mode 'none' - Cr\u00e9ation automatique du batch quotidien
+      try {
+        const dailyBatchId = await this.batchService.findOrCreateDailyBatch();
+        await this.shipmentService.assignToBatch(newId, dailyBatchId);
+
+        // Assigner le livreur au batch si sp\u00e9cifi\u00e9
+        if (v.driverId) {
+          const batchSnapSub = this.batchService.getById(dailyBatchId).pipe(take(1)).subscribe(async (b) => {
+            try {
+              if (b && !b.assignedTo) {
+                await this.batchService.update(dailyBatchId, { assignedTo: v.driverId });
+              }
+              await this.batchService.recomputeStats(dailyBatchId);
+            } catch {}
+          });
+          this.sub?.add(batchSnapSub);
+        } else {
+          await this.batchService.recomputeStats(dailyBatchId);
+        }
+        return dailyBatchId;
+      } catch (error) {
+        console.error('Erreur lors de la cr\u00e9ation du batch quotidien:', error);
+        // Si erreur, continuer sans batch (comportement d'origine)
+        return undefined;
+      }
     }
   }
 
-  private async maybePrint(print: boolean, newId: string, payload: Shipment, driverId?: string) {
+  private async maybePrint(print: boolean, newId: string, payload: Shipment, driverId?: string, batchId?: string) {
     if (!print) return;
     const createdShipment: Shipment = { id: newId, ...payload };
     let driverMin: DriverMin | undefined;
@@ -511,7 +540,27 @@ export class CreateComponent implements OnInit, OnDestroy {
       const d = this.drivers.find(x => x.id === driverId);
       if (d) driverMin = { id: d.id, name: d.displayName || d.name, phone: d.phone, vehicle: d.vehicle };
     }
-    try { await this.printService.generateShipmentPdf(createdShipment, undefined, driverMin); } catch {}
+
+    // Ajouter une note pour indiquer si le colis fait partie d'un batch
+    if (batchId) {
+      const batch = this.batches.find(b => b.id === batchId);
+      const batchInfo = batch ? `Lot: ${batch.code}` : `Lot: ${batchId}`;
+      createdShipment.notes = createdShipment.notes
+        ? `${createdShipment.notes}\n\n${batchInfo}`
+        : batchInfo;
+    } else {
+      // Pas de batch - ajouter une note pour indiquer l'impression détaillée
+      const detailNote = "Impression détaillée avec produits (aucun lot assigné)";
+      createdShipment.notes = createdShipment.notes
+        ? `${createdShipment.notes}\n\n${detailNote}`
+        : detailNote;
+    }
+
+    try {
+      await this.printService.generateShipmentPdf(createdShipment, undefined, driverMin);
+    } catch (error) {
+      console.error('Erreur lors de l\'impression:', error);
+    }
   }
 
   async submit(print = false) {
@@ -521,9 +570,9 @@ export class CreateComponent implements OnInit, OnDestroy {
       const { payload, v } = this.buildPayload();
       const ref = await this.shipmentService.create(payload);
       const newId = ref.id;
-      await this.handleBatchAndDriver(newId, v);
+      const batchId = await this.handleBatchAndDriver(newId, v);
       this.toastr.success('Colis créé');
-      await this.maybePrint(print, newId, payload, v.driverId);
+      await this.maybePrint(print, newId, payload, v.driverId, batchId);
       await this.router.navigate(['/megafast/colis']);
     } catch (e) {
       console.error('create shipment failed', e);
