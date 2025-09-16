@@ -13,6 +13,13 @@ export class DriverService {
   private readonly col = this.afs.collection<Driver>('drivers');
   private readonly usersCol = this.afs.collection<DriverUser>('users');
 
+  private normalizeEmail(raw: any): string {
+    if (!raw) return '';
+    if (typeof raw === 'string') return raw;
+    if (typeof raw === 'object') return (raw.email && typeof raw.email === 'string') ? raw.email : (raw.value && typeof raw.value === 'string' ? raw.value : '');
+    return '';
+  }
+
   constructor(
     private readonly afs: AngularFirestore,
     private readonly afAuth: AngularFireAuth,
@@ -77,7 +84,7 @@ export class DriverService {
           // Store driver user data
           const driverUser: DriverUser = {
             uid: userCredential.user.uid,
-            email: driver.email,
+            email: this.normalizeEmail(driver?.email),
             password: '', // Don't store password in plaintext
             displayName: driver.displayName || driver.name,
             role: 'driver',
@@ -212,16 +219,16 @@ export class DriverService {
         });
 
         // Store driver user data
-        const driverUser: DriverUser = {
-          uid: userCredential.user.uid,
-          email: driver.email,
-          password: '', // Don't store password in plaintext
-          displayName: driver.displayName || driver.name,
-          role: 'driver',
-          isActive: true,
-          createdAt: new Date(),
-          driverId: driver.id || ''
-        };
+    const driverUser: DriverUser = {
+      uid: userCredential.user.uid,
+      email: this.normalizeEmail(driver?.email),
+      password: '', // Don't store password in plaintext
+      displayName: driver.displayName || driver.name,
+      role: 'driver',
+      isActive: true,
+      createdAt: new Date(),
+      driverId: driver.id || ''
+    };
 
         // Update driver data with account info
         const updateData = {

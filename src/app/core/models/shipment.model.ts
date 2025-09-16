@@ -24,6 +24,7 @@ export interface Shipment {
   clientId?: string;
   clientName?: string;
   clientPhone?: string;
+  clientEmail?: string;
 
   // Adresse
   address?: string;
@@ -48,8 +49,10 @@ export interface Shipment {
   assignedTo?: string;       // driverId
   batchId?: string;          // lot
 
-  // Tracking
+  // Tracking & coordonnées
   geo?: { lat: number; lng: number } | null;
+  pickupGeo?: { lat: number; lng: number } | null;
+  deliveryGeo?: { lat: number; lng: number } | null;
 
   // Métadonnées
   createdAt?: any;

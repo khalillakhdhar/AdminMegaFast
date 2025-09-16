@@ -13,6 +13,13 @@ export class ClientService {
   private readonly col = this.afs.collection<Client>('clients');
   private readonly usersCol = this.afs.collection<ClientUser>('users');
 
+  private normalizeEmail(raw: any): string {
+    if (!raw) return '';
+    if (typeof raw === 'string') return raw;
+    if (typeof raw === 'object') return (raw.email && typeof raw.email === 'string') ? raw.email : (raw.value && typeof raw.value === 'string' ? raw.value : '');
+    return '';
+  }
+
   constructor(
     private readonly afs: AngularFirestore,
     private readonly afAuth: AngularFireAuth,
@@ -86,7 +93,7 @@ export class ClientService {
       if (createAccount && client.email) {
         // Generate temporary password
         const temporaryPassword = this.emailService.generateTemporaryPassword();
-        
+
         // Create Firebase user account
         const userCredential = await this.afAuth.createUserWithEmailAndPassword(
           client.email,
@@ -100,9 +107,10 @@ export class ClientService {
           });
 
           // Store client user data
+          const normalizedEmail = this.normalizeEmail(client?.email);
           const clientUser: ClientUser = {
             uid: userCredential.user.uid,
-            email: client.email,
+            email: normalizedEmail,
             password: '', // Don't store password in plaintext
             displayName: client.name,
             role: 'client',
@@ -118,7 +126,7 @@ export class ClientService {
 
           // Save client to Firestore
           const clientRef = await this.col.add(client);
-          
+
           // Update client user with client ID
           clientUser.clientId = clientRef.id;
           await this.usersCol.doc(userCredential.user.uid).set(clientUser);
@@ -157,7 +165,7 @@ export class ClientService {
   async deleteClientWithAccount(clientId: string): Promise<void> {
     try {
       const clientDocSnapshot = await this.col.doc(clientId).get().pipe(take(1)).toPromise();
-      
+
       if (!clientDocSnapshot?.exists) {
         throw new Error('Client non trouvé');
       }
@@ -169,13 +177,13 @@ export class ClientService {
         try {
           // Delete user document from Firestore
           await this.usersCol.doc(client.userId).delete();
-          
-          // Note: Pour supprimer complètement un utilisateur Firebase Auth, 
+
+          // Note: Pour supprimer complètement un utilisateur Firebase Auth,
           // il faut utiliser l'Admin SDK côté backend
           // Créez une Cloud Function pour cela
           console.log('🗑️ Compte utilisateur supprimé de Firestore:', client.email, 'UID:', client.userId);
           console.warn('⚠️ Pour supprimer complètement de Firebase Auth, utilisez une Cloud Function avec Admin SDK');
-          
+
         } catch (authError) {
           console.error('Erreur lors de la suppression du compte:', authError);
           // Continue with client deletion even if auth deletion fails
@@ -184,10 +192,10 @@ export class ClientService {
 
       // Delete client document
       await this.col.doc(clientId).delete();
-      
+
       this.toastr.success('Client supprimé avec succès');
       console.log('✅ Client supprimé:', client.name, client.email);
-      
+
     } catch (error) {
       console.error('Erreur lors de la suppression du client:', error);
       throw error;
@@ -202,7 +210,7 @@ export class ClientService {
   async createAccountForClient(clientId: string): Promise<any> {
     try {
       const clientDocSnapshot = await this.col.doc(clientId).get().pipe(take(1)).toPromise();
-      
+
       if (!clientDocSnapshot?.exists) {
         throw new Error('Client non trouvé');
       }
@@ -219,7 +227,7 @@ export class ClientService {
 
       // Generate temporary password
       const temporaryPassword = this.emailService.generateTemporaryPassword();
-      
+
       // Create Firebase user account
       const userCredential = await this.afAuth.createUserWithEmailAndPassword(
         client.email,
@@ -233,9 +241,10 @@ export class ClientService {
         });
 
         // Store client user data
+  const normalizedEmail2 = this.normalizeEmail(client?.email);
         const clientUser: ClientUser = {
           uid: userCredential.user.uid,
-          email: client.email,
+          email: normalizedEmail2,
           password: '', // Don't store password in plaintext
           displayName: client.name,
           clientId: clientId,
@@ -273,7 +282,7 @@ export class ClientService {
   async disableAccount(clientId: string): Promise<void> {
     try {
       const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
-      
+
       if (!clientDocSnapshot?.exists) {
         throw new Error('Client non trouvé');
       }
@@ -318,7 +327,7 @@ export class ClientService {
   async enableAccount(clientId: string): Promise<void> {
     try {
       const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
-      
+
       if (!clientDocSnapshot?.exists) {
         throw new Error('Client non trouvé');
       }
@@ -332,7 +341,7 @@ export class ClientService {
       // Use Cloud Function to enable user in Firebase Auth
       try {
         await firstValueFrom(this.firebaseAdmin.enableUserAccount(client.userId));
-        
+
         // Update local data to reflect enabled status
         await this.usersCol.doc(client.userId).update({
           isActive: true,
@@ -375,7 +384,7 @@ export class ClientService {
   async resetClientPassword(clientId: string): Promise<void> {
     try {
       const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
-      
+
       if (!clientDocSnapshot?.exists) {
         throw new Error('Client non trouvé');
       }
@@ -388,7 +397,7 @@ export class ClientService {
 
       // Send password reset email using Firebase Auth
       await this.afAuth.sendPasswordResetEmail(client.email);
-      
+
       this.toastr.success('Email de réinitialisation envoyé avec succès');
       console.log('🔄 Reset password envoyé pour:', client.email);
     } catch (error) {

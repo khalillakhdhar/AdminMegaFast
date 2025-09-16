@@ -1,0 +1,288 @@
+<div class="container-fluid">
+	<app-page-title title="Créer un Colis" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+	<div class="card">
+		<div class="card-body">
+			<form [formGroup]="form" novalidate (ngSubmit)="submit(false)">
+
+				<!-- Wizard steps nav -->
+				<ul class="nav nav-pills nav-justified mb-4" aria-label="Étapes création colis">
+					<li class="nav-item">
+						<button class="nav-link" [class.active]="step===1" type="button" (click)="goToStep(1)">Client</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" [class.active]="step===2" type="button" (click)="goToStep(2)">Produits</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" [class.active]="step===3" type="button" (click)="goToStep(3)">Livraison & Frais</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" [class.active]="step===4" type="button" (click)="goToStep(4)">Lot & Livreur</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" [class.active]="step===5" type="button" (click)="goToStep(5)">Récap</button>
+					</li>
+				</ul>
+
+				<!-- Step 1: Client & Adresse de récupération -->
+				<div [hidden]="step!==1">
+					<!-- Sélection client existant -->
+					<div class="row g-3 mb-4">
+						<div class="col-12">
+							<h6 class="text-primary mb-2">
+								<i class="bx bx-user me-1"></i>
+								Sélectionner un client existant (optionnel)
+							</h6>
+							<ng-select
+								[items]="clients"
+								[clearable]="true"
+								bindLabel="name"
+								placeholder="Rechercher et sélectionner un client..."
+								(change)="onClientSelect($event)"
+								[typeahead]="true">
+								<ng-option *ngFor="let client of clients" [value]="client">
+									<div>
+										<strong>{{ client.name }}</strong>
+										<small class="text-muted d-block">{{ client.phone }} - {{ client.email }}</small>
+									</div>
+								</ng-option>
+							</ng-select>
+							<button
+								*ngIf="selectedClient"
+								type="button"
+								class="btn btn-sm btn-outline-secondary mt-2"
+								(click)="clearClientSelection()">
+								<i class="bx bx-x me-1"></i>
+								Effacer la sélection
+							</button>
+						</div>
+					</div>
+
+					<hr class="my-4">
+
+					<!-- Client Information -->
+					<div class="row g-3">
+						<div class="col-md-6">
+							<label class="form-label" for="clientName">Nom du client <span class="text-danger">*</span></label>
+							<input type="text" formControlName="clientName" id="clientName" class="form-control" placeholder="Nom du client">
+							<div class="invalid-feedback d-block" *ngIf="form.get('clientName')?.invalid && form.get('clientName')?.touched">
+								Le nom du client est requis
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="clientPhone">Téléphone <span class="text-danger">*</span></label>
+							<input type="tel" formControlName="clientPhone" id="clientPhone" class="form-control" placeholder="22123456">
+							<div class="invalid-feedback d-block" *ngIf="form.get('clientPhone')?.invalid && form.get('clientPhone')?.touched">
+								Le téléphone du client est requis
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="clientEmail">Email</label>
+							<input type="email" formControlName="clientEmail" id="clientEmail" class="form-control" placeholder="client@example.com">
+						</div>
+					</div>
+
+					<hr class="my-4">
+
+					<!-- Pickup Information -->
+					<h6 class="text-primary mb-3">
+						<i class="bx bx-package me-1"></i>
+						Adresse de récupération
+					</h6>
+					<div class="row g-3">
+						<div class="col-12">
+							<label class="form-label" for="pickupAddress">Adresse de récupération <span class="text-danger">*</span></label>
+							<textarea formControlName="pickupAddress" id="pickupAddress" class="form-control" rows="2" placeholder="Adresse complète de récupération"></textarea>
+							<div class="invalid-feedback d-block" *ngIf="form.get('pickupAddress')?.invalid && form.get('pickupAddress')?.touched">
+								L'adresse de récupération est requise
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="pickupGovernorate">Gouvernorat de récupération <span class="text-danger">*</span></label>
+							<select formControlName="pickupGovernorate" id="pickupGovernorate" class="form-select" (change)="onPickupGovernorateChange($event)">
+								<option value="">Sélectionner un gouvernorat</option>
+								<option *ngFor="let gov of pickupGovernorates" [value]="gov.code">{{ gov.name }} ({{ gov.arabicName }})</option>
+							</select>
+							<div class="invalid-feedback d-block" *ngIf="form.get('pickupGovernorate')?.invalid && form.get('pickupGovernorate')?.touched">
+								Le gouvernorat de récupération est requis
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="pickupDelegation">Délégation de récupération</label>
+							<select formControlName="pickupDelegation" id="pickupDelegation" class="form-select" [disabled]="pickupDelegations.length === 0">
+								<option value="">Sélectionner une délégation</option>
+								<option *ngFor="let del of pickupDelegations" [value]="del.code">{{ del.name }} ({{ del.arabicName }})</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="d-flex justify-content-end mt-4">
+						<button type="button" class="btn btn-primary"
+							(click)="next()"
+							[disabled]="form.get('clientName')?.invalid || form.get('clientPhone')?.invalid || form.get('pickupAddress')?.invalid || form.get('pickupGovernorate')?.invalid">
+							Suivant
+						</button>
+					</div>
+				</div>
+
+				<!-- Step 2: Products -->
+				<div [hidden]="step!==2">
+					<div class="table-responsive">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>Produit <span class="text-danger">*</span></th>
+									<th>Quantité <span class="text-danger">*</span></th>
+									<th>Prix unitaire <span class="text-danger">*</span></th>
+									<th>Poids unitaire (kg)</th>
+									<th>Total</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody formArrayName="items">
+								<tr *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+									<td><input type="text" formControlName="name" class="form-control" placeholder="Nom du produit"></td>
+									<td><input type="number" formControlName="qty" class="form-control" placeholder="1" min="1"></td>
+									<td><input type="number" formControlName="unitPrice" class="form-control" placeholder="0.00" step="0.01" min="0"></td>
+									<td><input type="number" formControlName="unitWeight" class="form-control" placeholder="0.0" step="0.1" min="0"></td>
+									<td class="align-middle">{{ (item.value.qty * item.value.unitPrice) | number:'1.2-2' }} TND</td>
+									<td class="col-actions"><button type="button" class="btn btn-link text-danger" (click)="removeItem(i)" [disabled]="items.length===1"><i class="bx bx-trash"></i></button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<button type="button" class="btn btn-light" (click)="addItem()"><i class="bx bx-plus"></i> Ajouter produit</button>
+
+					<div class="row mt-3">
+						<div class="col-md-4">
+							<label class="form-label" for="weight">Poids total (kg)</label>
+							<input type="number" formControlName="weight" id="weight" class="form-control" placeholder="0.0" step="0.1" min="0">
+						</div>
+					</div>
+					<div class="d-flex justify-content-between mt-3">
+						<button type="button" class="btn btn-light" (click)="prev()">Précédent</button>
+						<button type="button" class="btn btn-primary" (click)="next()">Suivant</button>
+					</div>
+				</div>
+
+				<!-- Step 3: Delivery & Fees -->
+				<div [hidden]="step!==3">
+					<div class="row g-3">
+						<div class="col-12">
+							<label class="form-label" for="address">Adresse de livraison <span class="text-danger">*</span></label>
+							<textarea formControlName="address" id="address" class="form-control" rows="3" placeholder="Adresse complète de livraison"></textarea>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="governorate">Gouvernorat de livraison <span class="text-danger">*</span></label>
+							<select formControlName="governorate" id="governorate" class="form-select" (change)="onDeliveryGovernorateChange($event)">
+								<option value="">Sélectionner un gouvernorat</option>
+								<option *ngFor="let gov of governorates" [value]="gov.code">{{ gov.name }} ({{ gov.arabicName }})</option>
+							</select>
+							<div class="invalid-feedback d-block" *ngIf="form.get('governorate')?.invalid && form.get('governorate')?.touched">
+								Le gouvernorat est requis
+							</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="delegation">Délégation de livraison</label>
+							<select formControlName="delegation" id="delegation" class="form-select" [disabled]="delegations.length === 0">
+								<option value="">Sélectionner une délégation</option>
+								<option *ngFor="let del of delegations" [value]="del.code">{{ del.name }} ({{ del.arabicName }})</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="paymentMethod">Mode de paiement</label>
+							<select formControlName="paymentMethod" id="paymentMethod" class="form-select">
+								<option value="prepaid">Prépayé</option>
+								<option value="cod">À la livraison (encaissement)</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="deliveryFee">Frais de livraison (TND) <span class="text-danger">*</span></label>
+							<input type="number" formControlName="deliveryFee" id="deliveryFee" class="form-control" placeholder="0.00" step="0.01" min="0">
+						</div>
+					</div>
+					<div class="d-flex justify-content-between mt-3">
+						<button type="button" class="btn btn-light" (click)="prev()">Précédent</button>
+						<button type="button" class="btn btn-primary" (click)="next()">Suivant</button>
+					</div>
+				</div>
+
+				<!-- Step 4: Batch & Driver -->
+				<div [hidden]="step!==4">
+					<div class="row g-3">
+						<div class="col-md-6">
+							<label class="form-label" for="batchId">Lot</label>
+							<select formControlName="batchId" id="batchId" class="form-select">
+								<option value="">Aucun lot (assignation automatique)</option>
+								<option *ngFor="let batch of batches" [value]="batch.id">{{ batch.name }}</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label" for="driverId">Livreur</label>
+							<select formControlName="driverId" id="driverId" class="form-select">
+								<option value="">Pas de livreur assigné</option>
+								<option *ngFor="let driver of drivers" [value]="driver.uid">{{ driver.displayName }}</option>
+							</select>
+						</div>
+					</div>
+					<div class="d-flex justify-content-between mt-3">
+						<button type="button" class="btn btn-light" (click)="prev()">Précédent</button>
+						<button type="button" class="btn btn-primary" (click)="next()">Suivant</button>
+					</div>
+				</div>
+
+				<!-- Step 5: Summary -->
+				<div [hidden]="step!==5">
+					<h5 class="mb-3">Récapitulatif du colis</h5>
+					<div class="row">
+						<div class="col-lg-6">
+							<h5>Client</h5>
+							<div class="text-muted">{{ form.get('clientName')?.value }} - {{ form.get('clientPhone')?.value }}</div>
+							<h5 class="mt-3">Adresse de livraison</h5>
+							<div class="text-muted">
+								{{ form.get('address')?.value }}<br>
+								<strong>{{ selectedGovernorate?.name || 'Gouvernorat non sélectionné' }}</strong>
+								<span *ngIf="form.get('delegation')?.value && delegations.length > 0">
+									- {{ getDelegationName(form.get('delegation')?.value) }}
+								</span>
+							</div>
+							<h5 class="mt-3">Récupération</h5>
+							<div class="text-muted">
+								{{ form.get('pickupAddress')?.value }}<br>
+								<strong>{{ selectedPickupGovernorate?.name || 'Gouvernorat non sélectionné' }}</strong>
+								<span *ngIf="form.get('pickupDelegation')?.value && pickupDelegations.length > 0">
+									- {{ getPickupDelegationName(form.get('pickupDelegation')?.value) }}
+								</span>
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<h5>Produits</h5>
+							<ul class="mb-2">
+								<li *ngFor="let g of items.controls">{{ g.value.qty }} x {{ g.value.name }} &#64; {{ g.value.unitPrice }} = {{ (g.value.qty*g.value.unitPrice) | number:'1.2-2' }} TND</li>
+							</ul>
+							<div class="text-muted">Sous-total: {{ subtotal | number:'1.2-2' }} TND</div>
+							<div class="text-muted">Poids: {{ form.get('weight')?.value }} kg</div>
+							<div class="text-muted">Frais de livraison: {{ form.get('deliveryFee')?.value | number:'1.2-2' }} TND</div>
+							<div class="fw-bold">Total: {{ form.get('deliveryFee')?.value | number:'1.2-2' }} TND</div>
+						</div>
+					</div>
+
+					<div class="d-flex justify-content-between mt-3">
+						<button type="button" class="btn btn-light" (click)="prev()">Précédent</button>
+						<div>
+							<button type="button" class="btn btn-outline-primary me-2" (click)="submit(true)" [disabled]="saving">
+								<span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+								Créer & Imprimer
+							</button>
+							<button type="submit" class="btn btn-primary" [disabled]="saving">
+								<span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+								Créer
+							</button>
+						</div>
+					</div>
+				</div>
+
+			</form>
+		</div>
+	</div>
+</div>
