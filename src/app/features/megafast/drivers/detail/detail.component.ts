@@ -6,7 +6,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrService } from 'ngx-toastr';
 
 import { PageTitleComponent } from '../../../../shared/ui/pagetitle/pagetitle.component';
-import { Driver } from '../../../../core/models/driver.model';
+import { Driver, DriverZone } from '../../../../core/models/driver.model';
 import { DriverService } from '../../../../core/services/driver.service';
 import { ShipmentService } from '../../../../core/services/shipment.service';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -122,7 +122,15 @@ export class DetailComponent implements OnInit {
   async save() {
     if (!this.driver?.id || this.form.invalid) return;
   const v = this.form.value;
-  const zones = (v.zones || []) as string[];
+  const zoneStrings = (v.zones || []) as string[];
+  const zones: DriverZone[] = zoneStrings.map((zoneName, index) => ({
+    id: `zone_${index + 1}`,
+    name: zoneName,
+    type: 'assigned' as const,
+    coordinates: [],
+    priority: index + 1,
+    active: true
+  }));
 
     try {
       await this.driverService.update(this.driver.id, {

@@ -25,6 +25,7 @@
     "@angular/platform-browser": "18.2.11",
     "@angular/platform-browser-dynamic": "18.2.11",
     "@angular/router": "18.2.11",
+    "@googlemaps/js-api-loader": "^1.16.10",
     "@ng-select/ng-select": "^13.9.0",
     "@ngrx/effects": "^18.0.2",
     "@ngrx/store": "^18.0.2",
@@ -60,9 +61,12 @@
     "@angular/language-service": "^18.2.11",
     "@cypress/schematic": "^2.5.2",
     "@juggle/resize-observer": "^3.4.0",
+    "@types/google.maps": "^3.58.1",
     "@types/jasmine": "^5.1.4",
     "@types/jasminewd2": "^2.0.13",
     "@types/node": "^22.7.4",
+    "angular-eslint": "20.3.0",
+    "eslint": "^9.35.0",
     "jasmine-core": "^5.3.0",
     "jasmine-spec-reporter": "^7.0.0",
     "karma": "^6.4.4",
@@ -71,6 +75,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "typescript-eslint": "8.40.0"
   }
 }

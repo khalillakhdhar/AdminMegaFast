@@ -1,0 +1,229 @@
+<div class="delivery-map-container" [style.height]="height">
+  <!-- Header mobile avec informations essentielles -->
+  <div class="mobile-header" *ngIf="mapState.navigationMode === 'navigation'">
+    <div class="navigation-info">
+      <div class="destination-info">
+        <h6 class="mb-1">{{ mapState.nextDelivery?.customerInfo?.name }}</h6>
+        <small class="text-muted">{{ mapState.nextDelivery?.customerInfo?.address }}</small>
+      </div>
+      <div class="route-info">
+        <div class="time-distance">
+          <span class="time">
+            <i class="fas fa-clock"></i>
+            {{ mapState.routeProgress.timeRemaining }}
+          </span>
+          <span class="distance">
+            <i class="fas fa-road"></i>
+            {{ mapState.routeProgress.distanceRemaining }}
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="mapState.routeProgress.progress"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-sm stop-nav" (click)="stopNavigation()">
+      <i class="fas fa-stop"></i>
+    </button>
+  </div>
+
+  <!-- Vue d'ensemble des livraisons -->
+  <div class="overview-header" *ngIf="mapState.navigationMode === 'overview'">
+    <div class="delivery-summary">
+      <div class="stat-item">
+        <span class="count">{{ getDeliveriesCount('pending') }}</span>
+        <span class="label">En attente</span>
+      </div>
+      <div class="stat-item">
+        <span class="count">{{ getDeliveriesCount('delivered') }}</span>
+        <span class="label">Livrées</span>
+      </div>
+      <div class="stat-item">
+        <span class="count">{{ getTotalDistance() }}</span>
+        <span class="label">Distance</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Google Maps -->
+  <div class="map-content">
+    <div #mapContainer class="google-map"></div>
+
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-2">Initialisation de la carte...</p>
+    </div>
+
+    <!-- Contrôles de carte (position fixe) -->
+    <div class="map-controls">
+      <!-- Bouton de localisation -->
+      <button class="control-btn location-btn"
+              [class.active]="followUserLocation"
+              (click)="toggleFollowLocation()"
+              title="Ma position">
+        <i class="fas fa-crosshairs"></i>
+      </button>
+
+      <!-- Boutons de zoom -->
+      <div class="zoom-controls">
+        <button class="control-btn zoom-btn" (click)="zoomIn()" title="Zoom +">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button class="control-btn zoom-btn" (click)="zoomOut()" title="Zoom -">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
+
+      <!-- Bouton trafic -->
+      <button class="control-btn traffic-btn"
+              [class.active]="showTraffic"
+              (click)="toggleTraffic()"
+              title="Trafic">
+        <i class="fas fa-car"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel des livraisons (vue d'ensemble) -->
+  <div class="deliveries-panel"
+       *ngIf="mapState.navigationMode === 'overview'"
+       [class.expanded]="panelExpanded">
+
+    <div class="panel-header" (click)="togglePanel()">
+      <h6><i class="fas fa-clipboard-list"></i> Mes livraisons</h6>
+      <i class="fas fa-chevron-up" [class.fa-chevron-down]="!panelExpanded"></i>
+    </div>
+
+    <div class="panel-content" *ngIf="panelExpanded">
+      <div class="delivery-list">
+        <div class="delivery-item"
+             *ngFor="let delivery of mapState.deliveryMarkers; trackBy: trackDelivery"
+             [class]="'status-' + delivery.deliveryStatus"
+             (click)="selectDelivery(delivery)">
+
+          <div class="delivery-header">
+            <div class="customer-name">
+              <i class="fas fa-user"></i>
+              {{ delivery.customerInfo?.name }}
+            </div>
+            <div class="priority-badge" [class]="'priority-' + delivery.priority">
+              {{ getPriorityLabel(delivery.priority) }}
+            </div>
+          </div>
+
+          <div class="delivery-details">
+            <div class="address">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ delivery.customerInfo?.address }}
+            </div>
+            <div class="phone" *ngIf="delivery.customerInfo?.phone">
+              <i class="fas fa-phone"></i>
+              {{ delivery.customerInfo?.phone }}
+            </div>
+          </div>
+
+          <div class="delivery-actions">
+            <button class="btn btn-primary btn-sm"
+                    (click)="startNavigationTo(delivery); $event.stopPropagation()"
+                    [disabled]="delivery.deliveryStatus === 'delivered'">
+              <i class="fas fa-route"></i>
+              Navigation
+            </button>
+
+            <div class="status-actions">
+              <button class="btn btn-warning btn-sm"
+                      *ngIf="delivery.deliveryStatus === 'pending'"
+                      (click)="updateDeliveryStatus(delivery.id, 'in_progress'); $event.stopPropagation()">
+                <i class="fas fa-play"></i>
+                Démarrer
+              </button>
+
+              <button class="btn btn-success btn-sm"
+                      *ngIf="delivery.deliveryStatus === 'in_progress'"
+                      (click)="markAsDelivered(delivery); $event.stopPropagation()">
+                <i class="fas fa-check"></i>
+                Livré
+              </button>
+            </div>
+          </div>
+
+          <div class="eta" *ngIf="delivery.estimatedArrival">
+            <i class="fas fa-clock"></i>
+            ETA: {{ delivery.estimatedArrival | date:'HH:mm' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de navigation (mode navigation) -->
+  <div class="navigation-panel"
+       *ngIf="mapState.navigationMode === 'navigation' && mapState.nextDelivery">
+
+    <div class="current-delivery">
+      <div class="delivery-info">
+        <h6>{{ mapState.nextDelivery.customerInfo?.name }}</h6>
+        <p class="address">{{ mapState.nextDelivery.customerInfo?.address }}</p>
+
+        <div class="instructions" *ngIf="mapState.nextDelivery.deliveryInstructions">
+          <i class="fas fa-info-circle"></i>
+          {{ mapState.nextDelivery.deliveryInstructions }}
+        </div>
+      </div>
+
+      <div class="delivery-actions">
+        <a href="tel:{{ mapState.nextDelivery.customerInfo?.phone }}"
+           class="btn btn-outline-primary btn-sm"
+           *ngIf="mapState.nextDelivery.customerInfo?.phone">
+          <i class="fas fa-phone"></i>
+          Appeler
+        </a>
+
+        <button class="btn btn-success btn-sm"
+                (click)="markAsDelivered(mapState.nextDelivery)">
+          <i class="fas fa-check"></i>
+          Livré
+        </button>
+
+        <button class="btn btn-danger btn-sm"
+                (click)="markAsFailed(mapState.nextDelivery)">
+          <i class="fas fa-times"></i>
+          Échec
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton de guidance vocale -->
+  <button class="voice-guidance-btn"
+          [class.active]="voiceGuidance"
+          (click)="toggleVoiceGuidance()"
+          title="Guidance vocale">
+    <i class="fas fa-volume-up" *ngIf="voiceGuidance"></i>
+    <i class="fas fa-volume-mute" *ngIf="!voiceGuidance"></i>
+  </button>
+
+  <!-- Fab pour actions rapides -->
+  <div class="fab-menu" *ngIf="mapState.navigationMode === 'overview'">
+    <button class="fab main-fab" (click)="toggleFabMenu()">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <div class="fab-options" *ngIf="fabMenuOpen">
+      <button class="fab option-fab" (click)="centerOnUser()" title="Ma position">
+        <i class="fas fa-location-arrow"></i>
+      </button>
+
+      <button class="fab option-fab" (click)="refreshDeliveries()" title="Actualiser">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+
+      <button class="fab option-fab" (click)="optimizeRoute()" title="Optimiser route">
+        <i class="fas fa-route"></i>
+      </button>
+    </div>
+  </div>
+</div>

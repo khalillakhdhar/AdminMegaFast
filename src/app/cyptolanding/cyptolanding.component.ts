@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { interval } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { TablesModule } from '../pages/tables/tables.module';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { SlickCarouselModule } from 'ngx-slick-carousel';
 import { SharedModule } from './shared/shared.module';
@@ -12,7 +11,7 @@ import { SharedModule } from './shared/shared.module';
   selector: 'app-cyptolanding',
   templateUrl: './cyptolanding.component.html',
   styleUrls: ['./cyptolanding.component.scss'],
-  imports:[CommonModule,AccordionModule,TablesModule,TabsModule,SlickCarouselModule,SharedModule],
+  imports:[CommonModule,AccordionModule,TabsModule,SlickCarouselModule,SharedModule],
   standalone:true,
   providers: []
 })

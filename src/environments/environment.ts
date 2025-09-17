@@ -14,6 +14,12 @@ export const environment = {
     messagingSenderId: "535657116969",
     appId: "1:535657116969:web:de3524e26a40f00268f338",
     measurementId: "G-NGQ9YDJ5TS"
+  },
+  googleMaps: {
+    apiKey: "AIzaSyAWbWm5NFe9mE9LL8KmSHAfngMtfe0tt0g",
+    libraries: ['places', 'geometry', 'drawing'],
+    language: 'fr',
+    region: 'TN' // Tunisie
   }
 };
 

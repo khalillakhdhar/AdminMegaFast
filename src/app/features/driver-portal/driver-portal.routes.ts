@@ -33,5 +33,9 @@ export const DRIVER_PORTAL_ROUTES: Routes = [
   {
     path: 'settings',
     loadComponent: () => import('./settings/driver-settings.component').then(m => m.DriverSettingsComponent)
+  },
+  {
+    path: 'delivery',
+    loadComponent: () => import('../delivery/delivery.component').then(m => m.DeliveryComponent)
   }
 ];

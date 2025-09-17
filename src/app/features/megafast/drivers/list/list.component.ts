@@ -137,7 +137,7 @@ export class ListComponent implements OnInit, OnDestroy {
     }
     if (this.selectedZones?.length) {
       const set = new Set(this.selectedZones.map(z => z.toLowerCase()));
-      arr = arr.filter((d) => (d.zones || []).some((x) => set.has((x || '').toLowerCase())));
+      arr = arr.filter((d) => (d.zones || []).some((x) => set.has((typeof x === 'string' ? x : x.name || '').toLowerCase())));
     }
 
     // sort

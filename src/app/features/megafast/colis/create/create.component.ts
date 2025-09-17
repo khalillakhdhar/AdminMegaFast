@@ -679,7 +679,10 @@ export class CreateComponent implements OnInit, OnDestroy {
     let driverMin: DriverMin | undefined;
     if (driverId) {
       const d = this.drivers.find(x => x.id === driverId);
-      if (d) driverMin = { id: d.id, name: d.displayName || d.name, phone: d.phone, vehicle: d.vehicle };
+      if (d) {
+        const vehicleString = d.vehicle ? `${d.vehicle.brand || ''} ${d.vehicle.model || ''}`.trim() || d.vehicle.licensePlate : '';
+        driverMin = { id: d.id, name: d.displayName || d.name, phone: d.phone, vehicle: vehicleString };
+      }
     }
 
     // Note pour impression directe sans lot

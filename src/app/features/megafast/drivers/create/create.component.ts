@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { PageTitleComponent } from '../../../../shared/ui/pagetitle/pagetitle.component';
 import { DriverService } from '../../../../core/services/driver.service';
+import { DriverZone } from '../../../../core/models/driver.model';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TUNISIA_CITIES } from '../../../../shared/data/tunisia-cities';
 
@@ -61,7 +62,15 @@ export class CreateComponent {
     }
 
     this.saving = true;
-    const zones = (formValue.zones || []) as string[];
+    const zoneStrings = (formValue.zones || []) as string[];
+    const zones: DriverZone[] = zoneStrings.map((zoneName, index) => ({
+      id: `zone_${index + 1}`,
+      name: zoneName,
+      type: 'assigned' as const,
+      coordinates: [],
+      priority: index + 1,
+      active: true
+    }));
 
     // Remove createAccount from driver data
     const { createAccount: _, ...driverData } = formValue;

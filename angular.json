@@ -182,12 +182,22 @@
               "devServerTarget": "skote:serve:production"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
   "cli": {
     "schematicCollections": [
+      "angular-eslint",
       "@cypress/schematic",
       "@schematics/angular"
     ],

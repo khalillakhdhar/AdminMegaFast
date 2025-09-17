@@ -1,0 +1,94 @@
+<div class="real-time-map-container" [style.height]="height">
+  <!-- Header avec contrôles -->
+  <div class="map-header">
+    <div class="map-title">
+      <h5><i class="fas fa-map-marked-alt"></i> Tracking Temps Réel</h5>
+      <small class="text-muted">
+        Dernière MAJ: {{ lastUpdate | date:'HH:mm:ss' }}
+        <i class="fas fa-circle text-success blink" *ngIf="autoRefresh"></i>
+      </small>
+    </div>
+
+    <div class="map-controls">
+      <!-- Filtres de statut -->
+      <div class="filter-group">
+        <label class="form-label">Statuts:</label>
+        <div class="status-filters">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox"
+                   [checked]="mapState.filterOptions.driverStatus.includes('online')"
+                   (change)="toggleStatusFilter('online')">
+            <label class="form-check-label status-online">En ligne</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox"
+                   [checked]="mapState.filterOptions.driverStatus.includes('busy')"
+                   (change)="toggleStatusFilter('busy')">
+            <label class="form-check-label status-busy">Occupé</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox"
+                   [checked]="mapState.filterOptions.driverStatus.includes('available')"
+                   (change)="toggleStatusFilter('available')">
+            <label class="form-check-label status-available">Disponible</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-buttons">
+        <button class="btn btn-sm btn-outline-primary"
+                (click)="centerOnDrivers()"
+                title="Centrer sur tous les drivers">
+          <i class="fas fa-expand-arrows-alt"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-secondary"
+                [class.active]="mapState.filterOptions.showRoutes"
+                (click)="toggleRoutes(!mapState.filterOptions.showRoutes)"
+                title="Afficher/Masquer les routes">
+          <i class="fas fa-route"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-success"
+                (click)="refresh()"
+                title="Rafraîchir">
+          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Google Maps -->
+  <div class="map-content">
+    <div #mapContainer class="google-map"></div>
+
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-2">Chargement de la carte...</p>
+    </div>
+  </div>
+
+  <!-- Statistiques en bas -->
+  <div class="map-footer">
+    <div class="stats-row">
+      <div class="stat-item">
+        <i class="fas fa-users text-primary"></i>
+        <span>{{ mapState.activeDrivers.length }} Drivers actifs</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-circle text-success"></i>
+        <span>{{ getDriversByStatus('online').length }} En ligne</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-circle text-warning"></i>
+        <span>{{ getDriversByStatus('busy').length }} Occupés</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-circle text-info"></i>
+        <span>{{ getDriversByStatus('available').length }} Disponibles</span>
+      </div>
+    </div>
+  </div>
+</div>
