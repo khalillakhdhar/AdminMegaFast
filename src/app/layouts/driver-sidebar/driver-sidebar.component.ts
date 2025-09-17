@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/prefer-inject */
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
@@ -20,7 +21,7 @@ interface MenuItem {
       <!-- Logo Section -->
       <div class="sidebar-header">
         <div class="logo">
-          <img src="assets/images/logo-white.png" alt="MegaFast" class="logo-img" *ngIf="!isCollapsed">
+          <img src="assets/images/logo-light.png" alt="MegaFast" class="logo-img" *ngIf="!isCollapsed">
           <img src="assets/images/logo-icon.png" alt="MF" class="logo-icon" *ngIf="isCollapsed">
         </div>
         <button
@@ -75,21 +76,6 @@ interface MenuItem {
         </div>
       </nav>
 
-      <!-- Quick Actions -->
-      <div class="quick-actions" *ngIf="!isCollapsed">
-        <h3 class="section-title">Actions rapides</h3>
-        <div class="action-buttons">
-          <button class="action-btn scan" type="button">
-            <i class="fas fa-qrcode"></i>
-            <span>Scanner un colis</span>
-          </button>
-          <button class="action-btn update" type="button">
-            <i class="fas fa-edit"></i>
-            <span>Mettre à jour statut</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Footer Info -->
       <div class="sidebar-footer">
         <div class="version-info" *ngIf="!isCollapsed">
@@ -139,21 +125,9 @@ export class DriverSidebarComponent implements OnInit {
       isActive: false
     },
     {
-      icon: 'fas fa-history',
-      label: 'Historique',
-      route: '/driver/history',
-      isActive: false
-    },
-    {
       icon: 'fas fa-user-circle',
       label: 'Mon Profil',
       route: '/driver/profile',
-      isActive: false
-    },
-    {
-      icon: 'fas fa-cog',
-      label: 'Paramètres',
-      route: '/driver/settings',
       isActive: false
     }
   ];

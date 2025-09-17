@@ -329,6 +329,25 @@ export class ColisListComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Delete shipment permanently
+  async deleteShipment(shipmentId: string): Promise<void> {
+    try {
+      if (confirm('Êtes-vous sûr de vouloir supprimer définitivement ce colis ? Cette action est irréversible.')) {
+        await this.shipmentService.delete(shipmentId);
+        this.toastr.success('Colis supprimé avec succès');
+        this.loadShipments();
+      }
+    } catch (error) {
+      console.error('Error deleting shipment:', error);
+      this.toastr.error('Erreur lors de la suppression du colis');
+    }
+  }
+
+  // Check if shipment can be deleted (only if not delivered)
+  canDelete(status: string): boolean {
+    return status !== 'delivered';
+  }
+
   async cancelShipment(shipmentId: string): Promise<void> {
     try {
       await this.shipmentService.setStatus(shipmentId, 'canceled', {
@@ -353,31 +372,6 @@ export class ColisListComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error marking in transit:', error);
       this.toastr.error('Erreur lors de la mise à jour du statut');
-    }
-  }
-
-  confirmDelete(shipmentId: string): void {
-    this.selectedShipmentId = shipmentId;
-    this.removeModal.show();
-  }
-
-  async deleteShipment(): Promise<void> {
-    if (!this.selectedShipmentId) return;
-
-    this.isProcessing = true;
-
-    try {
-      await this.shipmentService.delete(this.selectedShipmentId);
-      this.toastr.success('Colis supprimé avec succès');
-      this.removeModal.hide();
-      this.loadShipments();
-    } catch (error) {
-      console.error('Error deleting shipment:', error);
-      this.toastr.error('Erreur lors de la suppression');
-    } finally {
-      this.isProcessing = false;
-      this.selectedShipmentId = null;
-      this.cdr.markForCheck();
     }
   }
 

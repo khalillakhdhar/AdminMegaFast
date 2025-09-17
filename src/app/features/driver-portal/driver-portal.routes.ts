@@ -23,16 +23,8 @@ export const DRIVER_PORTAL_ROUTES: Routes = [
     loadComponent: () => import('./statistics/driver-statistics.component').then(m => m.DriverStatisticsComponent)
   },
   {
-    path: 'history',
-    loadComponent: () => import('./history/driver-history.component').then(m => m.DriverHistoryComponent)
-  },
-  {
     path: 'profile',
     loadComponent: () => import('./profile/driver-profile.component').then(m => m.DriverProfileComponent)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./settings/driver-settings.component').then(m => m.DriverSettingsComponent)
   },
   {
     path: 'delivery',

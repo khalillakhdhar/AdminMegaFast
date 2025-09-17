@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/prefer-inject */
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../../core/services/auth.service';
@@ -21,19 +22,19 @@ export class ClientTopbarComponent implements OnInit, OnDestroy {
     private readonly authService: AuthenticationService,
     private readonly userProfileService: UserProfileService,
     private readonly router: Router
-  ) { }
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadUserProfile();
     this.loadNotifications();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private loadUserProfile() {
+  private loadUserProfile(): void {
     this.userProfileService.getCurrentUserProfile()
       .pipe(takeUntil(this.destroy$))
       .subscribe(profile => {
@@ -41,7 +42,7 @@ export class ClientTopbarComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadNotifications() {
+  private loadNotifications(): void {
     this.userProfileService.getUserNotificationsCount()
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
@@ -49,72 +50,53 @@ export class ClientTopbarComponent implements OnInit, OnDestroy {
       });
   }
 
-  logout() {
+  logout(): void {
     console.log('🔓 Début de la déconnexion...');
 
-    // Gérer la déconnexion avec gestion d'erreur et nettoyage complet
+    // Nettoyage immédiat des données locales
+    this.userProfile = null;
+    this.notificationsCount = 0;
+
+    // Appel de la déconnexion Firebase
     try {
-      console.log('🔍 Appel du service d\'authentification...');
       const logoutResult = this.authService.logout();
       console.log('📋 Résultat du logout:', logoutResult);
 
       // Si logout retourne une promesse, l'attendre
       if (logoutResult && typeof logoutResult.then === 'function') {
-        console.log('⏳ Attente de la promesse de déconnexion...');
         logoutResult
           .then(() => {
             console.log('✅ Déconnexion Firebase réussie');
-            this.performLogoutCleanup();
+            this.navigateToLogin();
           })
-          .catch((error: any) => {
+          .catch((error: unknown) => {
             console.error('❌ Erreur lors de la déconnexion Firebase:', error);
-            // Forcer le nettoyage même en cas d'erreur
-            this.performLogoutCleanup();
+            // Forcer la navigation même en cas d'erreur
+            this.navigateToLogin();
           });
       } else {
-        // Si logout ne retourne pas de promesse, effectuer le nettoyage immédiatement
-        console.log('🔄 Logout synchrone, nettoyage immédiat');
-        this.performLogoutCleanup();
+        // Si logout ne retourne pas de promesse, naviguer immédiatement
+        console.log('🔄 Logout synchrone, navigation immédiate');
+        this.navigateToLogin();
       }
     } catch (error) {
       console.error('💥 Erreur critique lors de la déconnexion:', error);
-      // En cas d'erreur, forcer le nettoyage
-      this.performLogoutCleanup();
+      // En cas d'erreur, forcer la navigation
+      this.navigateToLogin();
     }
   }
 
-  // Méthode de déconnexion d'urgence (optionnelle pour debug)
-  forceLogout() {
-    console.log('Déconnexion forcée');
-
-    // Nettoyer complètement le localStorage et sessionStorage
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Rediriger avec window.location pour forcer un rechargement complet
-    window.location.href = '/auth/login';
-  }
-
-  private performLogoutCleanup() {
-    console.log('🧹 Début du nettoyage après déconnexion...');
-
-    // Nettoyer les données utilisateur du composant
-    this.userProfile = null;
-    this.notificationsCount = 0;
-    console.log('✨ Données du composant nettoyées');
-
-    // Navigation vers la page de login
+  private navigateToLogin(): void {
     console.log('🚀 Navigation vers /auth/login...');
     this.router.navigate(['/auth/login']).then((success) => {
       if (success) {
         console.log('✅ Navigation vers login réussie');
       } else {
-        console.log('⚠️ Navigation vers login échouée');
+        console.log('⚠️ Navigation vers login échouée, redirection forcée');
+        window.location.href = '/auth/login';
       }
     }).catch((error) => {
       console.error('❌ Erreur lors de la navigation:', error);
-      // Fallback: forcer la redirection avec window.location
-      console.log('🔄 Tentative de redirection avec window.location...');
       window.location.href = '/auth/login';
     });
   }

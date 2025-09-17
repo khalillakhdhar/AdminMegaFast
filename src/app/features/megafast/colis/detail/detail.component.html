@@ -205,7 +205,7 @@
             <i class="bx bx-map text-primary me-2"></i>
             <span>{{shipment.geo.lat}}, {{shipment.geo.lng}}</span>
           </div>
-          <button class="btn btn-outline-primary btn-sm mt-2" (click)="showOnMap()">
+          <button class="btn btn-outline-primary btn-sm mt-2" (click)="showOnMap(shipment)">
             <i class="bx bx-map-pin me-1"></i> Voir sur la carte
           </button>
         </div>

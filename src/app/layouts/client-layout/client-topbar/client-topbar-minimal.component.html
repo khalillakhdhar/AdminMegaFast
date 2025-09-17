@@ -1,0 +1,20 @@
+<div class="test-wrapper">
+  <h3>Test Minimal Client Topbar</h3>
+
+  <!-- Test simple -->
+  <p>Notifications Count: {{notificationsCount}}</p>
+
+  <!-- Test avec condition -->
+  <div *ngIf="userProfile">
+    <p>User Name: {{userProfile.name}}</p>
+    <p>User Email: {{userProfile.email}}</p>
+  </div>
+
+  <!-- Test avec condition null-safe -->
+  <div *ngIf="userProfile?.stats">
+    <p>Total Packages: {{userProfile.stats.totalPackages}}</p>
+  </div>
+
+  <!-- Button logout -->
+  <button (click)="logout()" class="btn btn-primary">Logout</button>
+</div>

@@ -26,10 +26,10 @@ export class ClientStatsService {
   /**
    * Get real-time client statistics from Firebase
    */
-  getClientStats(): Observable<ClientStats> {
-    const clientId = this.authService.getCurrentClientId();
+  getClientStats(clientId?: string): Observable<ClientStats> {
+    const targetClientId = clientId || this.authService.getCurrentClientId();
 
-    if (!clientId) {
+    if (!targetClientId) {
       return of({
         totalPackages: 0,
         deliveredPackages: 0,
@@ -43,7 +43,7 @@ export class ClientStatsService {
 
     // Query shipments for this client
     const shipmentsQuery = this.afs.collection('shipments', ref =>
-      ref.where('clientId', '==', clientId)
+      ref.where('clientId', '==', targetClientId)
     );
 
     return shipmentsQuery.valueChanges().pipe(

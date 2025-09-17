@@ -161,13 +161,13 @@
                               (click)="cancelShipment(shipment.id!)">
                         <i class="bx bx-x"></i>
                       </button>
+                      <button class="btn btn-light btn-sm text-danger" *ngIf="canDelete(shipment.status)" title="Supprimer"
+                              (click)="deleteShipment(shipment.id!)">
+                        <i class="bx bx-trash"></i>
+                      </button>
                       <button class="btn btn-light btn-sm" *ngIf="!shipment.batchId" title="Assigner lot"
                               (click)="openAssignBatchModal(shipment)">
                         <i class="bx bx-package"></i>
-                      </button>
-                      <button class="btn btn-light btn-sm text-danger" title="Supprimer"
-                              (click)="confirmDelete(shipment.id!)">
-                        <i class="bx bx-trash"></i>
                       </button>
                     </div>
                   </td>
@@ -213,29 +213,3 @@
     <p class="mt-2 text-muted">Chargement des colis...</p>
   </div>
 </ng-template>
-
-<!-- Delete Confirmation Modal -->
-<div #removeModal class="modal fade" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body px-4 py-5 text-center">
-        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" (click)="removeModal.hide()"></button>
-        <div class="avatar-sm mb-4 mx-auto">
-          <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
-            <i class="bx bx-trash font-size-20"></i>
-          </div>
-        </div>
-        <p class="text-muted font-size-16 mb-4">Êtes-vous sûr de vouloir supprimer ce colis ?</p>
-        <div class="hstack gap-2 justify-content-center mb-0">
-          <button type="button" class="btn btn-light" (click)="removeModal.hide()">Annuler</button>
-          <button type="button" class="btn btn-danger"
-                  (click)="deleteShipment()"
-                  [disabled]="isProcessing">
-            <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-            Supprimer
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>

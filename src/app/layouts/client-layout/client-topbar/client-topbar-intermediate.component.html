@@ -1,0 +1,69 @@
+<header id="page-topbar" class="light-topbar">
+  <div class="navbar-header">
+    <div class="d-flex align-items-center">
+      <!-- LOGO MegaFast uniquement -->
+      <div class="navbar-brand-box">
+        <a href="javascript:void(0);" class="logo logo-light">
+          <span class="logo-lg">
+            <h3 class="text-primary mb-0">MegaFast</h3>
+          </span>
+        </a>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="d-flex ms-auto">
+        <!-- Quick stats display (from Firebase) -->
+        <div class="quick-stats me-3 d-none d-lg-flex" *ngIf="userProfile?.stats">
+          <div class="stat-item">
+            <span class="stat-value text-primary">{{userProfile.stats.totalPackages}}</span>
+            <span class="stat-label">Colis</span>
+          </div>
+          <div class="stat-separator">|</div>
+          <div class="stat-item">
+            <span class="stat-value text-success">{{userProfile.stats.deliveredPackages}}</span>
+            <span class="stat-label">Livrés</span>
+          </div>
+          <div class="stat-separator">|</div>
+          <div class="stat-item">
+            <span class="stat-value text-warning">{{userProfile.stats.pendingPackages}}</span>
+            <span class="stat-label">En cours</span>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="dropdown d-inline-block me-2">
+          <button type="button" class="btn btn-light-outline header-item position-relative">
+            <i class="fas fa-bell text-primary"></i>
+            <span class="badge bg-primary" *ngIf="notificationsCount > 0">{{notificationsCount}}</span>
+          </button>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown d-inline-block">
+          <button type="button" class="btn header-item" data-bs-toggle="dropdown">
+            <img class="rounded-circle header-profile-user"
+                 src="assets/images/users/avatar-default.jpg"
+                 alt="Header Avatar">
+            <span class="d-none d-xl-inline-block ms-1" *ngIf="userProfile">{{userProfile.name}}</span>
+            <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+          </button>
+
+          <div class="dropdown-menu dropdown-menu-end">
+            <div class="dropdown-header" *ngIf="userProfile">
+              <h6 class="mb-1">{{userProfile.name}}</h6>
+              <p class="mb-0 text-muted">{{userProfile.email}}</p>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/client/profile">
+              <i class="mdi mdi-account-circle font-size-16 align-middle me-1"></i> Profile
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="javascript:void(0);" (click)="logout()">
+              <i class="mdi mdi-logout font-size-16 align-middle me-1"></i> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

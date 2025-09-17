@@ -64,26 +64,42 @@ export class UserProfileService {
           driverId: userRole.driverId
         };
 
-        // If user is a client, get additional client information and basic stats
+        // If user is a client, get additional client information and stats
         if (userRole.role === 'client' && userRole.clientId) {
           return this.clientService.getById(userRole.clientId).pipe(
-            map(clientData => {
+            switchMap(clientData => {
               if (clientData) {
-                return {
+                const profileWithClientData = {
                   ...baseProfile,
                   name: clientData.name,
                   phone: clientData.phone,
                   address: clientData.address?.line1,
-                  city: clientData.address?.city,
-                  stats: {
-                    totalPackages: 24,
-                    deliveredPackages: 20,
-                    inTransitPackages: 2,
-                    pendingPackages: 2
-                  }
+                  city: clientData.address?.city
                 } as UserProfile;
+
+                // Get real stats from client stats service
+                return this.clientStatsService.getClientStats(userRole.clientId!).pipe(
+                  map(stats => ({
+                    ...profileWithClientData,
+                    stats: {
+                      totalPackages: stats.totalPackages || 0,
+                      deliveredPackages: stats.deliveredPackages || 0,
+                      inTransitPackages: stats.inTransitPackages || 0,
+                      pendingPackages: stats.pendingPackages || 0
+                    }
+                  })),
+                  catchError(() => of({
+                    ...profileWithClientData,
+                    stats: {
+                      totalPackages: 0,
+                      deliveredPackages: 0,
+                      inTransitPackages: 0,
+                      pendingPackages: 0
+                    }
+                  }))
+                );
               }
-              return baseProfile;
+              return of(baseProfile);
             }),
             catchError(() => of(baseProfile))
           );
@@ -97,10 +113,20 @@ export class UserProfileService {
   }
 
   /**
-   * Get user notifications count
+   * Get notifications count for current user
    */
   getUserNotificationsCount(): Observable<number> {
-    return this.clientStatsService.getNotifications().pipe(
+    const currentUser = this.authService.currentUser();
+
+    if (!currentUser?.uid) {
+      return of(0);
+    }
+
+    // Query unread notifications for this user
+    return this.afs.collection('notifications', ref =>
+      ref.where('userId', '==', currentUser.uid)
+         .where('isRead', '==', false)
+    ).valueChanges().pipe(
       map(notifications => notifications.length),
       catchError(() => of(0))
     );

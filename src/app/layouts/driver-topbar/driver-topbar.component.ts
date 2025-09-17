@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/prefer-inject */
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -98,10 +99,6 @@ import { UserProfile } from '../../core/models/user-profile.model';
               <button class="menu-item" type="button">
                 <i class="fas fa-user"></i>
                 Mon Profil
-              </button>
-              <button class="menu-item" type="button">
-                <i class="fas fa-cog"></i>
-                Paramètres
               </button>
               <button class="menu-item" type="button">
                 <i class="fas fa-chart-bar"></i>

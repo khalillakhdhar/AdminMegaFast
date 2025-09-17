@@ -274,8 +274,43 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  showOnMap(): void {
-    // Implement map functionality
-    this.toastr.info('Fonctionnalité de carte en cours de développement');
+  showOnMap(shipment: Shipment): void {
+    if (!shipment?.geo?.lat || !shipment?.geo?.lng) {
+      this.toastr.error('Coordonnées GPS non disponibles pour ce colis');
+      return;
+    }
+
+    try {
+      // Build Google Maps URL with the shipment location
+      const lat = shipment.geo.lat;
+      const lng = shipment.geo.lng;
+
+      // Create Google Maps URL with coordinates and address
+      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+
+      // Open in new tab
+      window.open(googleMapsUrl, '_blank');
+
+      this.toastr.success('Ouverture de Google Maps...');
+    } catch (error) {
+      console.error('Error opening map:', error);
+      this.toastr.error('Erreur lors de l\'ouverture de la carte');
+    }
+  }
+
+  private getFullAddress(shipment: Shipment): string {
+    if (!shipment) return '';
+
+    let address = '';
+    if (shipment.address) {
+      address = shipment.address;
+      if (shipment.city) {
+        address += ', ' + shipment.city;
+      }
+      if (shipment.delegation) {
+        address += ', ' + shipment.delegation;
+      }
+    }
+    return address;
   }
 }
