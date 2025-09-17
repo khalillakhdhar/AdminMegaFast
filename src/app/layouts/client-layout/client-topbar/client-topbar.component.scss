@@ -1,14 +1,27 @@
-/* Client Topbar - Thème Clair avec Bleu */
+/* Client Topbar - Thème Clair avec Bleu AMÉLIORÉ */
 .light-topbar {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.1);
-  position: relative;
+  box-shadow: 0 2px 15px rgba(59, 130, 246, 0.08);
+  position: sticky; /* Position sticky pour un meilleur UX */
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar-header {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem; /* Padding légèrement augmenté */
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 70px; /* Hauteur minimale pour une meilleure présence */
+
+  /* Amélioration de l'accessibilité */
+  &:focus-within {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  }
 }
 
 /* Logo MegaFast Moderne */
@@ -160,16 +173,22 @@
   padding: 0.2rem 0.4rem;
 }
 
-/* Stats rapides avec style moderne */
+/* Stats rapides avec style moderne AMÉLIORÉ */
 .quick-stats {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  background: #ffffff;
+  gap: 1.25rem; /* Espacement augmenté */
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px; /* Bordures plus arrondies */
+  padding: 1rem 1.25rem; /* Padding augmenté */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+  }
 }
 
 .quick-stats .stat-item {
@@ -177,26 +196,29 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 0.25rem; /* Espacement interne */
 }
 
 .quick-stats .stat-value {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.3rem; /* Taille augmentée */
+  font-weight: 800; /* Poids plus important */
   color: #1e293b;
+  line-height: 1.2;
 }
 
 .quick-stats .stat-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 500;
+  letter-spacing: 0.8px; /* Espacement des lettres augmenté */
+  font-weight: 600; /* Poids augmenté */
+  margin-top: 0.25rem;
 }
 
 .quick-stats .stat-divider {
   width: 1px;
-  height: 30px;
-  background: #e2e8f0;
+  height: 35px; /* Hauteur augmentée */
+  background: linear-gradient(180deg, transparent, #e2e8f0, transparent);
 }
 
 /* Dropdown utilisateur moderne */
@@ -355,31 +377,126 @@
   color: #dc2626;
 }
 
-/* Responsive */
+/* Responsive AMÉLIORÉ POUR MEILLEURE UX MOBILE */
 @media (max-width: 768px) {
+  .navbar-header {
+    padding: 0.75rem 1rem; /* Padding réduit sur tablette */
+    min-height: 60px;
+  }
+
   .quick-stats {
-    display: none !important;
+    display: none !important; /* Masqué sur tablette pour plus d'espace */
   }
 
   .route-selector-wrapper {
-    display: none !important;
+    display: none !important; /* Masqué sur tablette */
   }
 
   .user-info {
-    display: none !important;
+    display: none !important; /* Info utilisateur masquée sur tablette */
+  }
+
+  /* Menu toggle plus visible sur mobile */
+  #vertical-menu-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border: 1px solid #cbd5e1;
+    color: #3b82f6;
+
+    &:hover {
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+  }
+
+  /* Notification bell optimisée pour mobile */
+  .notification-bell .btn-light-outline {
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+
+  /* User dropdown adapté pour mobile */
+  .user-dropdown .user-btn {
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .user-dropdown .avatar-initials {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 576px) {
   .navbar-header {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem; /* Padding encore plus réduit sur mobile */
+    min-height: 56px;
   }
 
   .notification-bell {
-    display: none;
+    display: none; /* Masqué complètement sur mobile */
   }
 
   .navbar-brand-box .brand-subtitle {
-    display: none;
+    display: none; /* Sous-titre masqué pour économiser l'espace */
+  }
+
+  /* Logo plus compact sur mobile */
+  .navbar-brand-box .brand-text {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* User dropdown ultra-compact pour mobile */
+  .user-dropdown .user-btn {
+    padding: 0.5rem;
+    min-width: 45px;
+  }
+
+  .user-dropdown .avatar-initials {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  /* Menu toggle très visible sur petit mobile */
+  #vertical-menu-btn {
+    padding: 0.625rem 0.875rem;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+
+  /* Dropdown menu mobile optimisé */
+  .dropdown-menu-light {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    right: 20px !important;
+    transform: none !important;
+    width: auto !important;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .dropdown-item-light {
+    padding: 1rem 1.5rem; /* Padding augmenté pour faciliter le toucher */
+    font-size: 0.95rem;
+    min-height: 48px; /* Hauteur minimale pour accessibilité */
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-item-light i {
+    font-size: 1.2rem; /* Icônes plus grandes sur mobile */
+    width: 24px;
+    margin-right: 1rem;
   }
 }

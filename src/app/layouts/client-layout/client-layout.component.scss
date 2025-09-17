@@ -1,8 +1,10 @@
-// Client Layout - Design Futuristique
+// Client Layout - Design Futuristique AMÉLIORÉ POUR LISIBILITÉ
 .client-layout-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   position: relative;
+  display: flex;
+  overflow-x: hidden; /* Prévient le débordement horizontal */
 
   &::before {
     content: '';
@@ -12,11 +14,20 @@
     right: 0;
     bottom: 0;
     background:
-      radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 1;
   }
+}
+
+/* Sidebar wrapper avec largeur augmentée */
+.client-sidebar-wrapper {
+  width: 280px; /* Largeur augmentée pour plus d'espace */
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .client-main-content {
@@ -25,18 +36,22 @@
   flex-direction: column;
   position: relative;
   z-index: 2;
+  min-width: 0; /* Permet la contraction du contenu */
+  margin-left: 0.5rem; /* Espacement de la sidebar */
 }
 
 .client-page-content {
   flex: 1;
-  padding: 2rem 0;
+  padding: 2rem 0; /* Padding augmenté pour plus d'aération */
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.7) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 0 0 0 25px;
-  box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.1);
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 100%);
+  backdrop-filter: blur(15px); /* Effet de flou plus prononcé */
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 0 0 0 30px; /* Bordures plus arrondies */
+  box-shadow:
+    0 -8px 32px rgba(59, 130, 246, 0.08),
+    0 -2px 8px rgba(59, 130, 246, 0.04); /* Ombre améliorée */
   position: relative;
   overflow: hidden;
 
@@ -46,32 +61,174 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+    height: 3px; /* Hauteur augmentée */
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8, #6366f1);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); /* Ombre plus visible */
   }
 
   .container-fluid {
     position: relative;
     z-index: 2;
+    max-width: 100%;
+    padding: 0 2rem; /* Padding latéral augmenté */
   }
 }
 
-// Responsive
+// Responsive AMÉLIORÉ POUR MEILLEURE EXPÉRIENCE UTILISATEUR
 @media (max-width: 991px) {
   .client-layout-wrapper {
     flex-direction: column !important;
   }
 
+  .client-sidebar-wrapper {
+    width: 100% !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.sidebar-open {
+      transform: translateX(0);
+    }
+  }
+
+  .client-main-content {
+    margin-left: 0; /* Supprime la marge sur tablette */
+    width: 100%;
+  }
+
   .client-page-content {
-    border-radius: 0;
+    border-radius: 0; /* Supprime les bordures arrondies sur tablette */
     margin-top: 0;
+    padding: 1.5rem 0; /* Padding réduit sur tablette */
+
+    .container-fluid {
+      padding: 0 1.5rem; /* Padding latéral réduit */
+    }
   }
 }
 
 @media (max-width: 768px) {
+  .client-layout-wrapper {
+    &::before {
+      opacity: 0.5; /* Réduit l'intensité des effets visuels sur mobile */
+    }
+  }
+
   .client-page-content {
-    padding: 1rem 0;
+    padding: 1rem 0; /* Padding encore plus réduit sur mobile */
+
+    &::before {
+      height: 2px; /* Ligne décorative plus fine sur mobile */
+    }
+
+    .container-fluid {
+      padding: 0 1rem; /* Padding latéral minimal sur mobile */
+    }
+  }
+
+  /* Animation simplifiée pour mobile pour des performances optimales */
+  .client-page-content {
+    animation: none; /* Supprime l'animation sur mobile pour économiser les ressources */
+  }
+}
+
+@media (max-width: 576px) {
+  .client-page-content {
+    .container-fluid {
+      padding: 0 0.75rem; /* Padding ultra-minimal sur très petit mobile */
+    }
+  }
+
+  /* Optimisation pour les très petits écrans */
+  .client-layout-wrapper {
+    &::before {
+      display: none; /* Supprime complètement les effets visuels sur très petit mobile */
+    }
+  }
+}
+
+/* Overlay pour fermer la sidebar sur mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Amélioration de l'accessibilité */
+  &:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+/* Bouton menu mobile FIXE - AMÉLIORÉ */
+.fixed-mobile-btn {
+  position: fixed !important;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1070; /* Z-index plus élevé que la sidebar */
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  border: none;
+  border-radius: 15px;
+  color: white;
+  padding: 1rem;
+  font-size: 1.2rem;
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.6);
+  }
+
+  &:active {
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 3px;
+  }
+
+  i {
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+  }
+
+  /* Animation plus visible pour l'icône */
+  &:hover i {
+    transform: rotate(180deg) scale(1.1);
+  }
+
+  /* Animation quand la sidebar est ouverte */
+  &[aria-expanded="true"] {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+
+    &:hover {
+      background: linear-gradient(135deg, #b91c1c, #991b1b);
+    }
   }
 }
 
