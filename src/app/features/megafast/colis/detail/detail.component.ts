@@ -8,7 +8,6 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { ShipmentService } from 'src/app/core/services/shipment.service';
-import { BatchService } from 'src/app/core/services/batch.service';
 import { DriverService } from 'src/app/core/services/driver.service';
 import { ShipmentPrintService } from 'src/app/core/services/shipment-print.service';
 import { Shipment, ShipmentStatus, ShipmentHistoryEntry } from 'src/app/core/models/shipment.model';
@@ -36,7 +35,6 @@ interface DriverOption {
 })
 export class ColisDetailComponent implements OnInit, OnDestroy {
   @ViewChild('assignDriverModal') assignDriverModal!: ElementRef;
-  @ViewChild('assignBatchModal') assignBatchModal!: ElementRef;
 
   private readonly destroy$ = new Subject<void>();
   private shipmentId!: string;
@@ -49,13 +47,10 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
 
   // Reference data
   drivers: DriverOption[] = [];
-  batches: any[] = [];
   private readonly driverMap = new Map<string, string>();
-  private readonly batchMap = new Map<string, string>();
 
   // Forms
   assignDriverForm!: FormGroup;
-  assignBatchForm!: FormGroup;
 
   // Loading states
   isLoading = false;
@@ -68,7 +63,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly shipmentService: ShipmentService,
-    private readonly batchService: BatchService,
     private readonly driverService: DriverService,
     private readonly printService: ShipmentPrintService,
     private readonly formBuilder: FormBuilder,
@@ -99,10 +93,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     this.assignDriverForm = this.formBuilder.group({
       driverId: [null]
     });
-
-    this.assignBatchForm = this.formBuilder.group({
-      batchId: [null]
-    });
   }
 
   private loadReferenceData(): void {
@@ -118,20 +108,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
         drivers.forEach(driver => {
           if (driver.id) {
             this.driverMap.set(driver.id, driver.name);
-          }
-        });
-        this.cdr.markForCheck();
-      });
-
-    // Load batches
-    this.batchService.getAll()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(batches => {
-        this.batches = batches;
-        this.batchMap.clear();
-        batches.forEach(batch => {
-          if (batch.id) {
-            this.batchMap.set(batch.id, batch.code || batch.id);
           }
         });
         this.cdr.markForCheck();
@@ -217,10 +193,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     return this.driverMap.get(driverId) || 'Inconnu';
   }
 
-  getBatchCode(batchId: string): string {
-    return this.batchMap.get(batchId) || `LOT-${batchId.slice(-8)}`;
-  }
-
   canMarkAsDelivered(status: ShipmentStatus): boolean {
     return ['assigned', 'in_transit'].includes(status);
   }
@@ -242,12 +214,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     modal.show();
   }
 
-  openAssignBatchModal(): void {
-    this.assignBatchForm.reset();
-    const modal = new (window as any).bootstrap.Modal(this.assignBatchModal.nativeElement);
-    modal.show();
-  }
-
   async assignDriver(): Promise<void> {
     const driverId = this.assignDriverForm.get('driverId')?.value;
     if (!driverId) return;
@@ -263,29 +229,6 @@ export class ColisDetailComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error assigning driver:', error);
       this.toastr.error('Erreur lors de l\'assignation du livreur');
-    } finally {
-      this.isProcessing = false;
-      this.cdr.markForCheck();
-    }
-  }
-
-  async assignToBatch(): Promise<void> {
-    const batchId = this.assignBatchForm.get('batchId')?.value;
-    if (!batchId) return;
-
-    this.isProcessing = true;
-
-    try {
-      await this.shipmentService.assignToBatch(this.shipmentId, batchId);
-      await this.batchService.recomputeStats(batchId);
-
-      this.toastr.success('Colis assigné au lot avec succès');
-      const modal = (window as any).bootstrap.Modal.getInstance(this.assignBatchModal.nativeElement);
-      modal?.hide();
-      this.loadShipment();
-    } catch (error) {
-      console.error('Error assigning to batch:', error);
-      this.toastr.error('Erreur lors de l\'assignation au lot');
     } finally {
       this.isProcessing = false;
       this.cdr.markForCheck();

@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="col-xl-3 col-md-6">
       <div class="card mini-stats-wid">
         <div class="card-body">
@@ -86,13 +86,12 @@
         <div class="card-body">
           <div class="d-flex">
             <div class="flex-grow-1">
-              <p class="text-muted fw-medium">Lots Actifs</p>
-              <h4 class="mb-0">{{dashboardStats.activeBatches}}</h4>
+              <p class="text-muted fw-medium">Livreurs Actifs</p>
+              <h4 class="mb-0">{{dashboardStats.driversActive}}</h4>
               <p class="text-muted mt-1">
                 <span class="text-info">
-                  <i class="bx bx-truck"></i> {{dashboardStats.driversActive}}
+                  <i class="bx bx-truck"></i> Prêts pour livraisons
                 </span>
-                livreurs en route
               </p>
             </div>
             <div class="flex-shrink-0 align-self-center">
@@ -125,7 +124,7 @@
             </div>
             <h4 class="card-title mb-4">Performance des Livraisons</h4>
           </div>
-          
+
           <!-- Chart Placeholder -->
           <div class="text-center p-5 bg-light rounded">
             <i class="bx bx-line-chart font-size-48 text-muted"></i>
@@ -140,7 +139,7 @@
       <div class="card">
         <div class="card-body">
           <h4 class="card-title mb-4">Répartition par Statut</h4>
-          
+
           <!-- Status Distribution -->
           <div class="mb-3">
             <div class="d-flex justify-content-between mb-1">
@@ -197,7 +196,7 @@
               Voir tout
             </a>
           </div>
-          
+
           <div class="activity-timeline">
             <div class="activity-item" *ngFor="let activity of recentActivities; trackBy: trackByActivity">
               <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
@@ -222,7 +221,7 @@
       <div class="card">
         <div class="card-body">
           <h4 class="card-title mb-4">Top Livreurs</h4>
-          
+
           <div class="table-responsive">
             <table class="table table-borderless align-middle">
               <thead>

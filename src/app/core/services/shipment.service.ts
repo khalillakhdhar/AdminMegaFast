@@ -9,7 +9,6 @@ export interface ShipmentListFilters {
   clientPhone?: string;
   status?: ShipmentStatus;
   assignedTo?: string;
-  batchId?: string;
   dateFrom?: Date;
   dateTo?: Date;
   limit?: number;               // ex: 20
@@ -63,7 +62,6 @@ export class ShipmentService {
 
       if (filters.status)      q = q.where('status', '==', filters.status);
       if (filters.assignedTo)  q = q.where('assignedTo', '==', filters.assignedTo);
-      if (filters.batchId)     q = q.where('batchId', '==', filters.batchId);
       if (filters.barcode)     q = q.where('barcode', '==', filters.barcode);
       if (filters.clientPhone) q = q.where('clientPhone', '==', filters.clientPhone);
 
@@ -121,7 +119,6 @@ export class ShipmentService {
 
     if (filters.status)      q = q.where('status', '==', filters.status);
     if (filters.assignedTo)  q = q.where('assignedTo', '==', filters.assignedTo);
-    if (filters.batchId)     q = q.where('batchId', '==', filters.batchId);
     if (filters.barcode)     q = q.where('barcode', '==', filters.barcode);
     if (filters.clientPhone) q = q.where('clientPhone', '==', filters.clientPhone);
 
@@ -153,11 +150,11 @@ export class ShipmentService {
 
       const current = snap.data();
       const history = (current.history || []).slice(-30); // garde les 30 derniers
-      const entry: ShipmentHistoryEntry = { 
-        at: now, 
-        status 
+      const entry: ShipmentHistoryEntry = {
+        at: now,
+        status
       };
-      
+
       // Only add optional fields if they have truthy values
       if (opts?.by?.trim()) {
         entry.by = opts.by.trim();
@@ -165,14 +162,14 @@ export class ShipmentService {
       if (opts?.note?.trim()) {
         entry.note = opts.note.trim();
       }
-      
+
       history.push(entry);
 
       // Build update object without undefined values
-      const updateData: any = { 
-        status, 
-        updatedAt: now, 
-        history 
+      const updateData: any = {
+        status,
+        updatedAt: now,
+        history
       };
 
       tx.update(ref, updateData);
@@ -183,38 +180,10 @@ export class ShipmentService {
     return this.update(id, { assignedTo: driverId, status: 'assigned' });
   }
 
-  async assignToBatch(id: string, batchId: string) {
-    const ref = this.col.doc(id).ref;
-    const now = new Date();
-    await this.afs.firestore.runTransaction(async tx => {
-      const snap = await tx.get(ref);
-      if (!snap.exists) throw new Error('Colis introuvable');
-
-      const current = snap.data();
-      const history = (current.history || []).slice(-30);
-      history.push({ at: now, status: current.status, note: `Affecté au lot ${batchId}` });
-
-      tx.update(ref, { batchId, updatedAt: now, history });
-    });
-  }
-
-  async unassignFromBatch(id: string) {
-    const ref = this.col.doc(id).ref;
-    const now = new Date();
-    await this.afs.firestore.runTransaction(async tx => {
-      const snap = await tx.get(ref);
-      if (!snap.exists) throw new Error('Colis introuvable');
-      const current = snap.data();
-      const history = (current.history || []).slice(-30);
-      history.push({ at: now, status: current.status, note: 'Retiré du lot' });
-      tx.update(ref, { batchId: null, updatedAt: now, history });
-    });
-  }
-
   /**
-   * Affectation en masse à un lot (chunk 500 écritures)
+   * Affectation en masse à un livreur (chunk 500 écritures)
    */
-  async bulkAssignToBatch(shipmentIds: string[], batchId: string) {
+  async bulkAssignToDriver(shipmentIds: string[], driverId: string) {
     const chunks: string[][] = [];
     for (let i = 0; i < shipmentIds.length; i += 450) chunks.push(shipmentIds.slice(i, i + 450));
 
@@ -223,7 +192,7 @@ export class ShipmentService {
       const wb = this.afs.firestore.batch();
       for (const id of c) {
         const ref = this.col.doc(id).ref;
-        wb.update(ref, { batchId, updatedAt: now });
+        wb.update(ref, { assignedTo: driverId, updatedAt: now });
       }
       await wb.commit();
     }

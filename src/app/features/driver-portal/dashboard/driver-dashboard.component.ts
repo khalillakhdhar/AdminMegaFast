@@ -3,13 +3,35 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import {
+  ApexChart,
+  ApexNonAxisChartSeries,
+  ApexLegend,
+  ApexTooltip,
+  ApexDataLabels,
+  ApexResponsive,
+  ApexPlotOptions
+} from 'ng-apexcharts';
 
 import { DriverService, DriverDashboardData } from '../../../core/services/driver-portal.service';
+
+export interface ChartOptions {
+  series: ApexNonAxisChartSeries;
+  chart: ApexChart;
+  labels: string[];
+  colors: string[];
+  legend: ApexLegend;
+  tooltip: ApexTooltip;
+  dataLabels: ApexDataLabels;
+  responsive: ApexResponsive[];
+  plotOptions: ApexPlotOptions;
+}
 
 @Component({
   selector: 'app-driver-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgApexchartsModule],
   template: `
     <div class="driver-dashboard">
       <!-- Page Header -->
@@ -101,21 +123,55 @@ import { DriverService, DriverDashboardData } from '../../../core/services/drive
               </span>
             </div>
           </div>
-
-          <div class="stat-card batches">
-            <div class="stat-icon">
-              <i class="fas fa-layer-group"></i>
-            </div>
-            <div class="stat-content">
-              <h3>{{ dashboardData.stats.activeBatches }}</h3>
-              <p>Lots actifs</p>
-              <span class="stat-action">{{ dashboardData.stats.totalBatches }} total</span>
-            </div>
-          </div>
         </div>
 
         <!-- Main Content Grid -->
         <div class="content-grid">
+          <!-- Analytics Charts -->
+          <div class="content-card analytics-charts">
+            <div class="card-header">
+              <h2>
+                <i class="fas fa-chart-pie"></i>
+                Analyse des livraisons
+              </h2>
+            </div>
+            <div class="card-content">
+              <div class="charts-grid">
+                <!-- Delivery Status Distribution -->
+                <div class="chart-container">
+                  <h3>Répartition des statuts</h3>
+                  <apx-chart
+                    [series]="statusChartOptions.series"
+                    [chart]="statusChartOptions.chart"
+                    [labels]="statusChartOptions.labels"
+                    [colors]="statusChartOptions.colors"
+                    [legend]="statusChartOptions.legend"
+                    [tooltip]="statusChartOptions.tooltip"
+                    [dataLabels]="statusChartOptions.dataLabels"
+                    [responsive]="statusChartOptions.responsive"
+                    [plotOptions]="statusChartOptions.plotOptions">
+                  </apx-chart>
+                </div>
+
+                <!-- Failure Reasons Distribution -->
+                <div class="chart-container">
+                  <h3>Motifs d'échecs</h3>
+                  <apx-chart
+                    [series]="failureChartOptions.series"
+                    [chart]="failureChartOptions.chart"
+                    [labels]="failureChartOptions.labels"
+                    [colors]="failureChartOptions.colors"
+                    [legend]="failureChartOptions.legend"
+                    [tooltip]="failureChartOptions.tooltip"
+                    [dataLabels]="failureChartOptions.dataLabels"
+                    [responsive]="failureChartOptions.responsive"
+                    [plotOptions]="failureChartOptions.plotOptions">
+                  </apx-chart>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Today's Deliveries -->
           <div class="content-card today-deliveries">
             <div class="card-header">
@@ -180,46 +236,6 @@ import { DriverService, DriverDashboardData } from '../../../core/services/drive
                 <div class="empty-state">
                   <i class="fas fa-box-open"></i>
                   <p>Aucun colis assigné</p>
-                </div>
-              </ng-template>
-            </div>
-          </div>
-
-          <!-- Active Batches -->
-          <div class="content-card active-batches">
-            <div class="card-header">
-              <h2>
-                <i class="fas fa-layer-group"></i>
-                Lots actifs
-              </h2>
-              <button class="view-all-btn" (click)="navigateToBatches()">
-                Gérer
-              </button>
-            </div>
-            <div class="card-content">
-              <div class="batch-list" *ngIf="dashboardData.activeBatches.length > 0; else noBatches">
-                <div class="batch-item" *ngFor="let batch of dashboardData.activeBatches">
-                  <div class="batch-info">
-                    <span class="batch-name">{{ batch.name }}</span>
-                    <span class="batch-count">{{ batch.shipmentsCount }} colis</span>
-                    <span class="batch-date">{{ formatDate(batch.createdAt) }}</span>
-                  </div>
-                  <div class="batch-actions">
-                    <button class="action-btn start" *ngIf="batch.status === 'active'" type="button">
-                      <i class="fas fa-play"></i>
-                      Commencer
-                    </button>
-                    <button class="action-btn continue" *ngIf="batch.status === 'in_progress'" type="button">
-                      <i class="fas fa-route"></i>
-                      Continuer
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <ng-template #noBatches>
-                <div class="empty-state">
-                  <i class="fas fa-layer-group"></i>
-                  <p>Aucun lot actif</p>
                 </div>
               </ng-template>
             </div>
@@ -293,6 +309,124 @@ export class DriverDashboardComponent implements OnInit, OnDestroy {
   dashboardData: DriverDashboardData | null = null;
   isLoading = true;
 
+  // Chart options for delivery status distribution
+  statusChartOptions: ChartOptions = {
+    series: [],
+    chart: {
+      type: 'pie',
+      height: 300,
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800
+      }
+    },
+    labels: [],
+    colors: ['#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6c757d'],
+    legend: {
+      position: 'bottom',
+      horizontalAlign: 'center',
+      fontSize: '12px',
+      markers: {
+        strokeWidth: 0
+      }
+    },
+    tooltip: {
+      style: {
+        fontSize: '12px'
+      },
+      y: {
+        formatter: (val: number) => `${val} colis`
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => `${val.toFixed(1)}%`,
+      style: {
+        fontSize: '11px',
+        fontWeight: 'bold'
+      }
+    },
+    responsive: [{
+      breakpoint: 768,
+      options: {
+        chart: {
+          height: 250
+        },
+        legend: {
+          fontSize: '10px'
+        }
+      }
+    }],
+    plotOptions: {
+      pie: {
+        expandOnClick: true,
+        donut: {
+          size: '0%'
+        }
+      }
+    }
+  };
+
+  // Chart options for failure reasons distribution
+  failureChartOptions: ChartOptions = {
+    series: [],
+    chart: {
+      type: 'pie',
+      height: 300,
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800
+      }
+    },
+    labels: [],
+    colors: ['#dc3545', '#fd7e14', '#ffc107', '#6f42c1', '#e83e8c', '#20c997'],
+    legend: {
+      position: 'bottom',
+      horizontalAlign: 'center',
+      fontSize: '12px',
+      markers: {
+        strokeWidth: 0
+      }
+    },
+    tooltip: {
+      style: {
+        fontSize: '12px'
+      },
+      y: {
+        formatter: (val: number) => `${val} échecs`
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => `${val.toFixed(1)}%`,
+      style: {
+        fontSize: '11px',
+        fontWeight: 'bold'
+      }
+    },
+    responsive: [{
+      breakpoint: 768,
+      options: {
+        chart: {
+          height: 250
+        },
+        legend: {
+          fontSize: '10px'
+        }
+      }
+    }],
+    plotOptions: {
+      pie: {
+        expandOnClick: true,
+        donut: {
+          size: '0%'
+        }
+      }
+    }
+  };
+
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -317,6 +451,7 @@ export class DriverDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.dashboardData = data;
+          this.updateChartData();
           this.isLoading = false;
         },
         error: (error) => {
@@ -324,6 +459,55 @@ export class DriverDashboardComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       });
+  }
+
+  private updateChartData(): void {
+    if (!this.dashboardData) return;
+
+    // Update delivery status chart
+    this.updateDeliveryStatusChart();
+
+    // Update failure reasons chart
+    this.updateFailureReasonsChart();
+  }
+
+  private updateDeliveryStatusChart(): void {
+    if (!this.dashboardData) return;
+
+    const stats = this.dashboardData.stats;
+    const data = [
+      { label: 'Livrés', value: stats.deliveredShipments, color: '#28a745' },
+      { label: 'En transit', value: stats.inTransitShipments, color: '#17a2b8' },
+      { label: 'En attente', value: stats.pendingShipments, color: '#ffc107' },
+      { label: 'Retournés', value: stats.returnedShipments || 0, color: '#dc3545' },
+      { label: 'Autres', value: Math.max(0, stats.totalShipments - stats.deliveredShipments - stats.inTransitShipments - stats.pendingShipments - (stats.returnedShipments || 0)), color: '#6c757d' }
+    ].filter(item => item.value > 0);
+
+    this.statusChartOptions = {
+      ...this.statusChartOptions,
+      series: data.map(item => item.value),
+      labels: data.map(item => item.label),
+      colors: data.map(item => item.color)
+    };
+  }
+
+  private updateFailureReasonsChart(): void {
+    // Données d'exemple pour les motifs d'échecs (en production, ces données viendraient du service)
+    const failureData = [
+      { label: 'Destinataire absent', value: 12, color: '#dc3545' },
+      { label: 'Adresse incorrecte', value: 8, color: '#fd7e14' },
+      { label: 'Refus de livraison', value: 5, color: '#ffc107' },
+      { label: 'Colis endommagé', value: 3, color: '#6f42c1' },
+      { label: 'Accès difficile', value: 4, color: '#e83e8c' },
+      { label: 'Autres', value: 2, color: '#20c997' }
+    ].filter(item => item.value > 0);
+
+    this.failureChartOptions = {
+      ...this.failureChartOptions,
+      series: failureData.map(item => item.value),
+      labels: failureData.map(item => item.label),
+      colors: failureData.map(item => item.color)
+    };
   }
 
   formatCurrency(amount: number): string {
@@ -373,10 +557,6 @@ export class DriverDashboardComponent implements OnInit, OnDestroy {
 
   navigateToShipments(): void {
     this.router.navigate(['/driver/shipments']);
-  }
-
-  navigateToBatches(): void {
-    this.router.navigate(['/driver/batches']);
   }
 
   navigateToRoutes(): void {

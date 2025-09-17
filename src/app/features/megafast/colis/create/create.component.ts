@@ -1,19 +1,17 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { PageTitleComponent } from '../../../../shared/ui/pagetitle/pagetitle.component';
 import { TUNISIA_CITIES } from '../../../../shared/data/tunisia-cities';
 import { ShipmentService } from '../../../../core/services/shipment.service';
-import { BatchService } from '../../../../core/services/batch.service';
 import { DriverService } from '../../../../core/services/driver.service';
 import { ClientService } from '../../../../core/services/client.service';
 import { TunisiaLocationsService, TunisianGovernorate, TunisianDelegation } from '../../../../core/services/tunisia-locations.service';
 import { Shipment } from '../../../../core/models/shipment.model';
-import { Batch } from '../../../../core/models/batch.model';
 import { Driver } from '../../../../core/models/driver.model';
 import { Client } from '../../../../core/models/client.model';
 import { Recipient, RecipientFormData } from '../../../../core/models/recipient.model';
@@ -52,7 +50,6 @@ export class CreateComponent implements OnInit, OnDestroy {
 
   // Data
   drivers: Driver[] = [];
-  batches: Batch[] = [];
   clients: Client[] = [];
   selectedClient: Client | null = null;
 
@@ -80,14 +77,19 @@ export class CreateComponent implements OnInit, OnDestroy {
   // Services injectés
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly toastr = inject(ToastrService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly shipmentService = inject(ShipmentService);
-  private readonly batchService = inject(BatchService);
   private readonly driverService = inject(DriverService);
   private readonly clientService = inject(ClientService);
   private readonly tunisiaService = inject(TunisiaLocationsService);
   private readonly printService = inject(ShipmentPrintService);
+
+  // Edition properties
+  isEditMode = false;
+  shipmentId: string | null = null;
+  originalShipment: Shipment | null = null;
 
   constructor() {
     this.form = this.fb.group({
@@ -119,34 +121,36 @@ export class CreateComponent implements OnInit, OnDestroy {
       // Step 3: Produits
       items: this.fb.array([this.newItem()]),
 
-      // Step 4: Livraison & Frais
+      // Step 4: Livraison & Frais + Livreur
       notes: [''],
       paymentMode: ['cod', Validators.required],
-      amount: [0, [Validators.min(0)]],
       weight: [0, [Validators.min(0)]],
 
       // Frais de livraison saisis (un seul montant)
-      deliveryFee: [0, [Validators.min(0)]],
+      deliveryFee: [0, [Validators.required, Validators.min(0)]],
       includeFeeInTotal: [true], // Option pour inclure/exclure les frais du total
 
-      // Step 5: Lot & Livreur
-      batchMode: ['none'], // 'none' | 'existing' | 'create'
-      batchId: [''],
-      batchCode: [''],
+      // Livreur assigné (optionnel)
       driverId: [''],
     });
   }
 
   ngOnInit(): void {
+    // Check edit mode
+    this.shipmentId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.shipmentId;
+
+    if (this.isEditMode) {
+      this.breadCrumbItems = [
+        { label: 'Colis', link: '/megafast/colis' },
+        { label: 'Modifier', active: true },
+      ];
+    }
+
     // Load data
     this.sub = new Subscription();
     this.sub.add(this.driverService.getAll().subscribe(ds => {
       this.drivers = ds || [];
-      this.cdr.markForCheck();
-    }));
-
-    this.sub.add(this.batchService.getAll().subscribe(bs => {
-      this.batches = bs || [];
       this.cdr.markForCheck();
     }));
 
@@ -203,6 +207,11 @@ export class CreateComponent implements OnInit, OnDestroy {
       }));
     }
 
+    // Load existing shipment data if edit mode
+    if (this.isEditMode && this.shipmentId) {
+      this.loadShipmentForEdit(this.shipmentId);
+    }
+
     // Initial compute
     this.computeDerived();
   }
@@ -225,8 +234,74 @@ export class CreateComponent implements OnInit, OnDestroy {
     });
   }
 
-  addItem() { this.items.push(this.newItem()); this.computeDerived(); }
-  removeItem(i: number) { if (this.items.length > 1) { this.items.removeAt(i); this.computeDerived(); } }
+  addItem() {
+    this.items.push(this.newItem());
+    this.computeDerived();
+    // Mark new item as touched to show validation immediately if empty
+    const newItemIndex = this.items.length - 1;
+    setTimeout(() => this.markItemAsTouched(newItemIndex), 100);
+  }
+
+  removeItem(i: number) {
+    if (this.items.length > 1) {
+      this.items.removeAt(i);
+      this.computeDerived();
+    }
+  }
+
+  // Validate specific item field
+  validateItemField(itemIndex: number, fieldName: string): void {
+    const item = this.items.at(itemIndex);
+    if (item) {
+      const field = item.get(fieldName);
+      if (field) {
+        field.markAsTouched();
+        field.updateValueAndValidity();
+        this.cdr.markForCheck();
+      }
+    }
+  }
+
+  // Mark all fields of an item as touched
+  markItemAsTouched(itemIndex: number): void {
+    const item = this.items.at(itemIndex);
+    if (item) {
+      Object.keys(item.controls).forEach(key => {
+        item.get(key)?.markAsTouched();
+      });
+      this.cdr.markForCheck();
+    }
+  }
+
+  // Check if there are errors in items
+  hasItemsErrors(): boolean {
+    return this.items.controls.some(item =>
+      item.invalid && (item.touched || item.dirty)
+    );
+  }
+
+  // Get detailed error messages for items
+  getItemsErrorMessages(): string[] {
+    const errors: string[] = [];
+    this.items.controls.forEach((item, index) => {
+      if (item.invalid && (item.touched || item.dirty)) {
+        const itemNumber = index + 1;
+        if (item.get('name')?.errors) {
+          errors.push(`Produit ${itemNumber} : Le nom est requis`);
+        }
+        if (item.get('qty')?.errors) {
+          errors.push(`Produit ${itemNumber} : La quantité doit être au moins 1`);
+        }
+        if (item.get('unitPrice')?.errors) {
+          errors.push(`Produit ${itemNumber} : Le prix doit être supérieur ou égal à 0`);
+        }
+        if (item.get('unitWeight')?.errors) {
+          errors.push(`Produit ${itemNumber} : Le poids doit être supérieur ou égal à 0`);
+        }
+      }
+    });
+    return errors;
+  }
 
   // -- Client selection
   onClientModeChange(mode: 'existing' | 'new') {
@@ -357,11 +432,14 @@ export class CreateComponent implements OnInit, OnDestroy {
   private computeDerived() {
     this.subtotal = this.calcSubtotal();
     const autoWeight = this.calcWeightFromItems();
-    // If user hasn't overridden weight (0), use auto
+
+    // Only update weight if user hasn't manually set it (avoid conflicts with validation)
     const weightCtrl = this.form.get('weight');
-    if (weightCtrl && !weightCtrl.value) {
+    if (weightCtrl && (weightCtrl.value === 0 || weightCtrl.value === null)) {
+      // Don't emit events to avoid triggering validation loops
       weightCtrl.setValue(autoWeight, { emitEvent: false });
     }
+
     this.totalQty = this.calcTotalQty();
 
     const fee = Number(this.form.get('deliveryFee')?.value || 0);
@@ -404,10 +482,86 @@ export class CreateComponent implements OnInit, OnDestroy {
   // removed fee breakdown: single deliveryFee is entered by user
 
   // -- Wizard navigation
-  next() { if (this.step < 5) this.step++; }
+  next() {
+    if (this.canProceedToNextStep()) {
+      if (this.step < 6) this.step++;
+    } else {
+      this.markFormGroupTouched();
+
+      // Show specific error message for products step
+      if (this.step === 3) {
+        const itemsErrors = this.getItemsErrorMessages();
+        if (itemsErrors.length > 0) {
+          this.toastr.warning('Veuillez corriger les erreurs dans les produits', 'Erreurs de validation');
+        } else {
+          this.toastr.warning('Veuillez ajouter au moins un produit valide');
+        }
+      } else {
+        this.toastr.warning('Veuillez corriger les erreurs avant de continuer');
+      }
+    }
+  }
   prev() { if (this.step > 1) this.step--; }
   goToStep(stepNumber: number) {
     this.step = stepNumber;
+  }
+
+  // Check if can proceed to next step
+  canProceedToNextStep(): boolean {
+    switch (this.step) {
+      case 1:
+        return this.form.get('clientName')?.valid &&
+               this.form.get('clientPhone')?.valid &&
+               this.form.get('pickupAddress')?.valid &&
+               this.form.get('pickupGovernorate')?.valid;
+      case 2:
+        return this.form.get('recipientName')?.valid &&
+               this.form.get('recipientPhone')?.valid &&
+               this.form.get('recipientAddressLine1')?.valid &&
+               this.form.get('recipientGovernorate')?.valid;
+      case 3:
+        // Force validation of all items
+        this.items.controls.forEach((item, index) => {
+          this.markItemAsTouched(index);
+        });
+        // Check if we have at least one item and all items are valid
+        const hasValidItems = this.items.length > 0 && this.items.valid;
+        return hasValidItems;
+      case 4:
+        const weightValid = this.form.get('weight')?.valid !== false;
+        const deliveryFeeValid = this.form.get('deliveryFee')?.valid;
+        return weightValid && deliveryFeeValid;
+      case 5:
+        return true; // No required fields in step 5
+      default:
+        return true;
+    }
+  }
+
+  // Mark all form controls as touched to show validation errors
+  markFormGroupTouched(): void {
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control) {
+        control.markAsTouched();
+        if (control instanceof FormArray) {
+          control.controls.forEach((c, index) => {
+            if (c instanceof FormGroup) {
+              Object.keys(c.controls).forEach(subKey => {
+                c.get(subKey)?.markAsTouched();
+              });
+            }
+          });
+        }
+      }
+    });
+
+    // Force validation display for all items
+    this.items.controls.forEach((item, index) => {
+      this.markItemAsTouched(index);
+    });
+
+    this.cdr.markForCheck();
   }
 
   // Helper methods for template
@@ -426,6 +580,46 @@ export class CreateComponent implements OnInit, OnDestroy {
     return delegation ? delegation.name : '';
   }
 
+  // Debug method to identify invalid fields
+  debugFormValidation(): string[] {
+    const invalidFields: string[] = [];
+
+    console.log('=== FORM VALIDATION DEBUG ===');
+    console.log('Form valid:', this.form.valid);
+    console.log('Form status:', this.form.status);
+
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control && control.invalid) {
+        console.log(`❌ ${key}:`, control.errors, 'Value:', control.value);
+        invalidFields.push(`${key} (${Object.keys(control.errors || {}).join(', ')})`);
+      } else if (control && control.valid) {
+        console.log(`✅ ${key}: valid`);
+      }
+    });
+
+    // Check items array specifically
+    console.log('Items array length:', this.items.length);
+    console.log('Items array valid:', this.items.valid);
+    this.items.controls.forEach((item, index) => {
+      if (item.invalid) {
+        console.log(`❌ Item ${index}:`, item.errors);
+        Object.keys(item.controls).forEach(fieldKey => {
+          const field = item.get(fieldKey);
+          if (field && field.invalid) {
+            console.log(`  ❌ ${fieldKey}:`, field.errors, 'Value:', field.value);
+            invalidFields.push(`Item ${index} ${fieldKey} (${Object.keys(field.errors || {}).join(', ')})`);
+          }
+        });
+      } else {
+        console.log(`✅ Item ${index}: valid`);
+      }
+    });
+
+    console.log('=== END DEBUG ===');
+    return invalidFields;
+  }
+
   // -- Submit
   private buildPayload() {
     const v = this.form.getRawValue();
@@ -439,7 +633,6 @@ export class CreateComponent implements OnInit, OnDestroy {
       barcode,
       status: 'created',
       paymentMode: v.paymentMode,
-      amount: Number(v.amount) || 0,
       weight: Number(v.weight) || 0,
       notes,
     } as Shipment;
@@ -473,66 +666,14 @@ export class CreateComponent implements OnInit, OnDestroy {
     return { payload, v };
   }
 
-  private async handleBatchAndDriver(newId: string, v: any): Promise<string | undefined> {
-    if (v.batchMode === 'existing' && v.batchId) {
-      await this.shipmentService.assignToBatch(newId, v.batchId);
-      if (v.driverId) {
-        const batchSnapSub = this.batchService.getById(v.batchId).pipe(take(1)).subscribe(async (b) => {
-          try {
-            if (b && !b.assignedTo) {
-              await this.batchService.update(v.batchId, { assignedTo: v.driverId });
-            }
-            await this.batchService.recomputeStats(v.batchId);
-          } catch {}
-        });
-        this.sub?.add(batchSnapSub);
-      } else {
-        await this.batchService.recomputeStats(v.batchId);
-      }
-      return v.batchId;
-    } else if (v.batchMode === 'create') {
-      const batchData: Partial<Batch> = {
-        code: v.batchCode || undefined,
-        assignedTo: v.driverId || '',
-        shipmentIds: [newId],
-        status: 'planned',
-        createdAt: new Date(),
-      } as any;
-      const bref = await this.batchService.create(batchData as Batch);
-      const batchId = bref.id;
-      await this.shipmentService.assignToBatch(newId, batchId);
-      await this.batchService.recomputeStats(batchId);
-      return batchId;
-    } else {
-      // Mode 'none' - Cr\u00e9ation automatique du batch quotidien
-      try {
-        const dailyBatchId = await this.batchService.findOrCreateDailyBatch();
-        await this.shipmentService.assignToBatch(newId, dailyBatchId);
-
-        // Assigner le livreur au batch si sp\u00e9cifi\u00e9
-        if (v.driverId) {
-          const batchSnapSub = this.batchService.getById(dailyBatchId).pipe(take(1)).subscribe(async (b) => {
-            try {
-              if (b && !b.assignedTo) {
-                await this.batchService.update(dailyBatchId, { assignedTo: v.driverId });
-              }
-              await this.batchService.recomputeStats(dailyBatchId);
-            } catch {}
-          });
-          this.sub?.add(batchSnapSub);
-        } else {
-          await this.batchService.recomputeStats(dailyBatchId);
-        }
-        return dailyBatchId;
-      } catch (error) {
-        console.error('Erreur lors de la cr\u00e9ation du batch quotidien:', error);
-        // Si erreur, continuer sans batch (comportement d'origine)
-        return undefined;
-      }
+  private async handleDriverAssignment(newId: string, v: any): Promise<void> {
+    // Simple assignation directe au livreur si spécifié
+    if (v.driverId) {
+      await this.shipmentService.assignToDriver(newId, v.driverId);
     }
   }
 
-  private async maybePrint(print: boolean, newId: string, payload: Shipment, driverId?: string, batchId?: string) {
+  private async maybePrint(print: boolean, newId: string, payload: Shipment, driverId?: string) {
     if (!print) return;
     const createdShipment: Shipment = { id: newId, ...payload };
     let driverMin: DriverMin | undefined;
@@ -541,20 +682,11 @@ export class CreateComponent implements OnInit, OnDestroy {
       if (d) driverMin = { id: d.id, name: d.displayName || d.name, phone: d.phone, vehicle: d.vehicle };
     }
 
-    // Ajouter une note pour indiquer si le colis fait partie d'un batch
-    if (batchId) {
-      const batch = this.batches.find(b => b.id === batchId);
-      const batchInfo = batch ? `Lot: ${batch.code}` : `Lot: ${batchId}`;
-      createdShipment.notes = createdShipment.notes
-        ? `${createdShipment.notes}\n\n${batchInfo}`
-        : batchInfo;
-    } else {
-      // Pas de batch - ajouter une note pour indiquer l'impression détaillée
-      const detailNote = "Impression détaillée avec produits (aucun lot assigné)";
-      createdShipment.notes = createdShipment.notes
-        ? `${createdShipment.notes}\n\n${detailNote}`
-        : detailNote;
-    }
+    // Note pour impression directe sans lot
+    const detailNote = "Impression détaillée - assigné directement au livreur";
+    createdShipment.notes = createdShipment.notes
+      ? `${createdShipment.notes}\n\n${detailNote}`
+      : detailNote;
 
     try {
       await this.printService.generateShipmentPdf(createdShipment, undefined, driverMin);
@@ -563,16 +695,265 @@ export class CreateComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Load shipment data for editing
+  async loadShipmentForEdit(shipmentId: string): Promise<void> {
+    try {
+      const shipment = await this.shipmentService.getById(shipmentId).pipe(take(1)).toPromise();
+      if (!shipment) {
+        this.toastr.error('Colis introuvable');
+        this.router.navigate(['/megafast/colis']);
+        return;
+      }
+
+      this.originalShipment = shipment;
+      this.populateFormWithShipment(shipment);
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading shipment:', error);
+      this.toastr.error('Erreur lors du chargement du colis');
+    }
+  }
+
+  // Populate form with existing shipment data
+  private populateFormWithShipment(shipment: Shipment): void {
+    // Parse metadata
+    let meta: any = {};
+    if (shipment.notes?.includes('META:')) {
+      try {
+        const metaStart = shipment.notes.indexOf('META:') + 5;
+        const metaString = shipment.notes.substring(metaStart);
+        meta = JSON.parse(metaString);
+      } catch (e) {
+        console.warn('Failed to parse meta:', e);
+      }
+    }
+
+    // Client info
+    this.form.patchValue({
+      clientMode: shipment.clientId ? 'existing' : 'new',
+      clientId: shipment.clientId || '',
+      clientName: shipment.clientName || '',
+      clientPhone: shipment.clientPhone || '',
+      clientEmail: shipment.clientEmail || '',
+
+      // Pickup address
+      pickupAddress: shipment.pickupAddress || '',
+      pickupGovernorate: shipment.pickupCity || '',
+      pickupDelegation: shipment.pickupDelegation || '',
+
+      // Recipient
+      recipientName: shipment.clientName || '',
+      recipientPhone: shipment.clientPhone || '',
+      recipientEmail: shipment.clientEmail || '',
+      recipientAddressLine1: shipment.address || '',
+      recipientGovernorate: shipment.city || '',
+      recipientDelegation: shipment.delegation || '',
+
+      // Shipment details
+      notes: this.extractUserNotes(shipment.notes || ''),
+      paymentMode: shipment.paymentMode || 'cod',
+      weight: shipment.weight || 0,
+
+      // Driver assignment (direct assignment without batch)
+      driverId: shipment.assignedTo || '',
+    });
+
+    // Set items
+    if (meta.items && meta.items.length > 0) {
+      const itemsArray = this.form.get('items') as FormArray;
+      itemsArray.clear();
+      meta.items.forEach((item: any) => {
+        itemsArray.push(this.fb.group({
+          name: [item.name || item.description || '', Validators.required],
+          qty: [item.qty || item.quantity || 1, [Validators.required, Validators.min(1)]],
+          unitPrice: [item.unitPrice || 0, [Validators.required, Validators.min(0)]],
+          unitWeight: [item.unitWeight || 0, [Validators.required, Validators.min(0)]]
+        }));
+      });
+    }
+
+    // Set delivery fee and metadata
+    if (meta.fees) {
+      this.form.patchValue({
+        deliveryFee: meta.fees.feeTotal || 0,
+        includeFeeInTotal: meta.grandTotal === (this.subtotal + (meta.fees.feeTotal || 0))
+      });
+    }
+
+    // Recompute derived values
+    this.computeDerived();
+  }
+
+  // Extract user notes (removing META part)
+  private extractUserNotes(notes: string): string {
+    const metaIndex = notes.indexOf('META:');
+    if (metaIndex > 0) {
+      return notes.substring(0, metaIndex).trim();
+    }
+    return metaIndex === 0 ? '' : notes;
+  }
+
   async submit(print = false) {
+    // Check specific validation issues
+    if (this.saving) return;
+
+    // Force validation of all form fields
+    this.markFormGroupTouched();
+
+    if (this.form.invalid) {
+      // Debug: identify exact invalid fields
+      const invalidFields = this.debugFormValidation();
+
+      // Provide specific error messages
+      const errors: string[] = [];
+
+      // Check items first (most common issue)
+      if (this.items.invalid || this.items.length === 0) {
+        if (this.items.length === 0) {
+          errors.push('Au moins un produit est requis');
+        } else {
+          const itemErrors = this.getItemsErrorMessages();
+          if (itemErrors.length > 0) {
+            errors.push(...itemErrors);
+          }
+        }
+      }
+
+      // Check required client info
+      if (this.form.get('clientName')?.invalid) {
+        errors.push('Le nom du client est requis');
+      }
+      if (this.form.get('clientPhone')?.invalid) {
+        errors.push('Le téléphone du client est requis');
+      }
+
+      // Check pickup address
+      if (this.form.get('pickupAddress')?.invalid) {
+        errors.push('L\'adresse de récupération est requise');
+      }
+      if (this.form.get('pickupGovernorate')?.invalid) {
+        errors.push('Le gouvernorat de récupération est requis');
+      }
+
+      // Check recipient info
+      if (this.form.get('recipientName')?.invalid) {
+        errors.push('Le nom du destinataire est requis');
+      }
+      if (this.form.get('recipientPhone')?.invalid) {
+        errors.push('Le téléphone du destinataire est requis');
+      }
+      if (this.form.get('recipientAddressLine1')?.invalid) {
+        errors.push('L\'adresse du destinataire est requise');
+      }
+      if (this.form.get('recipientGovernorate')?.invalid) {
+        errors.push('Le gouvernorat du destinataire est requis');
+      }
+
+      // Check weight
+      if (this.form.get('weight')?.invalid) {
+        errors.push('Le poids total est invalide');
+      }
+
+      // Check delivery fee
+      if (this.form.get('deliveryFee')?.invalid) {
+        errors.push('Les frais de livraison sont requis');
+      }
+
+      // Show specific errors
+      if (errors.length > 0) {
+        this.toastr.error(errors.join(' • '), 'Formulaire invalide');
+      } else {
+        // Show debug info if no specific errors found
+        this.toastr.error(`Champs invalides: ${invalidFields.join(', ')}`, 'Erreurs de validation détectées');
+      }
+      return;
+    }
+
+    this.saving = true;
+    this.cdr.markForCheck();
+
+    try {
+      if (this.isEditMode && this.shipmentId) {
+        await this.updateShipment(print);
+      } else {
+        await this.createShipment(print);
+      }
+    } catch (e) {
+      console.error('submit failed', e);
+      this.toastr.error('Erreur lors de l\'enregistrement');
+    } finally {
+      this.saving = false; this.cdr.markForCheck();
+    }
+  }
+
+  // Create new shipment
+  private async createShipment(print = false) {
+    const { payload, v } = this.buildPayload();
+    const ref = await this.shipmentService.create(payload);
+    const newId = ref.id;
+
+    // Assigner directement au livreur si spécifié
+    if (v.driverId) {
+      await this.shipmentService.assignToDriver(newId, v.driverId);
+    }
+
+    this.toastr.success('Colis créé');
+    await this.maybePrint(print, newId, payload, v.driverId);
+    await this.router.navigate(['/megafast/colis']);
+  }
+
+  // Update existing shipment
+  private async updateShipment(print = false) {
+    if (!this.shipmentId) return;
+
+    const { payload, v } = this.buildPayload();
+
+    // Update the shipment
+    await this.shipmentService.update(this.shipmentId, payload);
+
+    // Handle direct driver assignment changes
+    const currentDriver = this.originalShipment?.assignedTo;
+    const newDriver = v.driverId;
+
+    if (currentDriver !== newDriver) {
+      if (newDriver) {
+        await this.shipmentService.assignToDriver(this.shipmentId, newDriver);
+      }
+    }
+
+    this.toastr.success('Colis modifié');
+
+    if (print) {
+      try {
+        const driverMin: DriverMin | undefined = newDriver ?
+          { id: newDriver, name: this.drivers.find(d => d.id === newDriver)?.name || '' } :
+          undefined;
+        const updatedPayload = { ...payload, id: this.shipmentId };
+        await this.printService.generateShipmentPdf(updatedPayload as Shipment, undefined, driverMin);
+      } catch (error) {
+        console.error('Erreur lors de l\'impression:', error);
+      }
+    }
+
+    await this.router.navigate(['/megafast/colis']);
+  }
+
+  // Legacy method for backward compatibility (kept for now)
+  async submitLegacy(print = false) {
     if (this.form.invalid || this.saving) { this.toastr.error('Formulaire invalide'); return; }
     this.saving = true; this.cdr.markForCheck();
     try {
       const { payload, v } = this.buildPayload();
       const ref = await this.shipmentService.create(payload);
       const newId = ref.id;
-      const batchId = await this.handleBatchAndDriver(newId, v);
+
+      // Assigner directement au livreur si spécifié
+      if (v.driverId) {
+        await this.shipmentService.assignToDriver(newId, v.driverId);
+      }
+
       this.toastr.success('Colis créé');
-      await this.maybePrint(print, newId, payload, v.driverId, batchId);
+      await this.maybePrint(print, newId, payload, v.driverId);
       await this.router.navigate(['/megafast/colis']);
     } catch (e) {
       console.error('create shipment failed', e);

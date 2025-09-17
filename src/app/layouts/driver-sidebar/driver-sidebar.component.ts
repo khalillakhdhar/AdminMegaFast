@@ -124,13 +124,6 @@ export class DriverSidebarComponent implements OnInit {
       isActive: false
     },
     {
-      icon: 'fas fa-layer-group',
-      label: 'Mes Lots',
-      route: '/driver/batches',
-      badge: 0,
-      isActive: false
-    },
-    {
       icon: 'fas fa-route',
       label: 'Itinéraires',
       route: '/driver/routes',

@@ -2,16 +2,19 @@ import { Component, OnInit, ChangeDetectorRef, OnDestroy, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { Subscription } from 'rxjs';
 
 import { ClientShipmentService } from '../../../../core/services/client-shipment.service';
 import { TunisiaLocationsService, TunisianGovernorate, TunisianDelegation } from '../../../../core/services/tunisia-locations.service';
+import { DriverService } from '../../../../core/services/driver.service';
 import { Shipment } from '../../../../core/models/shipment.model';
+import { Driver } from '../../../../core/models/driver.model';
 
 @Component({
   selector: 'app-shipments-create',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, NgSelectModule],
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
 })
@@ -38,6 +41,10 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
   selectedDeliveryGovernorate: TunisianGovernorate | null = null;
   deliveryDelegations: TunisianDelegation[] = [];
 
+  // Drivers selection
+  availableDrivers: Driver[] = [];
+  selectedDriver: Driver | null = null;
+
   // Derived values
   subtotal = 0;
   totalQty = 0;
@@ -51,10 +58,12 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private tunisiaService = inject(TunisiaLocationsService);
+  private driverService = inject(DriverService);
 
   ngOnInit(): void {
     this.initForm();
     this.loadTunisiaLocations();
+    this.loadDrivers();
     this.setupFormWatchers();
   }
 
@@ -90,7 +99,10 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
       amount: [0, [Validators.min(0)]],
       weight: [0, [Validators.min(0)]],
       deliveryFee: [0, [Validators.min(0)]],
-      includeFeeInTotal: [true]
+      includeFeeInTotal: [true],
+
+      // Optional driver selection
+      selectedDriverId: ['']
     });
   }
 
@@ -100,6 +112,21 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
     this.governorates = this.tunisiaService.getGovernorates();
     this.deliveryGovernorates = this.tunisiaService.getGovernorates();
     this.cdr.markForCheck();
+  }
+
+  private loadDrivers(): void {
+    // Charger tous les livreurs actifs
+    this.driverService.getAll().subscribe({
+      next: (drivers) => {
+        // Filtrer seulement les livreurs actifs
+        this.availableDrivers = drivers.filter(driver => driver.active);
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des livreurs:', error);
+        this.availableDrivers = [];
+      }
+    });
   }
 
   private setupFormWatchers(): void {
@@ -172,6 +199,10 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
     } else {
       this.deliveryDelegations = [];
     }
+  }
+
+  onDriverSelectionChange(driverId: string): void {
+    this.selectedDriver = this.availableDrivers.find(d => d.id === driverId) || null;
   }
 
   // Getters for template
@@ -261,6 +292,9 @@ export class ShipmentsCreateComponent implements OnInit, OnDestroy {
         // Payment
         paymentMode: formValue.paymentMode,
         amount: formValue.paymentMode === 'cod' ? formValue.amount : 0,
+
+        // Driver assignment (if selected)
+        assignedTo: formValue.selectedDriverId || undefined,
 
         // Status
         status: 'created'

@@ -307,6 +307,56 @@
               </div>
             </div>
 
+            <!-- Section optionnelle: Sélection du livreur -->
+            <div class="step-section mb-4">
+              <h5 class="text-primary mb-3">
+                <i class="mdi mdi-truck me-2"></i>
+                Livreur préféré (optionnel)
+              </h5>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="form-label">Choisir un livreur</label>
+                  <ng-select
+                    formControlName="selectedDriverId"
+                    (change)="onDriverSelectionChange($event)"
+                    placeholder="Sélectionner un livreur (optionnel)"
+                    [clearable]="true"
+                    bindLabel="displayName"
+                    bindValue="id">
+                    <ng-option *ngFor="let driver of availableDrivers" [value]="driver.id">
+                      <span class="fw-bold">{{ driver.displayName || driver.name }}</span>
+                      <small class="text-muted d-block">{{ driver.phone }}</small>
+                      <small class="text-muted" *ngIf="driver.zones?.length">
+                        Zones: {{ driver.zones.join(', ') }}
+                      </small>
+                    </ng-option>
+                  </ng-select>
+                  <small class="form-text text-muted">
+                    <i class="mdi mdi-information me-1"></i>
+                    Si aucun livreur n'est sélectionné, l'envoi sera assigné automatiquement.
+                  </small>
+                </div>
+                <div class="col-md-6" *ngIf="selectedDriver">
+                  <div class="card">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <i class="mdi mdi-account-circle me-1"></i>
+                        {{ selectedDriver.displayName || selectedDriver.name }}
+                      </h6>
+                      <p class="card-text">
+                        <strong>Téléphone:</strong> {{ selectedDriver.phone }}<br>
+                        <strong>Email:</strong> {{ selectedDriver.email }}<br>
+                        <span *ngIf="selectedDriver.zones?.length">
+                          <strong>Zones de livraison:</strong> {{ selectedDriver.zones.join(', ') }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Boutons d'action -->
             <div class="row">
               <div class="col-12">

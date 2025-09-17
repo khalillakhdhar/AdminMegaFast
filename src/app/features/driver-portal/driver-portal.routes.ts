@@ -15,10 +15,6 @@ export const DRIVER_PORTAL_ROUTES: Routes = [
     loadComponent: () => import('./shipments/driver-shipments.component').then(m => m.DriverShipmentsComponent)
   },
   {
-    path: 'batches',
-    loadComponent: () => import('./batches/driver-batches.component').then(m => m.DriverBatchesComponent)
-  },
-  {
     path: 'routes',
     loadComponent: () => import('./routes/driver-routes.component').then(m => m.DriverRoutesComponent)
   },

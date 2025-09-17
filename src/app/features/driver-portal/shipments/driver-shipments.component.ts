@@ -6,12 +6,14 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { DriverService, ShipmentFilters, CityOption } from '../../../core/services/driver-portal.service';
 import { Shipment, ShipmentStatus } from '../../../core/models/shipment.model';
+import { DeliveryAttempt } from '../../../core/models/delivery-attempt.model';
 import { ShipmentDetailModalComponent } from './shipment-detail-modal.component';
+import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery-failure-modal.component';
 
 @Component({
   selector: 'app-driver-shipments',
   standalone: true,
-  imports: [CommonModule, FormsModule, ShipmentDetailModalComponent],
+  imports: [CommonModule, FormsModule, ShipmentDetailModalComponent, DeliveryFailureModalComponent],
   template: `
     <div class="driver-shipments">
       <!-- Page Header -->
@@ -314,16 +316,6 @@ import { ShipmentDetailModalComponent } from './shipment-detail-modal.component'
                   </div>
                 </div>
               </div>
-
-              <div class="detail-row" *ngIf="shipment.batchId">
-                <div class="detail-item">
-                  <i class="fas fa-layer-group"></i>
-                  <div class="detail-content">
-                    <span class="detail-label">Lot</span>
-                    <span class="detail-value batch-id">{{ shipment.batchId }}</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div class="shipment-actions">
@@ -354,6 +346,16 @@ import { ShipmentDetailModalComponent } from './shipment-detail-modal.component'
                 Livrer
               </button>
 
+              <!-- Bouton d'échec de livraison -->
+              <button
+                class="action-btn failure"
+                *ngIf="['picked_up', 'in_transit'].includes(shipment.status)"
+                (click)="reportDeliveryFailure(shipment)"
+                type="button">
+                <i class="fas fa-exclamation-triangle"></i>
+                Échec
+              </button>
+
               <button
                 class="action-btn return"
                 *ngIf="['picked_up', 'in_transit'].includes(shipment.status)"
@@ -361,6 +363,16 @@ import { ShipmentDetailModalComponent } from './shipment-detail-modal.component'
                 type="button">
                 <i class="fas fa-undo"></i>
                 Retourner
+              </button>
+
+              <!-- Bouton de nouvelle tentative pour les colis retournés -->
+              <button
+                class="action-btn retry"
+                *ngIf="shipment.status === 'returned'"
+                (click)="scheduleRetry(shipment)"
+                type="button">
+                <i class="fas fa-redo"></i>
+                Nouvelle tentative
               </button>
 
               <button
@@ -393,6 +405,15 @@ import { ShipmentDetailModalComponent } from './shipment-detail-modal.component'
       [isVisible]="isDetailModalVisible"
       (closeEvent)="closeDetailModal()">
     </app-shipment-detail-modal>
+
+    <!-- Delivery Failure Modal -->
+    <app-delivery-failure-modal
+      [shipment]="selectedShipmentForFailure"
+      [driverId]="getCurrentDriverId()"
+      [isVisible]="isFailureModalVisible"
+      (closed)="closeFailureModal()"
+      (confirmed)="onFailureConfirmed($event)">
+    </app-delivery-failure-modal>
   `,
   styleUrls: ['./driver-shipments.component.scss']
 })
@@ -407,12 +428,15 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
   selectedShipment: Shipment | null = null;
   isDetailModalVisible = false;
 
+  // Failure modal properties
+  selectedShipmentForFailure: Shipment | null = null;
+  isFailureModalVisible = false;
+
   filters = {
     status: '',
     barcode: '',
     dateFrom: '',
     dateTo: '',
-    batchId: '',
     city: '',
     delegation: '',
     pickupCity: '',
@@ -491,9 +515,6 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
     if (this.filters.clientName) {
       filterParams.clientName = this.filters.clientName;
     }
-    if (this.filters.batchId) {
-      filterParams.batchId = this.filters.batchId;
-    }
     if (this.filters.dateFrom) {
       filterParams.dateFrom = new Date(this.filters.dateFrom);
     }
@@ -535,7 +556,6 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
       barcode: '',
       dateFrom: '',
       dateTo: '',
-      batchId: '',
       city: '',
       delegation: '',
       pickupCity: '',
@@ -599,5 +619,82 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
   closeDetailModal(): void {
     this.isDetailModalVisible = false;
     this.selectedShipment = null;
+  }
+
+  // === NOUVELLES MÉTHODES POUR GESTION ÉCHECS ET TENTATIVES ===
+
+  /**
+   * Ouvre le modal de signalement d'échec de livraison
+   */
+  reportDeliveryFailure(shipment: Shipment): void {
+    this.selectedShipmentForFailure = shipment;
+    this.isFailureModalVisible = true;
+  }
+
+  /**
+   * Ferme le modal de gestion d'échecs
+   */
+  closeFailureModal(): void {
+    this.isFailureModalVisible = false;
+    this.selectedShipmentForFailure = null;
+  }
+
+  /**
+   * Traite la confirmation d'un échec de livraison
+   */
+  onFailureConfirmed(result: DeliveryFailureResult): void {
+    if (!this.selectedShipmentForFailure?.id) return;
+
+    console.log('Échec de livraison confirmé:', result);
+
+    // TODO: Intégrer avec le service pour enregistrer l'échec
+    // this.driverService.recordDeliveryFailure(this.selectedShipmentForFailure.id, result)
+    //   .then(() => {
+    //     // Mettre à jour le statut du colis
+    //     if (result.reschedule) {
+    //       this.updateStatus(this.selectedShipmentForFailure!.id!, 'assigned'); // Reprogrammé
+    //     } else {
+    //       this.updateStatus(this.selectedShipmentForFailure!.id!, 'returned'); // Retour dépôt
+    //     }
+    //   });
+
+    // Pour l'instant, mise à jour simple du statut
+    if (result.reschedule) {
+      this.updateStatus(this.selectedShipmentForFailure.id, 'assigned');
+      this.showToast('Nouvelle tentative programmée', 'success');
+    } else {
+      this.updateStatus(this.selectedShipmentForFailure.id, 'returned');
+      this.showToast('Échec enregistré, colis retourné au dépôt', 'warning');
+    }
+
+    this.closeFailureModal();
+  }
+
+  /**
+   * Programme une nouvelle tentative pour un colis retourné
+   */
+  scheduleRetry(shipment: Shipment): void {
+    // Ouvre directement le modal de reprogrammation
+    this.selectedShipmentForFailure = shipment;
+    this.isFailureModalVisible = true;
+
+    // TODO: Pré-remplir le formulaire avec reschedule=true
+    this.showToast('Planifiez une nouvelle tentative de livraison', 'info');
+  }
+
+  /**
+   * Récupère l'ID du livreur actuel
+   */
+  getCurrentDriverId(): string {
+    // TODO: Récupérer l'ID du livreur connecté depuis le service d'authentification
+    return 'current-driver-id'; // Placeholder
+  }
+
+  /**
+   * Affiche un message toast (placeholder)
+   */
+  private showToast(message: string, type: 'success' | 'warning' | 'error' | 'info'): void {
+    // TODO: Intégrer avec ngx-toastr ou système de notification
+    console.log(`[${type.toUpperCase()}] ${message}`);
   }
 }

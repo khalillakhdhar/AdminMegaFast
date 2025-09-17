@@ -108,14 +108,10 @@ import { DriverService } from '../../../core/services/driver-portal.service';
           </div>
 
           <!-- Assignment Details -->
-          <div class="info-section" *ngIf="shipment.batchId || shipment.assignedTo">
+          <div class="info-section" *ngIf="shipment.assignedTo">
             <h4><i class="fas fa-tasks"></i> Affectation</h4>
             <div class="info-grid">
-              <div class="info-item" *ngIf="shipment.batchId">
-                <label>Lot:</label>
-                <span class="batch-id">{{ shipment.batchId }}</span>
-              </div>
-              <div class="info-item" *ngIf="shipment.assignedTo">
+              <div class="info-item">
                 <label>Assigné à:</label>
                 <span>{{ shipment.assignedTo }}</span>
               </div>

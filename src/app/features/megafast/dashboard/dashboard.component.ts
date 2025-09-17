@@ -7,7 +7,6 @@ import { Observable, Subject } from 'rxjs';
 
 import { PageTitleComponent } from '../../../shared/ui/pagetitle/pagetitle.component';
 import { ShipmentService } from '../../../core/services/shipment.service';
-import { BatchService } from '../../../core/services/batch.service';
 import { ToastrService } from 'ngx-toastr';
 
 interface DashboardStats {
@@ -17,7 +16,6 @@ interface DashboardStats {
   deliveryRateImprovement: number;
   totalCOD: number;
   codGrowth: number;
-  activeBatches: number;
   driversActive: number;
 }
 
@@ -30,7 +28,7 @@ interface StatusDistribution {
 
 interface Activity {
   id: string;
-  type: 'shipment' | 'batch' | 'delivery' | 'return';
+  type: 'shipment' | 'delivery' | 'return';
   title: string;
   description: string;
   timestamp: Date;
@@ -72,7 +70,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     deliveryRateImprovement: 0,
     totalCOD: 0,
     codGrowth: 0,
-    activeBatches: 0,
     driversActive: 0
   };
 
@@ -89,7 +86,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     public router: Router,
     private readonly shipmentService: ShipmentService,
-    private readonly batchService: BatchService,
     private readonly toastrService: ToastrService
   ) {}
 
@@ -105,18 +101,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadDashboardData(): void {
     // For now, generate mock data since service methods don't exist yet
     const mockShipments: any[] = [];
-    const mockBatches: any[] = [];
     const mockDrivers: any[] = [];
 
-    this.calculateStats(mockShipments, mockBatches, mockDrivers);
+    this.calculateStats(mockShipments, mockDrivers);
     this.calculateStatusDistribution(mockShipments);
-    this.generateRecentActivities(mockShipments, mockBatches);
+    this.generateRecentActivities(mockShipments);
     this.updateTopDrivers(mockDrivers);
 
     this.toastrService.info('Données du tableau de bord chargées');
   }
 
-  private calculateStats(shipments: any[], batches: any[], drivers: any[]): void {
+  private calculateStats(shipments: any[], drivers: any[]): void {
     const now = new Date();
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
 
@@ -135,7 +130,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       deliveryRateImprovement: this.calculateDeliveryRateImprovement(shipments),
       totalCOD: this.calculateTotalCOD(shipments),
       codGrowth: this.calculateCODGrowth(shipments),
-      activeBatches: batches.filter(b => ['in_progress', 'assigned'].includes(b.status)).length,
       driversActive: drivers.filter(d => d.status === 'active').length
     };
   }
@@ -164,14 +158,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  private generateRecentActivities(shipments: any[], batches: any[]): void {
+  private generateRecentActivities(shipments: any[]): void {
     const activities: Activity[] = [];
 
     // Recent shipment activities
     shipments
       .filter(s => s.statusHistory && s.statusHistory.length > 0)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5)
+      .slice(0, 8)
       .forEach(shipment => {
         const lastStatus = shipment.statusHistory[shipment.statusHistory.length - 1];
         activities.push({
@@ -180,21 +174,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           title: `Colis ${shipment.trackingNumber}`,
           description: this.getStatusDescription(lastStatus.status),
           timestamp: new Date(lastStatus.timestamp)
-        });
-      });
-
-    // Recent batch activities
-    const sortedBatches = [...batches];
-    sortedBatches.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-    sortedBatches
-      .slice(0, 3)
-      .forEach(batch => {
-        activities.push({
-          id: `batch-${batch.id}`,
-          type: 'batch',
-          title: `Lot ${batch.name}`,
-          description: `${batch.shipments?.length || 0} colis assignés`,
-          timestamp: new Date(batch.updatedAt)
         });
       });
 
@@ -317,7 +296,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getActivityIconClass(type: Activity['type']): string {
     const classes = {
       'shipment': 'bg-primary-subtle text-primary',
-      'batch': 'bg-success-subtle text-success',
       'delivery': 'bg-success-subtle text-success',
       'return': 'bg-danger-subtle text-danger'
     };
@@ -327,7 +305,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getActivityIcon(type: Activity['type']): string {
     const icons = {
       'shipment': 'bx bx-package',
-      'batch': 'bx bx-list-ul',
       'delivery': 'bx bx-check-circle',
       'return': 'bx bx-x-circle'
     };

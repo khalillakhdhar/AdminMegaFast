@@ -33,14 +33,6 @@
               </ng-select>
             </div>
             <div class="col-md-2">
-              <label class="form-label" for="batchId">Lot</label>
-              <ng-select id="batchId" formControlName="batchId" placeholder="Tous les lots" [clearable]="true">
-                <ng-option *ngFor="let batch of batches" [value]="batch.id">
-                  {{batch.code}}
-                </ng-option>
-              </ng-select>
-            </div>
-            <div class="col-md-2">
               <label class="form-label" for="dateRange">Période</label>
               <input type="text" id="dateRange" class="form-control" bsDaterangepicker formControlName="dateRange" placeholder="Sélectionner...">
             </div>
@@ -92,7 +84,6 @@
                   <th sortable="clientName" (sort)="onSort($event)">Client</th>
                   <th>Destination</th>
                   <th sortable="status" (sort)="onSort($event)">Statut</th>
-                  <th sortable="amount" (sort)="onSort($event)">Montant</th>
                   <th sortable="createdAt" (sort)="onSort($event)">Date</th>
                   <th>Livreur</th>
                   <th>Lot</th>
@@ -129,10 +120,6 @@
                     </span>
                   </td>
                   <td>
-                    <span class="fw-medium">{{shipment.amount | currency:'TND'}}</span>
-                    <small class="text-muted d-block">{{shipment.paymentMode?.toUpperCase()}}</small>
-                  </td>
-                  <td>
                     <div>{{shipment.createdAt?.toDate() | date:'dd/MM/yyyy'}}</div>
                     <small class="text-muted">{{shipment.createdAt?.toDate() | date:'HH:mm'}}</small>
                   </td>
@@ -155,7 +142,7 @@
                         <i class="bx bx-show"></i>
                       </button>
                       <button class="btn btn-light btn-sm" title="Modifier"
-                              (click)="router.navigate(['/megafast/colis', shipment.id])">
+                              (click)="router.navigate(['/megafast/colis/edit', shipment.id])">
                         <i class="bx bx-edit"></i>
                       </button>
                       <button class="btn btn-light btn-sm" title="Imprimer"
@@ -227,45 +214,12 @@
   </div>
 </ng-template>
 
-<!-- Assign Batch Modal -->
-<div #assignBatchModal class="modal fade" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Assigner au lot</h5>
-        <button type="button" class="btn-close"></button>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="assignBatchForm">
-          <div class="mb-3">
-            <label class="form-label" for="batchSelect">Sélectionner un lot</label>
-            <ng-select id="batchSelect" formControlName="batchId" placeholder="Choisir un lot...">
-              <ng-option *ngFor="let batch of batches" [value]="batch.id">
-                {{batch.code}} - {{batch.assignedTo}}
-              </ng-option>
-            </ng-select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary">Annuler</button>
-        <button type="button" class="btn btn-primary"
-                (click)="assignToBatch()"
-                [disabled]="!assignBatchForm.get('batchId')?.value || isProcessing">
-          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-          Assigner
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Delete Confirmation Modal -->
 <div #removeModal class="modal fade" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-body px-4 py-5 text-center">
-        <button type="button" class="btn-close position-absolute end-0 top-0 m-3"></button>
+        <button type="button" class="btn-close position-absolute end-0 top-0 m-3" (click)="removeModal.hide()"></button>
         <div class="avatar-sm mb-4 mx-auto">
           <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
             <i class="bx bx-trash font-size-20"></i>
@@ -273,7 +227,7 @@
         </div>
         <p class="text-muted font-size-16 mb-4">Êtes-vous sûr de vouloir supprimer ce colis ?</p>
         <div class="hstack gap-2 justify-content-center mb-0">
-          <button type="button" class="btn btn-light">Annuler</button>
+          <button type="button" class="btn btn-light" (click)="removeModal.hide()">Annuler</button>
           <button type="button" class="btn btn-danger"
                   (click)="deleteShipment()"
                   [disabled]="isProcessing">

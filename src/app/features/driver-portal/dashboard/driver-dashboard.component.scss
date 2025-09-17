@@ -444,6 +444,44 @@
             }
           }
         }
+
+        // Analytics Charts Styles
+        &.analytics-charts {
+          grid-column: 1 / -1; // Span full width
+
+          .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+
+            .chart-container {
+              h3 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1e293b;
+                margin: 0 0 16px 0;
+                text-align: center;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #e2e8f0;
+              }
+
+              .apx-chart {
+                margin: 0 auto;
+              }
+            }
+          }
+
+          @media (max-width: 768px) {
+            .charts-grid {
+              grid-template-columns: 1fr;
+              gap: 16px;
+
+              .chart-container h3 {
+                font-size: 14px;
+              }
+            }
+          }
+        }
       }
     }
 

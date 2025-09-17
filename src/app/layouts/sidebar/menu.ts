@@ -36,17 +36,6 @@ export const MENU: MenuItem[] = [
     ]
   },
 
-  {
-    id: 11,
-    label: 'Lots',
-    icon: 'bx-grid',
-    subItems: [
-      // routes MEGAFAST_ROUTES: 'batches'
-      { id: 12, label: 'Liste des lots', link: '/megafast/batches',        parentId: 11 },
-      { id: 13, label: 'Créer un lot',   link: '/megafast/batches/create', parentId: 11 },
-    ]
-  },
-
   // Temporairement désactivé - Facturation, Comptabilité, Paie, Congés et Statistiques
   // { id: 14, label: 'Facturation',  icon: 'bx-receipt',       link: '/megafast/facturation' },
   // { id: 15, label: 'Comptabilité', icon: 'bx-book-content',  link: '/megafast/comptabilite' },

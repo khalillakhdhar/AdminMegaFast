@@ -351,12 +351,30 @@
               }
             }
 
+            &.failure {
+              background: #f59e0b;
+              color: white;
+
+              &:hover {
+                background: #d97706;
+              }
+            }
+
             &.return {
               background: #ef4444;
               color: white;
 
               &:hover {
                 background: #dc2626;
+              }
+            }
+
+            &.retry {
+              background: #06b6d4;
+              color: white;
+
+              &:hover {
+                background: #0891b2;
               }
             }
 
