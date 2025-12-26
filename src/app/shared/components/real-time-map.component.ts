@@ -1,23 +1,38 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Input } from '@angular/core';
-import { Observable, Subject, combineLatest, timer } from 'rxjs';
-import { takeUntil, distinctUntilChanged, debounceTime } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  Input,
+} from "@angular/core";
+import { Observable, Subject, combineLatest, timer } from "rxjs";
+import { takeUntil, distinctUntilChanged, debounceTime } from "rxjs/operators";
+import { CommonModule } from "@angular/common";
 
-import { GoogleMapsService } from '../../core/services/google-maps.service';
-import { LocationTrackingService, LocationUpdate } from '../../core/services/location-tracking.service';
-import { RouteCalculationService } from '../../core/services/route-calculation.service';
-import { MapMarker, MapRoute, RealTimeMapState, DeliveryMapMarker } from '../../core/models/map.model';
+import { GoogleMapsService } from "../../core/services/google-maps.service";
+import {
+  LocationTrackingService,
+  LocationUpdate,
+} from "../../core/services/location-tracking.service";
+import { RouteCalculationService } from "../../core/services/route-calculation.service";
+import {
+  MapMarker,
+  MapRoute,
+  RealTimeMapState,
+  DeliveryMapMarker,
+} from "../../core/models/map.model";
 
 @Component({
-  selector: 'app-real-time-map',
+  selector: "app-real-time-map",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './real-time-map.component.html',
-  styleUrls: ['./real-time-map.component.scss']
+  templateUrl: "./real-time-map.component.html",
+  styleUrls: ["./real-time-map.component.scss"],
 })
 export class RealTimeMapComponent implements OnInit, OnDestroy {
-  @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
-  @Input() height: string = '500px';
+  @ViewChild("mapContainer", { static: true }) mapContainer!: ElementRef;
+  @Input() height: string = "500px";
   @Input() autoRefresh: boolean = true;
   @Input() refreshInterval: number = 5000; // 5 secondes
 
@@ -29,11 +44,11 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     filterOptions: {
       showOnlineOnly: true,
       showRoutes: true,
-      driverStatus: ['online', 'busy', 'available'],
-      timeRange: {}
+      driverStatus: ["online", "busy", "available"],
+      timeRange: {},
     },
     mapCenter: { lat: 36.8, lng: 10.18 }, // Tunis par défaut
-    mapZoom: 10
+    mapZoom: 10,
   };
 
   // Variables supplémentaires pour le tracking
@@ -84,18 +99,18 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
           disableDefaultUI: false,
           zoomControl: true,
           streetViewControl: false,
-          fullscreenControl: true
+          fullscreenControl: true,
         }
       );
 
       // Créer l'InfoWindow
       this.infoWindow = new google.maps.InfoWindow({
-        maxWidth: 300
+        maxWidth: 300,
       });
 
       this.isLoading = false;
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de la carte:', error);
+      console.error("Erreur lors de l'initialisation de la carte:", error);
       this.isLoading = false;
     }
   }
@@ -104,13 +119,14 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    * Configurer le tracking des localisations
    */
   private setupLocationTracking(): void {
-    this.driversLocations$ = this.locationTrackingService.getActiveDriversLocations();
+    this.driversLocations$ =
+      this.locationTrackingService.getActiveDriversLocations();
 
     this.driversLocations$
       .pipe(
         takeUntil(this.destroy$),
-        distinctUntilChanged((prev, curr) =>
-          JSON.stringify(prev) === JSON.stringify(curr)
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
         ),
         debounceTime(1000) // Éviter les mises à jour trop fréquentes
       )
@@ -120,8 +136,8 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
           this.lastUpdate = Date.now();
         },
         error: (error) => {
-          console.error('Erreur lors du tracking des drivers:', error);
-        }
+          console.error("Erreur lors du tracking des drivers:", error);
+        },
       });
   }
 
@@ -146,7 +162,7 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     if (!this.map) return;
 
     // Supprimer les marqueurs des drivers inactifs
-    const activeDriverIds = new Set(locations.map(loc => loc.userId));
+    const activeDriverIds = new Set(locations.map((loc) => loc.userId));
     for (const [driverId, marker] of this.markers) {
       if (!activeDriverIds.has(driverId)) {
         marker.setMap(null);
@@ -155,15 +171,17 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     }
 
     // Mettre à jour ou créer les marqueurs
-    locations.forEach(location => {
+    locations.forEach((location) => {
       this.updateDriverMarker(location);
     });
 
     // Mettre à jour l'état
-    this.mapState.activeDrivers = Array.from(this.markers.keys()).map(driverId => {
-      const location = locations.find(loc => loc.userId === driverId);
-      return this.createMapMarkerFromLocation(location!);
-    });
+    this.mapState.activeDrivers = Array.from(this.markers.keys()).map(
+      (driverId) => {
+        const location = locations.find((loc) => loc.userId === driverId);
+        return this.createMapMarkerFromLocation(location!);
+      }
+    );
   }
 
   /**
@@ -188,11 +206,11 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
         map: this.map,
         title: `Driver ${location.userId}`,
         icon: this.getDriverIcon(location.status),
-        animation: google.maps.Animation.DROP
+        animation: google.maps.Animation.DROP,
       });
 
       // Ajouter l'événement click
-      marker.addListener('click', () => {
+      marker.addListener("click", () => {
         this.showDriverInfo(location, marker);
       });
 
@@ -203,7 +221,10 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
   /**
    * Afficher les informations d'un driver
    */
-  private showDriverInfo(location: LocationUpdate, marker: google.maps.Marker): void {
+  private showDriverInfo(
+    location: LocationUpdate,
+    marker: google.maps.Marker
+  ): void {
     if (!this.infoWindow) return;
 
     const content = this.createDriverInfoContent(location);
@@ -215,7 +236,9 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    * Créer le contenu de l'InfoWindow pour un driver
    */
   private createDriverInfoContent(location: LocationUpdate): string {
-    const lastUpdate = new Date(location.timestamp?.toDate?.() || Date.now()).toLocaleTimeString();
+    const lastUpdate = new Date(
+      location.timestamp?.toDate?.() || Date.now()
+    ).toLocaleTimeString();
 
     return `
       <div class="driver-info">
@@ -237,21 +260,29 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
           <i class="fas fa-bullseye"></i>
           <span>Précision: ${location.accuracy}m</span>
         </div>
-        ${location.speed ? `
+        ${
+          location.speed
+            ? `
           <div class="info-row">
             <i class="fas fa-tachometer-alt"></i>
             <span>Vitesse: ${Math.round(location.speed * 3.6)} km/h</span>
           </div>
-        ` : ''}
+        `
+            : ""
+        }
         <div class="info-row">
           <i class="fas fa-clock"></i>
           <span>Dernière MAJ: ${lastUpdate}</span>
         </div>
         <div class="actions">
-          <button class="btn btn-sm btn-primary" onclick="this.viewDriverDetails('${location.userId}')">
+          <button class="btn btn-sm btn-primary" onclick="this.viewDriverDetails('${
+            location.userId
+          }')">
             <i class="fas fa-eye"></i> Détails
           </button>
-          <button class="btn btn-sm btn-success" onclick="this.trackDriver('${location.userId}')">
+          <button class="btn btn-sm btn-success" onclick="this.trackDriver('${
+            location.userId
+          }')">
             <i class="fas fa-route"></i> Suivre
           </button>
         </div>
@@ -266,13 +297,13 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     // Pour l'instant, utilisons des icônes colorées simples
     // Plus tard, nous remplacerons par des icônes personnalisées
     const colors: { [key: string]: string } = {
-      'online': '#1cc88a',    // Vert
-      'busy': '#f6c23e',      // Jaune
-      'available': '#36b9cc', // Bleu
-      'offline': '#e74a3b'    // Rouge
+      online: "#1cc88a", // Vert
+      busy: "#f6c23e", // Jaune
+      available: "#36b9cc", // Bleu
+      offline: "#e74a3b", // Rouge
     };
 
-    const color = colors[status] || colors['offline'];
+    const color = colors[status] || colors["offline"];
 
     return {
       url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
@@ -284,7 +315,7 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
       `)}`,
       scaledSize: new google.maps.Size(32, 32),
       origin: new google.maps.Point(0, 0),
-      anchor: new google.maps.Point(16, 32)
+      anchor: new google.maps.Point(16, 32),
     };
   }
 
@@ -293,12 +324,12 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    */
   private getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'online': 'En ligne',
-      'busy': 'Occupé',
-      'available': 'Disponible',
-      'offline': 'Hors ligne'
+      online: "En ligne",
+      busy: "Occupé",
+      available: "Disponible",
+      offline: "Hors ligne",
     };
-    return labels[status] || 'Inconnu';
+    return labels[status] || "Inconnu";
   }
 
   /**
@@ -308,16 +339,16 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     return {
       id: location.userId,
       position: { lat: location.latitude, lng: location.longitude },
-      type: 'driver',
+      type: "driver",
       title: `Driver ${location.userId}`,
       status: location.status,
       icon: {
         url: this.getDriverIcon(location.status).url,
         scaledSize: this.getDriverIcon(location.status).scaledSize,
         origin: this.getDriverIcon(location.status).origin,
-        anchor: this.getDriverIcon(location.status).anchor
+        anchor: this.getDriverIcon(location.status).anchor,
       },
-      data: location
+      data: location,
     };
   }
 
@@ -327,15 +358,15 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
   private getMapStyles(): google.maps.MapTypeStyle[] {
     return [
       {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }]
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }],
       },
       {
-        featureType: 'transit',
-        elementType: 'labels',
-        stylers: [{ visibility: 'off' }]
-      }
+        featureType: "transit",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }],
+      },
     ];
   }
 
@@ -346,7 +377,7 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     if (!this.map || this.markers.size === 0) return;
 
     const bounds = new google.maps.LatLngBounds();
-    this.markers.forEach(marker => {
+    this.markers.forEach((marker) => {
       bounds.extend(marker.getPosition()!);
     });
 
@@ -360,8 +391,10 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
     this.mapState.filterOptions.driverStatus = statuses;
     // Re-filtrer les marqueurs existants
     this.markers.forEach((marker, driverId) => {
-      const location = this.mapState.activeDrivers.find(m => m.id === driverId);
-      if (location && statuses.includes(location.status || '')) {
+      const location = this.mapState.activeDrivers.find(
+        (m) => m.id === driverId
+      );
+      if (location && statuses.includes(location.status || "")) {
         marker.setVisible(true);
       } else {
         marker.setVisible(false);
@@ -374,7 +407,7 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    */
   toggleRoutes(show: boolean): void {
     this.mapState.filterOptions.showRoutes = show;
-    this.routes.forEach(route => {
+    this.routes.forEach((route) => {
       route.setMap(show ? this.map : null);
     });
   }
@@ -383,14 +416,10 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    * Méthodes publiques pour les actions
    */
   viewDriverDetails(driverId: string): void {
-    // Émettre un événement ou naviguer vers la page de détails
-    console.log('Voir détails driver:', driverId);
+    // TODO: Émettre un événement ou naviguer vers la page de détails
   }
 
   trackDriver(driverId: string): void {
-    // Commencer le suivi d'un driver spécifique
-    console.log('Suivre driver:', driverId);
-
     // Centrer la carte sur ce driver
     const marker = this.markers.get(driverId);
     if (marker && this.map) {
@@ -427,6 +456,8 @@ export class RealTimeMapComponent implements OnInit, OnDestroy {
    * Obtenir les drivers par statut
    */
   getDriversByStatus(status: string): MapMarker[] {
-    return this.mapState.activeDrivers.filter(marker => marker.status === status);
+    return this.mapState.activeDrivers.filter(
+      (marker) => marker.status === status
+    );
   }
 }

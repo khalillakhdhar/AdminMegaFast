@@ -1,10 +1,14 @@
-import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Observable, combineLatest, of, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { Observable, combineLatest, of, firstValueFrom } from "rxjs";
+import { map } from "rxjs/operators";
 
-import { Shipment, ShipmentStatus } from '../models/shipment.model';
-import { AuthenticationService } from './auth.service';
+import { Shipment, ShipmentStatus } from "../models/shipment.model";
+import {
+  DeliveryWindow,
+  FailureReason,
+} from "../models/delivery-attempt.model";
+import { AuthenticationService } from "./auth.service";
 
 export interface DriverStats {
   totalShipments: number;
@@ -43,10 +47,9 @@ export interface DriverDashboardData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
-export class DriverService {
-
+export class DriverPortalService {
   constructor(
     private readonly afs: AngularFirestore,
     private readonly authService: AuthenticationService
@@ -57,7 +60,7 @@ export class DriverService {
    */
   getCurrentDriverId(): string | null {
     if (this.authService.isDriver()) {
-      return localStorage.getItem('driverId');
+      return localStorage.getItem("driverId");
     }
     return null;
   }
@@ -65,22 +68,27 @@ export class DriverService {
   /**
    * Get driver's assigned shipments
    */
-  getDriverShipments(status?: string, limit: number = 50): Observable<Shipment[]> {
+  getDriverShipments(
+    status?: string,
+    limit: number = 50
+  ): Observable<Shipment[]> {
     const driverId = this.getCurrentDriverId();
 
     if (!driverId) {
       return of([]);
     }
 
-    return this.afs.collection<Shipment>('shipments', ref => {
-      let query = ref.where('assignedTo', '==', driverId);
+    return this.afs
+      .collection<Shipment>("shipments", (ref) => {
+        let query = ref.where("assignedTo", "==", driverId);
 
-      if (status) {
-        query = query.where('status', '==', status);
-      }
+        if (status) {
+          query = query.where("status", "==", status);
+        }
 
-      return query.orderBy('createdAt', 'desc').limit(limit);
-    }).valueChanges({ idField: 'id' });
+        return query.orderBy("createdAt", "desc").limit(limit);
+      })
+      .valueChanges({ idField: "id" });
   }
 
   /**
@@ -92,61 +100,79 @@ export class DriverService {
       return of([]);
     }
 
-    return this.afs.collection<Shipment>('shipments', ref => {
-      let query: any = ref.where('assignedTo', '==', driverId);
+    return this.afs
+      .collection<Shipment>("shipments", (ref) => {
+        let query: any = ref.where("assignedTo", "==", driverId);
 
-      if (filters.status) {
-        query = query.where('status', '==', filters.status);
-      }
-      if (filters.city) {
-        query = query.where('city', '==', filters.city);
-      }
-      if (filters.delegation) {
-        query = query.where('delegation', '==', filters.delegation);
-      }
-      if (filters.pickupCity) {
-        query = query.where('pickupCity', '==', filters.pickupCity);
-      }
-      if (filters.pickupDelegation) {
-        query = query.where('pickupDelegation', '==', filters.pickupDelegation);
-      }
-
-      return query.orderBy('createdAt', 'desc');
-    }).valueChanges({ idField: 'id' }).pipe(
-      map((shipments: Shipment[]) => {
-        let filtered = shipments;
-
-        // Client-side filtering for complex queries
-        if (filters.barcode) {
-          filtered = filtered.filter(s =>
-            s.barcode?.toLowerCase().includes(filters.barcode.toLowerCase())
+        if (filters.status) {
+          query = query.where("status", "==", filters.status);
+        }
+        if (filters.city) {
+          query = query.where("city", "==", filters.city);
+        }
+        if (filters.delegation) {
+          query = query.where("delegation", "==", filters.delegation);
+        }
+        if (filters.pickupCity) {
+          query = query.where("pickupCity", "==", filters.pickupCity);
+        }
+        if (filters.pickupDelegation) {
+          query = query.where(
+            "pickupDelegation",
+            "==",
+            filters.pickupDelegation
           );
         }
-        if (filters.clientName) {
-          filtered = filtered.filter(s =>
-            s.clientName?.toLowerCase().includes(filters.clientName.toLowerCase())
-          );
-        }
-        if (filters.dateFrom) {
-          filtered = filtered.filter(s => {
-            const shipmentDate = s.createdAt?.toDate ? s.createdAt.toDate() : new Date(s.createdAt);
-            return shipmentDate >= filters.dateFrom;
-          });
-        }
-        if (filters.dateTo) {
-          filtered = filtered.filter(s => {
-            const shipmentDate = s.createdAt?.toDate ? s.createdAt.toDate() : new Date(s.createdAt);
-            return shipmentDate <= filters.dateTo;
-          });
-        }
-        if (filters.amountFrom) {
-          filtered = filtered.filter(s => (s.amount || 0) >= filters.amountFrom);
-        }
-        if (filters.amountTo) {
-          filtered = filtered.filter(s => (s.amount || 0) <= filters.amountTo);
-        }        return filtered;
+
+        return query.orderBy("createdAt", "desc");
       })
-    );
+      .valueChanges({ idField: "id" })
+      .pipe(
+        map((shipments: Shipment[]) => {
+          let filtered = shipments;
+
+          // Client-side filtering for complex queries
+          if (filters.barcode) {
+            filtered = filtered.filter((s) =>
+              s.barcode?.toLowerCase().includes(filters.barcode.toLowerCase())
+            );
+          }
+          if (filters.clientName) {
+            filtered = filtered.filter((s) =>
+              s.clientName
+                ?.toLowerCase()
+                .includes(filters.clientName.toLowerCase())
+            );
+          }
+          if (filters.dateFrom) {
+            filtered = filtered.filter((s) => {
+              const shipmentDate = s.createdAt?.toDate
+                ? s.createdAt.toDate()
+                : new Date(s.createdAt);
+              return shipmentDate >= filters.dateFrom;
+            });
+          }
+          if (filters.dateTo) {
+            filtered = filtered.filter((s) => {
+              const shipmentDate = s.createdAt?.toDate
+                ? s.createdAt.toDate()
+                : new Date(s.createdAt);
+              return shipmentDate <= filters.dateTo;
+            });
+          }
+          if (filters.amountFrom) {
+            filtered = filtered.filter(
+              (s) => (s.amount || 0) >= filters.amountFrom
+            );
+          }
+          if (filters.amountTo) {
+            filtered = filtered.filter(
+              (s) => (s.amount || 0) <= filters.amountTo
+            );
+          }
+          return filtered;
+        })
+      );
   }
 
   /**
@@ -158,44 +184,52 @@ export class DriverService {
       return of([]);
     }
 
-    return this.afs.collection<Shipment>('shipments', ref =>
-      ref.where('assignedTo', '==', driverId)
-    ).valueChanges().pipe(
-      map((shipments: Shipment[]) => {
-        const cities = new Set<string>();
-        const cityOptions: CityOption[] = [];
+    return this.afs
+      .collection<Shipment>("shipments", (ref) =>
+        ref.where("assignedTo", "==", driverId)
+      )
+      .valueChanges()
+      .pipe(
+        map((shipments: Shipment[]) => {
+          const cities = new Set<string>();
+          const cityOptions: CityOption[] = [];
 
-        shipments.forEach(shipment => {
-          // Destination cities
-          if (shipment.city) {
-            const delegation = shipment.delegation ? ` (${shipment.delegation})` : '';
-            const cityKey = `${shipment.city}${delegation}`;
-            if (!cities.has(cityKey)) {
-              cities.add(cityKey);
-              cityOptions.push({
-                value: shipment.city,
-                label: cityKey,
-                delegation: shipment.delegation
-              });
+          shipments.forEach((shipment) => {
+            // Destination cities
+            if (shipment.city) {
+              const delegation = shipment.delegation
+                ? ` (${shipment.delegation})`
+                : "";
+              const cityKey = `${shipment.city}${delegation}`;
+              if (!cities.has(cityKey)) {
+                cities.add(cityKey);
+                cityOptions.push({
+                  value: shipment.city,
+                  label: cityKey,
+                  delegation: shipment.delegation,
+                });
+              }
             }
-          }
 
-          // Pickup cities
-          if (shipment.pickupCity) {
-            const delegation = shipment.pickupDelegation ? ` (${shipment.pickupDelegation})` : '';
-            const cityKey = `${shipment.pickupCity}${delegation}`;
-            if (!cities.has(cityKey)) {
-              cities.add(cityKey);
-              cityOptions.push({
-                value: shipment.pickupCity,
-                label: cityKey,
-                delegation: shipment.pickupDelegation
-              });
+            // Pickup cities
+            if (shipment.pickupCity) {
+              const delegation = shipment.pickupDelegation
+                ? ` (${shipment.pickupDelegation})`
+                : "";
+              const cityKey = `${shipment.pickupCity}${delegation}`;
+              if (!cities.has(cityKey)) {
+                cities.add(cityKey);
+                cityOptions.push({
+                  value: shipment.pickupCity,
+                  label: cityKey,
+                  delegation: shipment.pickupDelegation,
+                });
+              }
             }
-          }
-        });        return cityOptions.sort((a, b) => a.label.localeCompare(b.label));
-      })
-    );
+          });
+          return cityOptions.sort((a, b) => a.label.localeCompare(b.label));
+        })
+      );
   }
 
   /**
@@ -212,23 +246,32 @@ export class DriverService {
         returnedShipments: 0,
         pendingShipments: 0,
         totalRevenue: 0,
-        deliveryRate: 0
+        deliveryRate: 0,
       });
     }
 
     return this.getDriverShipments().pipe(
       map((shipments) => {
         const totalShipments = shipments.length;
-        const deliveredShipments = shipments.filter(s => s.status === 'delivered').length;
-        const inTransitShipments = shipments.filter(s => s.status === 'in_transit').length;
-        const returnedShipments = shipments.filter(s => s.status === 'returned').length;
-        const pendingShipments = shipments.filter(s => ['assigned', 'picked_up'].includes(s.status)).length;
+        const deliveredShipments = shipments.filter(
+          (s) => s.status === "delivered"
+        ).length;
+        const inTransitShipments = shipments.filter(
+          (s) => s.status === "in_transit"
+        ).length;
+        const returnedShipments = shipments.filter(
+          (s) => s.status === "returned"
+        ).length;
+        const pendingShipments = shipments.filter((s) =>
+          ["assigned", "picked_up"].includes(s.status)
+        ).length;
 
         const totalRevenue = shipments
-          .filter(s => s.status === 'delivered')
+          .filter((s) => s.status === "delivered")
           .reduce((sum, s) => sum + (s.amount || 0), 0);
 
-        const deliveryRate = totalShipments > 0 ? (deliveredShipments / totalShipments) * 100 : 0;
+        const deliveryRate =
+          totalShipments > 0 ? (deliveredShipments / totalShipments) * 100 : 0;
 
         return {
           totalShipments,
@@ -237,7 +280,7 @@ export class DriverService {
           returnedShipments,
           pendingShipments,
           totalRevenue,
-          deliveryRate: Math.round(deliveryRate * 100) / 100
+          deliveryRate: Math.round(deliveryRate * 100) / 100,
         };
       })
     );
@@ -258,22 +301,22 @@ export class DriverService {
           returnedShipments: 0,
           pendingShipments: 0,
           totalRevenue: 0,
-          deliveryRate: 0
+          deliveryRate: 0,
         },
         recentShipments: [],
-        todayDeliveries: []
+        todayDeliveries: [],
       });
     }
 
     return combineLatest([
       this.getDriverStats(),
       this.getDriverShipments(undefined, 10), // Recent shipments
-      this.getTodayDeliveries()
+      this.getTodayDeliveries(),
     ]).pipe(
       map(([stats, recentShipments, todayDeliveries]) => ({
         stats,
         recentShipments,
-        todayDeliveries
+        todayDeliveries,
       }))
     );
   }
@@ -293,12 +336,15 @@ export class DriverService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return this.afs.collection<Shipment>('shipments', ref =>
-      ref.where('assignedTo', '==', driverId)
-         .where('deliveredAt', '>=', today)
-         .where('deliveredAt', '<', tomorrow)
-         .orderBy('deliveredAt', 'desc')
-    ).valueChanges({ idField: 'id' });
+    return this.afs
+      .collection<Shipment>("shipments", (ref) =>
+        ref
+          .where("assignedTo", "==", driverId)
+          .where("deliveredAt", ">=", today)
+          .where("deliveredAt", "<", tomorrow)
+          .orderBy("deliveredAt", "desc")
+      )
+      .valueChanges({ idField: "id" });
   }
 
   /**
@@ -313,16 +359,16 @@ export class DriverService {
       const updateData: any = {
         status: status,
         lastUpdated: new Date(),
-        lastUpdatedBy: this.getCurrentDriverId()
+        lastUpdatedBy: this.getCurrentDriverId(),
       };
 
       if (driverNotes) {
         updateData.driverNotes = driverNotes;
       }
 
-      await this.afs.collection('shipments').doc(shipmentId).update(updateData);
+      await this.afs.collection("shipments").doc(shipmentId).update(updateData);
     } catch (error) {
-      console.error('Error updating shipment status:', error);
+      console.error("Error updating shipment status:", error);
       throw error;
     }
   }
@@ -337,12 +383,75 @@ export class DriverService {
       return of(null);
     }
 
-    return this.afs.collection<Shipment>('shipments', ref =>
-      ref.where('barcode', '==', barcode)
-         .where('assignedTo', '==', driverId)
-         .limit(1)
-    ).valueChanges({ idField: 'id' }).pipe(
-      map(shipments => shipments.length > 0 ? shipments[0] : null)
-    );
+    return this.afs
+      .collection<Shipment>("shipments", (ref) =>
+        ref
+          .where("barcode", "==", barcode)
+          .where("assignedTo", "==", driverId)
+          .limit(1)
+      )
+      .valueChanges({ idField: "id" })
+      .pipe(map((shipments) => (shipments.length > 0 ? shipments[0] : null)));
+  }
+
+  /**
+   * Record a delivery failure with detailed information
+   */
+  async recordDeliveryFailure(
+    shipmentId: string,
+    failureData: {
+      failureReason: FailureReason;
+      failureNote?: string;
+      reschedule: boolean;
+      rescheduledDate?: Date;
+      rescheduledWindow?: DeliveryWindow;
+      clientNotified: boolean;
+      clientNotificationMethod?: string;
+      proofPhotos?: string[];
+    }
+  ): Promise<void> {
+    const driverId = this.getCurrentDriverId();
+    if (!driverId) {
+      throw new Error("Driver not authenticated");
+    }
+
+    const now = new Date();
+    const attemptData = {
+      shipmentId,
+      driverId,
+      attemptedAt: now,
+      failureReason: failureData.failureReason,
+      failureNote: failureData.failureNote || "",
+      reschedule: failureData.reschedule,
+      rescheduledDate: failureData.rescheduledDate || null,
+      rescheduledWindow: failureData.rescheduledWindow || null,
+      clientNotified: failureData.clientNotified,
+      clientNotificationMethod: failureData.clientNotificationMethod || null,
+      proofPhotos: failureData.proofPhotos || [],
+      createdAt: now,
+    };
+
+    // Store delivery attempt in a sub-collection or separate collection
+    await this.afs.collection("delivery_attempts").add(attemptData);
+
+    // Update shipment with failure information
+    const shipmentUpdate: any = {
+      lastAttemptAt: now,
+      lastAttemptBy: driverId,
+      lastFailureReason: failureData.failureReason,
+      status: failureData.reschedule ? "assigned" : "returned",
+      updatedAt: now,
+    };
+
+    if (failureData.reschedule && failureData.rescheduledDate) {
+      shipmentUpdate.scheduledDeliveryDate = failureData.rescheduledDate;
+      shipmentUpdate.scheduledDeliveryWindow =
+        failureData.rescheduledWindow || null;
+    }
+
+    await this.afs
+      .collection("shipments")
+      .doc(shipmentId)
+      .update(shipmentUpdate);
   }
 }

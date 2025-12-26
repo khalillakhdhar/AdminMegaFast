@@ -64,6 +64,49 @@
 									⚠️ L'email est requis pour créer un compte utilisateur.
 								</div>
 							</div>
+
+							<!-- Password options - shown when createAccount is enabled -->
+							<div class="col-12" *ngIf="f['createAccount'].value">
+								<div class="card bg-light border-0 mt-2">
+									<div class="card-body">
+										<h6 class="card-title mb-3">
+											<i class="fas fa-key me-2"></i>Configuration du mot de passe
+										</h6>
+
+										<div class="form-check form-switch mb-3">
+											<input class="form-check-input" type="checkbox" id="useAdminPasswordSwitch" formControlName="useAdminPassword">
+											<label class="form-check-label" for="useAdminPasswordSwitch">
+												Définir un mot de passe personnalisé
+											</label>
+										</div>
+
+										<div *ngIf="f['useAdminPassword'].value" class="mb-3">
+											<label class="form-label" for="adminPassword">Mot de passe</label>
+											<div class="input-group">
+												<input id="adminPassword"
+													   type="text"
+													   class="form-control"
+													   formControlName="adminPassword"
+													   placeholder="Minimum 6 caractères"
+													   minlength="6">
+												<button class="btn btn-outline-secondary" type="button"
+														(click)="generatePassword()"
+														title="Générer un mot de passe">
+													<i class="fas fa-sync-alt"></i>
+												</button>
+											</div>
+											<div class="form-text">
+												Ce mot de passe sera communiqué directement au livreur par l'admin.
+											</div>
+										</div>
+
+										<div *ngIf="!f['useAdminPassword'].value" class="alert alert-info mb-0">
+											<i class="fas fa-info-circle me-2"></i>
+											Un mot de passe sera généré automatiquement et un email de réinitialisation sera envoyé à l'adresse indiquée.
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 
 						<div class="text-end mt-4">

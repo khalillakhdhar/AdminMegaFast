@@ -1,23 +1,28 @@
-import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Client, ClientUser } from '../models/client.model';
-import { map, take } from 'rxjs/operators';
-import { Observable, firstValueFrom } from 'rxjs';
-import { EmailService } from './email.service';
-import { ToastrService } from 'ngx-toastr';
-import { FirebaseAdminService } from './firebase-admin.service';
+import { Injectable } from "@angular/core";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { Client, ClientUser } from "../models/client.model";
+import { map, take } from "rxjs/operators";
+import { Observable, firstValueFrom } from "rxjs";
+import { EmailService } from "./email.service";
+import { ToastrService } from "ngx-toastr";
+import { FirebaseAdminService } from "./firebase-admin.service";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ClientService {
-  private readonly col = this.afs.collection<Client>('clients');
-  private readonly usersCol = this.afs.collection<ClientUser>('users');
+  private readonly col = this.afs.collection<Client>("clients");
+  private readonly usersCol = this.afs.collection<ClientUser>("users");
 
   private normalizeEmail(raw: any): string {
-    if (!raw) return '';
-    if (typeof raw === 'string') return raw;
-    if (typeof raw === 'object') return (raw.email && typeof raw.email === 'string') ? raw.email : (raw.value && typeof raw.value === 'string' ? raw.value : '');
-    return '';
+    if (!raw) return "";
+    if (typeof raw === "string") return raw;
+    if (typeof raw === "object")
+      return raw.email && typeof raw.email === "string"
+        ? raw.email
+        : raw.value && typeof raw.value === "string"
+        ? raw.value
+        : "";
+    return "";
   }
 
   constructor(
@@ -29,44 +34,59 @@ export class ClientService {
   ) {}
 
   getById(id: string): Observable<Client | undefined> {
-    return this.col.doc(id).valueChanges({ idField: 'id' });
+    return this.col.doc(id).valueChanges({ idField: "id" });
   }
 
-  list(opts?: { limit?: number; orderBy?: 'createdAt' | 'name'; dir?: 'asc' | 'desc' }): Observable<Client[]> {
-    const orderBy = opts?.orderBy || 'createdAt';
-    const dir = opts?.dir || 'desc';
+  list(opts?: {
+    limit?: number;
+    orderBy?: "createdAt" | "name";
+    dir?: "asc" | "desc";
+  }): Observable<Client[]> {
+    const orderBy = opts?.orderBy || "createdAt";
+    const dir = opts?.dir || "desc";
     const limit = opts?.limit || 50;
 
-    return this.afs.collection<Client>('clients', ref =>
-      ref.orderBy(orderBy, dir).limit(limit)
-    ).snapshotChanges().pipe(
-      map(actions => actions.map(a => {
-        const data = a.payload.doc.data() as Client;
-        return { id: a.payload.doc.id, ...data };
-      }))
-    );
+    return this.afs
+      .collection<Client>("clients", (ref) =>
+        ref.orderBy(orderBy, dir).limit(limit)
+      )
+      .snapshotChanges()
+      .pipe(
+        map((actions) =>
+          actions.map((a) => {
+            const data = a.payload.doc.data() as Client;
+            return { id: a.payload.doc.id, ...data };
+          })
+        )
+      );
   }
 
   /**
    * Recherche simple par égalité sur phone ou par "startsWith" sur name (via where + >= + <)
    */
   search(term: string): Observable<Client[]> {
-    const trimmed = (term || '').trim();
+    const trimmed = (term || "").trim();
     if (!trimmed) return this.list({ limit: 50 });
 
     // Priorité au phone exact si numérique
     const isPhone = /^\+?[0-9\s-]+$/.test(trimmed);
     if (isPhone) {
-      return this.afs.collection<Client>('clients', ref =>
-        ref.where('phone', '==', trimmed).limit(20)
-      ).valueChanges({ idField: 'id' }) as Observable<Client[]>;
+      return this.afs
+        .collection<Client>("clients", (ref) =>
+          ref.where("phone", "==", trimmed).limit(20)
+        )
+        .valueChanges({ idField: "id" }) as Observable<Client[]>;
     }
 
     // startsWith sur name (nécessite index)
-    const end = trimmed.replace(/.$/, c => String.fromCharCode(c.charCodeAt(0) + 1));
-    return this.afs.collection<Client>('clients', ref =>
-      ref.where('name', '>=', trimmed).where('name', '<', end).limit(20)
-    ).valueChanges({ idField: 'id' }) as Observable<Client[]>;
+    const end = trimmed.replace(/.$/, (c) =>
+      String.fromCharCode(c.charCodeAt(0) + 1)
+    );
+    return this.afs
+      .collection<Client>("clients", (ref) =>
+        ref.where("name", ">=", trimmed).where("name", "<", end).limit(20)
+      )
+      .valueChanges({ idField: "id" }) as Observable<Client[]>;
   }
 
   create(client: Client) {
@@ -81,9 +101,14 @@ export class ClientService {
    * Create client with user account
    * @param client Client data
    * @param createAccount Whether to create user account
+   * @param adminPassword Optional password set by admin (if not provided, generates random)
    * @returns Promise with client creation result
    */
-  async createWithAccount(client: Client, createAccount: boolean = false): Promise<any> {
+  async createWithAccount(
+    client: Client,
+    createAccount: boolean = false,
+    adminPassword?: string
+  ): Promise<any> {
     try {
       const now = new Date();
       client.createdAt = now;
@@ -91,19 +116,20 @@ export class ClientService {
       client.isActive = true;
 
       if (createAccount && client.email) {
-        // Generate temporary password
-        const temporaryPassword = this.emailService.generateTemporaryPassword();
+        // Use admin-defined password or generate one
+        const password =
+          adminPassword || this.emailService.generateTemporaryPassword();
 
         // Create Firebase user account
         const userCredential = await this.afAuth.createUserWithEmailAndPassword(
           client.email,
-          temporaryPassword
+          password
         );
 
         if (userCredential.user) {
           // Update user profile
           await userCredential.user.updateProfile({
-            displayName: client.name
+            displayName: client.name,
           });
 
           // Store client user data
@@ -111,17 +137,18 @@ export class ClientService {
           const clientUser: ClientUser = {
             uid: userCredential.user.uid,
             email: normalizedEmail,
-            password: '', // Don't store password in plaintext
+            password: "", // Don't store password in plaintext
             displayName: client.name,
-            role: 'client',
+            role: "client",
             isActive: true,
-            createdAt: now
+            createdAt: now,
           };
 
           // Update client data with account info
           client.hasAccount = true;
           client.userId = userCredential.user.uid;
-          client.temporaryPassword = temporaryPassword; // Keep for admin verification
+          client.temporaryPassword = password; // Keep for admin verification
+          client.passwordSetByAdmin = !!adminPassword;
           client.accountCreatedAt = now;
 
           // Save client to Firestore
@@ -131,20 +158,44 @@ export class ClientService {
           clientUser.clientId = clientRef.id;
           await this.usersCol.doc(userCredential.user.uid).set(clientUser);
 
-          this.toastr.success(`Client créé avec compte utilisateur. Mot de passe temporaire: ${temporaryPassword}`);
-          console.log('🔑 Compte créé pour:', client.email, 'Mot de passe:', temporaryPassword);
+          // Show success message with password (admin can share directly with client)
+          if (adminPassword) {
+            this.toastr.success(
+              `Client créé avec le mot de passe défini. Communiquez le mot de passe: ${password}`,
+              "Compte créé",
+              { timeOut: 15000 }
+            );
+          } else {
+            // Send password reset email automatically for auto-generated passwords
+            try {
+              await this.afAuth.sendPasswordResetEmail(client.email);
+              this.toastr.success(
+                `Client créé. Email de réinitialisation envoyé à ${client.email}`
+              );
+            } catch (emailError) {
+              console.error("Erreur envoi email:", emailError);
+              this.toastr.success(
+                `Client créé. Mot de passe temporaire: ${password}`,
+                "Compte créé",
+                { timeOut: 15000 }
+              );
+              this.toastr.warning(
+                "Impossible d'envoyer l'email automatiquement. Partagez le mot de passe manuellement."
+              );
+            }
+          }
 
-          return { clientRef, userCredential, temporaryPassword };
+          return { clientRef, userCredential, temporaryPassword: password };
         }
       } else {
         // Create client without account
         client.hasAccount = false;
         const clientRef = await this.col.add(client);
-        this.toastr.success('Client créé avec succès!');
+        this.toastr.success("Client créé avec succès!");
         return { clientRef };
       }
     } catch (error) {
-      console.error('Erreur lors de la création du client:', error);
+      console.error("Erreur lors de la création du client:", error);
       throw error;
     }
   }
@@ -164,10 +215,14 @@ export class ClientService {
    */
   async deleteClientWithAccount(clientId: string): Promise<void> {
     try {
-      const clientDocSnapshot = await this.col.doc(clientId).get().pipe(take(1)).toPromise();
+      const clientDocSnapshot = await this.col
+        .doc(clientId)
+        .get()
+        .pipe(take(1))
+        .toPromise();
 
       if (!clientDocSnapshot?.exists) {
-        throw new Error('Client non trouvé');
+        throw new Error("Client non trouvé");
       }
 
       const client = { id: clientDocSnapshot.id, ...clientDocSnapshot.data() };
@@ -181,11 +236,17 @@ export class ClientService {
           // Note: Pour supprimer complètement un utilisateur Firebase Auth,
           // il faut utiliser l'Admin SDK côté backend
           // Créez une Cloud Function pour cela
-          console.log('🗑️ Compte utilisateur supprimé de Firestore:', client.email, 'UID:', client.userId);
-          console.warn('⚠️ Pour supprimer complètement de Firebase Auth, utilisez une Cloud Function avec Admin SDK');
-
+          console.log(
+            "🗑️ Compte utilisateur supprimé de Firestore:",
+            client.email,
+            "UID:",
+            client.userId
+          );
+          console.warn(
+            "⚠️ Pour supprimer complètement de Firebase Auth, utilisez une Cloud Function avec Admin SDK"
+          );
         } catch (authError) {
-          console.error('Erreur lors de la suppression du compte:', authError);
+          console.error("Erreur lors de la suppression du compte:", authError);
           // Continue with client deletion even if auth deletion fails
         }
       }
@@ -193,11 +254,10 @@ export class ClientService {
       // Delete client document
       await this.col.doc(clientId).delete();
 
-      this.toastr.success('Client supprimé avec succès');
-      console.log('✅ Client supprimé:', client.name, client.email);
-
+      this.toastr.success("Client supprimé avec succès");
+      console.log("✅ Client supprimé:", client.name, client.email);
     } catch (error) {
-      console.error('Erreur lors de la suppression du client:', error);
+      console.error("Erreur lors de la suppression du client:", error);
       throw error;
     }
   }
@@ -209,20 +269,24 @@ export class ClientService {
    */
   async createAccountForClient(clientId: string): Promise<any> {
     try {
-      const clientDocSnapshot = await this.col.doc(clientId).get().pipe(take(1)).toPromise();
+      const clientDocSnapshot = await this.col
+        .doc(clientId)
+        .get()
+        .pipe(take(1))
+        .toPromise();
 
       if (!clientDocSnapshot?.exists) {
-        throw new Error('Client non trouvé');
+        throw new Error("Client non trouvé");
       }
 
       const client = { id: clientDocSnapshot.id, ...clientDocSnapshot.data() };
 
       if (!client.email) {
-        throw new Error('L\'email du client est requis pour créer un compte');
+        throw new Error("L'email du client est requis pour créer un compte");
       }
 
       if (client.hasAccount) {
-        throw new Error('Ce client a déjà un compte utilisateur');
+        throw new Error("Ce client a déjà un compte utilisateur");
       }
 
       // Generate temporary password
@@ -237,20 +301,20 @@ export class ClientService {
       if (userCredential.user) {
         // Update user profile
         await userCredential.user.updateProfile({
-          displayName: client.name
+          displayName: client.name,
         });
 
         // Store client user data
-  const normalizedEmail2 = this.normalizeEmail(client?.email);
+        const normalizedEmail2 = this.normalizeEmail(client?.email);
         const clientUser: ClientUser = {
           uid: userCredential.user.uid,
           email: normalizedEmail2,
-          password: '', // Don't store password in plaintext
+          password: "", // Don't store password in plaintext
           displayName: client.name,
           clientId: clientId,
-          role: 'client',
+          role: "client",
           isActive: true,
-          createdAt: new Date()
+          createdAt: new Date(),
         };
 
         await this.usersCol.doc(userCredential.user.uid).set(clientUser);
@@ -261,16 +325,23 @@ export class ClientService {
           userId: userCredential.user.uid,
           temporaryPassword: temporaryPassword,
           accountCreatedAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
-        this.toastr.success(`Compte créé! Mot de passe temporaire: ${temporaryPassword}`);
-        console.log('🔑 Compte créé pour:', client.email, 'Mot de passe:', temporaryPassword);
+        this.toastr.success(
+          `Compte créé! Mot de passe temporaire: ${temporaryPassword}`
+        );
+        console.log(
+          "🔑 Compte créé pour:",
+          client.email,
+          "Mot de passe:",
+          temporaryPassword
+        );
 
         return { userCredential, temporaryPassword };
       }
     } catch (error) {
-      console.error('Erreur lors de la création du compte:', error);
+      console.error("Erreur lors de la création du compte:", error);
       throw error;
     }
   }
@@ -281,41 +352,54 @@ export class ClientService {
    */
   async disableAccount(clientId: string): Promise<void> {
     try {
-      const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
+      const clientDocSnapshot = await firstValueFrom(
+        this.col.doc(clientId).get()
+      );
 
       if (!clientDocSnapshot?.exists) {
-        throw new Error('Client non trouvé');
+        throw new Error("Client non trouvé");
       }
 
       const client = { id: clientDocSnapshot.id, ...clientDocSnapshot.data() };
 
       if (!client.hasAccount || !client.userId) {
-        throw new Error('Ce client n\'a pas de compte utilisateur');
+        throw new Error("Ce client n'a pas de compte utilisateur");
       }
 
       // Use Cloud Function to disable user in Firebase Auth
       try {
-        await firstValueFrom(this.firebaseAdmin.disableUserAccount(client.userId));
-        this.toastr.success('Compte client désactivé avec succès dans Firebase Auth');
+        await firstValueFrom(
+          this.firebaseAdmin.disableUserAccount(client.userId)
+        );
+        this.toastr.success(
+          "Compte client désactivé avec succès dans Firebase Auth"
+        );
       } catch (cloudFunctionError) {
-        console.error('Erreur Cloud Function:', cloudFunctionError);
+        console.error("Erreur Cloud Function:", cloudFunctionError);
         // Fallback: disable only in Firestore
         await this.usersCol.doc(client.userId).update({
           isActive: false,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
         await this.col.doc(clientId).update({
           isActive: false,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
-        this.toastr.warning('Compte désactivé localement seulement (Cloud Function indisponible)');
+        this.toastr.warning(
+          "Compte désactivé localement seulement (Cloud Function indisponible)"
+        );
       }
 
-      console.log('⚠️ Compte désactivé pour:', client.email, 'UID:', client.userId);
+      console.log(
+        "⚠️ Compte désactivé pour:",
+        client.email,
+        "UID:",
+        client.userId
+      );
     } catch (error) {
-      console.error('Erreur lors de la désactivation du compte:', error);
+      console.error("Erreur lors de la désactivation du compte:", error);
       throw error;
     }
   }
@@ -326,53 +410,66 @@ export class ClientService {
    */
   async enableAccount(clientId: string): Promise<void> {
     try {
-      const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
+      const clientDocSnapshot = await firstValueFrom(
+        this.col.doc(clientId).get()
+      );
 
       if (!clientDocSnapshot?.exists) {
-        throw new Error('Client non trouvé');
+        throw new Error("Client non trouvé");
       }
 
       const client = { id: clientDocSnapshot.id, ...clientDocSnapshot.data() };
 
       if (!client.hasAccount || !client.userId) {
-        throw new Error('Ce client n\'a pas de compte utilisateur');
+        throw new Error("Ce client n'a pas de compte utilisateur");
       }
 
       // Use Cloud Function to enable user in Firebase Auth
       try {
-        await firstValueFrom(this.firebaseAdmin.enableUserAccount(client.userId));
+        await firstValueFrom(
+          this.firebaseAdmin.enableUserAccount(client.userId)
+        );
 
         // Update local data to reflect enabled status
         await this.usersCol.doc(client.userId).update({
           isActive: true,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
         await this.col.doc(clientId).update({
           isActive: true,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
-        this.toastr.success('Compte client réactivé avec succès dans Firebase Auth');
+        this.toastr.success(
+          "Compte client réactivé avec succès dans Firebase Auth"
+        );
       } catch (cloudFunctionError) {
-        console.error('Erreur Cloud Function:', cloudFunctionError);
+        console.error("Erreur Cloud Function:", cloudFunctionError);
         // Fallback: enable only in Firestore
         await this.usersCol.doc(client.userId).update({
           isActive: true,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
         await this.col.doc(clientId).update({
           isActive: true,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
-        this.toastr.warning('Compte réactivé localement seulement (Cloud Function indisponible)');
+        this.toastr.warning(
+          "Compte réactivé localement seulement (Cloud Function indisponible)"
+        );
       }
 
-      console.log('✅ Compte réactivé pour:', client.email, 'UID:', client.userId);
+      console.log(
+        "✅ Compte réactivé pour:",
+        client.email,
+        "UID:",
+        client.userId
+      );
     } catch (error) {
-      console.error('Erreur lors de la réactivation du compte:', error);
+      console.error("Erreur lors de la réactivation du compte:", error);
       throw error;
     }
   }
@@ -383,25 +480,30 @@ export class ClientService {
    */
   async resetClientPassword(clientId: string): Promise<void> {
     try {
-      const clientDocSnapshot = await firstValueFrom(this.col.doc(clientId).get());
+      const clientDocSnapshot = await firstValueFrom(
+        this.col.doc(clientId).get()
+      );
 
       if (!clientDocSnapshot?.exists) {
-        throw new Error('Client non trouvé');
+        throw new Error("Client non trouvé");
       }
 
       const client = { id: clientDocSnapshot.id, ...clientDocSnapshot.data() };
 
       if (!client.hasAccount || !client.email) {
-        throw new Error('Ce client n\'a pas de compte utilisateur ou d\'email');
+        throw new Error("Ce client n'a pas de compte utilisateur ou d'email");
       }
 
       // Send password reset email using Firebase Auth
       await this.afAuth.sendPasswordResetEmail(client.email);
 
-      this.toastr.success('Email de réinitialisation envoyé avec succès');
-      console.log('🔄 Reset password envoyé pour:', client.email);
+      this.toastr.success("Email de réinitialisation envoyé avec succès");
+      console.log("🔄 Reset password envoyé pour:", client.email);
     } catch (error) {
-      console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+      console.error(
+        "Erreur lors de la réinitialisation du mot de passe:",
+        error
+      );
       throw error;
     }
   }
@@ -411,10 +513,11 @@ export class ClientService {
    * @param userId Firebase User ID
    */
   getClientByUserId(userId: string): Observable<Client | undefined> {
-    return this.afs.collection<Client>('clients', ref =>
-      ref.where('userId', '==', userId).limit(1)
-    ).valueChanges({ idField: 'id' }).pipe(
-      map(clients => clients.length > 0 ? clients[0] : undefined)
-    );
+    return this.afs
+      .collection<Client>("clients", (ref) =>
+        ref.where("userId", "==", userId).limit(1)
+      )
+      .valueChanges({ idField: "id" })
+      .pipe(map((clients) => (clients.length > 0 ? clients[0] : undefined)));
   }
 }

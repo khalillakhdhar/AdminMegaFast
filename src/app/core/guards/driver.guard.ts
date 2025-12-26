@@ -1,39 +1,37 @@
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { inject } from "@angular/core";
+import { Router, CanActivateFn } from "@angular/router";
 
-import { AuthenticationService } from '../services/auth.service';
+import { AuthenticationService } from "../services/auth.service";
 
-@Injectable({ providedIn: 'root' })
-export class DriverGuard implements CanActivate {
-    constructor(
-        private router: Router,
-        private authenticationService: AuthenticationService
-    ) { }
+/**
+ * Functional guard that checks if user is a driver
+ */
+export const DriverGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  const authService = inject(AuthenticationService);
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        const currentUser = this.authenticationService.currentUser();
+  const currentUser = authService.currentUser();
 
-        if (currentUser) {
-            // Check if user is a driver
-            if (this.authenticationService.isDriver()) {
-                return true;
-            }
-
-            // If admin, redirect to admin dashboard
-            if (this.authenticationService.isAdmin()) {
-                this.router.navigate(['/megafast']);
-                return false;
-            }
-
-            // If client, redirect to client portal
-            if (this.authenticationService.isClient()) {
-                this.router.navigate(['/client']);
-                return false;
-            }
-        }
-
-        // not logged in or no role, redirect to login
-        this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
-        return false;
+  if (currentUser) {
+    // Check if user is a driver
+    if (authService.isDriver()) {
+      return true;
     }
-}
+
+    // If admin, redirect to admin dashboard
+    if (authService.isAdmin()) {
+      router.navigate(["/megafast"]);
+      return false;
+    }
+
+    // If client, redirect to client portal
+    if (authService.isClient()) {
+      router.navigate(["/client"]);
+      return false;
+    }
+  }
+
+  // not logged in or no role, redirect to login
+  router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+  return false;
+};

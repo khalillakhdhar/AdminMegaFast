@@ -1,0 +1,295 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h4 class="mb-1">
+            <i class="bx bx-user-circle me-2"></i>Gestion des Utilisateurs
+          </h4>
+          <p class="text-muted mb-0">Gérez les comptes utilisateurs, mots de passe et accès</p>
+        </div>
+        <button class="btn btn-outline-primary" (click)="refreshUsers()">
+          <i class="bx bx-refresh me-1"></i>Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle me-3">
+              <i class="bx bx-group text-primary fs-4 d-flex align-items-center justify-content-center h-100"></i>
+            </div>
+            <div>
+              <h5 class="mb-0">{{ totalUsers }}</h5>
+              <small class="text-muted">Total utilisateurs</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="avatar-sm bg-success bg-opacity-10 rounded-circle me-3">
+              <i class="bx bx-check-circle text-success fs-4 d-flex align-items-center justify-content-center h-100"></i>
+            </div>
+            <div>
+              <h5 class="mb-0">{{ activeUsers }}</h5>
+              <small class="text-muted">Comptes actifs</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="avatar-sm bg-info bg-opacity-10 rounded-circle me-3">
+              <i class="bx bx-user text-info fs-4 d-flex align-items-center justify-content-center h-100"></i>
+            </div>
+            <div>
+              <h5 class="mb-0">{{ clientUsers }}</h5>
+              <small class="text-muted">Clients</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="avatar-sm bg-warning bg-opacity-10 rounded-circle me-3">
+              <i class="bx bx-car text-warning fs-4 d-flex align-items-center justify-content-center h-100"></i>
+            </div>
+            <div>
+              <h5 class="mb-0">{{ driverUsers }}</h5>
+              <small class="text-muted">Livreurs</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-white">
+              <i class="bx bx-search"></i>
+            </span>
+            <input type="text" class="form-control" placeholder="Rechercher par nom, email..."
+                   [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="roleFilter" (ngModelChange)="onRoleFilterChange()">
+            <option value="all">Tous les rôles</option>
+            <option value="client">Clients</option>
+            <option value="driver">Livreurs</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actifs</option>
+            <option value="inactive">Inactifs</option>
+          </select>
+        </div>
+        <div class="col-md-2 text-end">
+          <span class="badge bg-secondary">{{ filteredUsers.length }} résultats</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      @if (loading) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="text-muted mt-2">Chargement des utilisateurs...</p>
+        </div>
+      } @else if (filteredUsers.length === 0) {
+        <div class="text-center py-5">
+          <i class="bx bx-user-x display-4 text-muted"></i>
+          <p class="text-muted mt-2">Aucun utilisateur trouvé</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Mot de passe</th>
+                <th>Créé le</th>
+                <th>Dernière connexion</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredUsers; track user.uid) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                        <i class="bx" [ngClass]="user.role === 'client' ? 'bx-user' : 'bx-car'"></i>
+                      </div>
+                      <div>
+                        <div class="fw-medium">{{ user.displayName }}</div>
+                        @if (user.entityName && user.entityName !== user.displayName) {
+                          <small class="text-muted">{{ user.entityName }}</small>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <code class="text-primary">{{ user.email }}</code>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+                      {{ getRoleLabel(user.role) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (user.isActive) {
+                      <span class="badge bg-success-subtle text-success">
+                        <i class="bx bx-check-circle me-1"></i>Actif
+                      </span>
+                    } @else {
+                      <span class="badge bg-danger-subtle text-danger">
+                        <i class="bx bx-x-circle me-1"></i>Inactif
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <span [ngClass]="getPasswordStatus(user).class">
+                      <i class="bx bx-lock-alt me-1"></i>
+                      {{ getPasswordStatus(user).label }}
+                    </span>
+                  </td>
+                  <td>
+                    <small>{{ formatDate(user.createdAt) }}</small>
+                  </td>
+                  <td>
+                    <small>{{ formatDate(user.lastLoginAt) }}</small>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" (click)="openResetPasswordModal(user)"
+                              title="Réinitialiser le mot de passe">
+                        <i class="bx bx-key"></i>
+                      </button>
+                      <button class="btn btn-outline-info" (click)="sendPasswordResetEmail(user)"
+                              title="Envoyer email de réinitialisation">
+                        <i class="bx bx-envelope"></i>
+                      </button>
+                      <button class="btn"
+                              [ngClass]="user.isActive ? 'btn-outline-warning' : 'btn-outline-success'"
+                              (click)="toggleUserStatus(user)"
+                              [title]="user.isActive ? 'Désactiver le compte' : 'Activer le compte'">
+                        <i class="bx" [ngClass]="user.isActive ? 'bx-pause' : 'bx-play'"></i>
+                      </button>
+                      @if (user.entityId) {
+                        <button class="btn btn-outline-secondary" (click)="viewEntity(user)"
+                                title="Voir le profil">
+                          <i class="bx bx-show"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<ng-template #resetPasswordModal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bx bx-key me-2"></i>Réinitialiser le mot de passe
+    </h5>
+    <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedUser) {
+      <div class="alert alert-info mb-3">
+        <i class="bx bx-info-circle me-2"></i>
+        Réinitialisation du mot de passe pour <strong>{{ selectedUser.displayName }}</strong>
+        ({{ selectedUser.email }})
+      </div>
+
+      <form [formGroup]="passwordForm">
+        <div class="mb-3">
+          <label class="form-label">Nouveau mot de passe</label>
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                   formControlName="newPassword" placeholder="Minimum 6 caractères">
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+              <i class="bx" [ngClass]="showPassword ? 'bx-hide' : 'bx-show'"></i>
+            </button>
+            <button class="btn btn-outline-primary" type="button" (click)="generatePassword()">
+              <i class="bx bx-refresh me-1"></i>Générer
+            </button>
+          </div>
+          @if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.errors?.['minlength']) {
+            <small class="text-danger">Le mot de passe doit contenir au moins 6 caractères</small>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                 formControlName="confirmPassword" placeholder="Confirmer le mot de passe">
+          @if (passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched) {
+            <small class="text-danger">Les mots de passe ne correspondent pas</small>
+          }
+        </div>
+
+        @if (generatedPassword) {
+          <div class="alert alert-success">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>
+                <i class="bx bx-check-circle me-2"></i>
+                Mot de passe généré: <code class="ms-2">{{ generatedPassword }}</code>
+              </span>
+              <button class="btn btn-sm btn-outline-success" type="button"
+                      (click)="copyToClipboard(generatedPassword)">
+                <i class="bx bx-copy"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </form>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modalRef?.hide()">Annuler</button>
+    <button type="button" class="btn btn-primary" (click)="resetPassword()"
+            [disabled]="passwordForm.invalid">
+      <i class="bx bx-check me-1"></i>Définir le mot de passe
+    </button>
+  </div>
+</ng-template>

@@ -1,20 +1,20 @@
-import { GeolocationPosition } from '../services/geolocation.service';
+import { GeolocationPosition } from "../services/geolocation.service";
 
 export interface DriverVehicle {
-  type: 'car' | 'motorcycle' | 'van' | 'truck';
+  type: "car" | "motorcycle" | "van" | "truck";
   brand?: string;
   model?: string;
   licensePlate: string;
   color?: string;
-  fuelType?: 'gasoline' | 'diesel' | 'electric' | 'hybrid';
+  fuelType?: "gasoline" | "diesel" | "electric" | "hybrid";
   maxCapacity?: number; // en kg
   year?: number;
 }
 
 export interface DriverLocation {
   position: GeolocationPosition;
-  status: 'online' | 'offline' | 'busy' | 'available';
-  activity: 'idle' | 'driving' | 'delivering' | 'pickup';
+  status: "online" | "offline" | "busy" | "available";
+  activity: "idle" | "driving" | "delivering" | "pickup";
   lastUpdate: any; // Firebase Timestamp
   sessionId?: string;
   accuracy?: number;
@@ -33,7 +33,7 @@ export interface DriverLocationPreferences {
 export interface DriverZone {
   id: string;
   name: string;
-  type: 'preferred' | 'assigned' | 'restricted';
+  type: "preferred" | "assigned" | "restricted";
   coordinates: google.maps.LatLngLiteral[];
   priority: number;
   active: boolean;
@@ -59,16 +59,16 @@ export interface DriverStats {
 
 export interface Driver {
   id?: string;
-  uid?: string;              // Firebase Auth UID
+  uid?: string; // Firebase Auth UID
   name: string;
   displayName: string;
   phone: string;
   email: string;
-  vehicle?: DriverVehicle;   // Informations véhicule étendues
+  vehicle?: DriverVehicle; // Informations véhicule étendues
   cin?: string;
-  zones?: DriverZone[];      // Zones de livraison étendues
+  zones?: DriverZone[]; // Zones de livraison étendues
   active: boolean;
-  status?: 'available' | 'busy' | 'offline';  // Driver status
+  status?: "available" | "busy" | "offline"; // Driver status
   createdAt?: any;
   updatedAt?: any;
 
@@ -87,8 +87,8 @@ export interface Driver {
   };
 
   // Informations personnelles étendues
-  profilePicture?: string;   // URL de la photo de profil
-  dateOfBirth?: any;         // Date de naissance
+  profilePicture?: string; // URL de la photo de profil
+  dateOfBirth?: any; // Date de naissance
   address?: {
     line1?: string;
     line2?: string;
@@ -106,12 +106,12 @@ export interface Driver {
 
   // Statistiques et performances
   stats?: DriverStats;
-  rating?: number;           // Note moyenne
-  totalRatings?: number;     // Nombre total d'évaluations
+  rating?: number; // Note moyenne
+  totalRatings?: number; // Nombre total d'évaluations
 
   // Paramètres de sécurité
-  deviceId?: string;         // ID de l'appareil mobile
-  lastDeviceUpdate?: any;    // Dernière mise à jour de l'appareil
+  deviceId?: string; // ID de l'appareil mobile
+  lastDeviceUpdate?: any; // Dernière mise à jour de l'appareil
   securitySettings?: {
     twoFactorEnabled: boolean;
     locationAlertsEnabled: boolean;
@@ -119,30 +119,31 @@ export interface Driver {
   };
 
   // Authentication fields
-  hasAccount?: boolean;      // Indicates if driver has a user account
-  userId?: string;           // Firebase Auth UID (same as uid but kept for consistency)
+  hasAccount?: boolean; // Indicates if driver has a user account
+  userId?: string; // Firebase Auth UID (same as uid but kept for consistency)
   temporaryPassword?: string; // Temporary password for new accounts
-  accountCreatedAt?: any;    // When the account was created
-  isActive?: boolean;        // Account status (for authentication)
+  passwordSetByAdmin?: boolean; // True if password was set by admin directly
+  accountCreatedAt?: any; // When the account was created
+  isActive?: boolean; // Account status (for authentication)
 }
 
 export interface DriverUser {
-  uid: string;               // Firebase Auth UID
+  uid: string; // Firebase Auth UID
   email: string;
-  password?: string;         // Don't store in plaintext
+  password?: string; // Don't store in plaintext
   displayName: string;
-  driverId?: string;         // Reference to driver document
-  role: 'driver';            // User role
-  isActive: boolean;         // Account status
-  createdAt: any;            // Creation timestamp
-  updatedAt?: any;           // Last update timestamp
+  driverId?: string; // Reference to driver document
+  role: "driver"; // User role
+  isActive: boolean; // Account status
+  createdAt: any; // Creation timestamp
+  updatedAt?: any; // Last update timestamp
 
   // Extension sécurité
-  lastLoginAt?: any;         // Dernière connexion
-  loginAttempts?: number;    // Tentatives de connexion échouées
-  lockedUntil?: any;         // Verrouillage temporaire du compte
-  passwordChangedAt?: any;   // Dernière modification du mot de passe
-  deviceTokens?: string[];   // Tokens pour notifications push
+  lastLoginAt?: any; // Dernière connexion
+  loginAttempts?: number; // Tentatives de connexion échouées
+  lockedUntil?: any; // Verrouillage temporaire du compte
+  passwordChangedAt?: any; // Dernière modification du mot de passe
+  deviceTokens?: string[]; // Tokens pour notifications push
 }
 
 // Interfaces additionnelles pour la géolocalisation
@@ -152,7 +153,7 @@ export interface DriverLocationUpdate {
   timestamp: any;
   metadata?: {
     battery?: number;
-    network?: 'wifi' | '4g' | '3g' | 'offline';
+    network?: "wifi" | "4g" | "3g" | "offline";
     speed?: number;
     accuracy?: number;
   };
@@ -180,8 +181,8 @@ export interface Delivery {
   customerPhone: string;
   address: string;
   position: google.maps.LatLngLiteral;
-  status: 'pending' | 'in_progress' | 'delivered' | 'failed';
-  priority: 'low' | 'normal' | 'high' | 'urgent';
+  status: "pending" | "in_progress" | "delivered" | "failed";
+  priority: "low" | "normal" | "high" | "urgent";
   instructions?: string;
   deliveryWindow?: {
     start: string;

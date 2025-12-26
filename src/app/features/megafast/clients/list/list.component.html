@@ -238,7 +238,7 @@
                                   title="Modifier">
                             <i class="bx bx-edit-alt"></i>
                           </button>
-                          
+
                           <!-- Account Management Actions -->
                           @if (!hasAccount(client) && client.email) {
                             <button type="button"
@@ -248,7 +248,7 @@
                               <i class="bx bx-user-plus"></i>
                             </button>
                           }
-                          
+
                           @if (hasAccount(client)) {
                             <div class="btn-group" aria-label="Actions compte">
                               <button type="button"
@@ -274,7 +274,7 @@
                               }
                             </div>
                           }
-                          
+
                           <button type="button"
                                   class="btn btn-light btn-sm text-danger"
                                   (click)="openDeleteModal(client.id!)"
@@ -444,10 +444,51 @@
                   <strong>Créer un compte utilisateur pour ce client</strong>
                 </label>
               </div>
+
+              <!-- Password Configuration Section -->
+              @if (clientForm.get('createAccount')?.value) {
+                <div class="mt-3 p-3 border rounded bg-light">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="useAdminPassword" formControlName="useAdminPassword">
+                    <label class="form-check-label" for="useAdminPassword">
+                      <strong>Définir un mot de passe manuellement</strong>
+                      <small class="d-block text-muted">Évite l'envoi d'email automatique</small>
+                    </label>
+                  </div>
+
+                  @if (clientForm.get('useAdminPassword')?.value) {
+                    <div class="row g-2 align-items-end">
+                      <div class="col-8">
+                        <label for="adminPassword" class="form-label">Mot de passe</label>
+                        <input type="text" class="form-control" id="adminPassword" formControlName="adminPassword"
+                               placeholder="Minimum 6 caractères" minlength="6">
+                        @if (clientForm.get('adminPassword')?.touched && clientForm.get('adminPassword')?.errors?.['minlength']) {
+                          <small class="text-danger">Le mot de passe doit contenir au moins 6 caractères</small>
+                        }
+                      </div>
+                      <div class="col-4">
+                        <button type="button" class="btn btn-outline-secondary w-100" (click)="generatePassword()">
+                          <i class="bx bx-refresh me-1"></i>Générer
+                        </button>
+                      </div>
+                    </div>
+                    <div class="alert alert-info mt-2 mb-0">
+                      <i class="bx bx-info-circle me-1"></i>
+                      <small>Notez ce mot de passe et communiquez-le directement au client. Aucun email ne sera envoyé.</small>
+                    </div>
+                  } @else {
+                    <div class="alert alert-warning mb-0">
+                      <i class="bx bx-envelope me-1"></i>
+                      <small>Un email sera envoyé avec un mot de passe généré automatiquement.</small>
+                    </div>
+                  }
+                </div>
+              }
+
               <div class="mt-2">
                 <small class="text-muted">
                   <i class="bx bx-info-circle me-1"></i>
-                  Si activé, un compte sera créé et un email avec les informations de connexion sera envoyé au client.
+                  Si activé, un compte sera créé permettant au client d'accéder au portail client.
                   <strong>L'email est requis pour cette option.</strong>
                 </small>
               </div>

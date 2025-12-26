@@ -1,19 +1,32 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { Subject } from "rxjs";
+import { takeUntil, debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { ToastrService } from "ngx-toastr";
 
-import { DriverService, ShipmentFilters, CityOption } from '../../../core/services/driver-portal.service';
-import { Shipment, ShipmentStatus } from '../../../core/models/shipment.model';
-import { DeliveryAttempt } from '../../../core/models/delivery-attempt.model';
-import { ShipmentDetailModalComponent } from './shipment-detail-modal.component';
-import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery-failure-modal.component';
+import {
+  DriverPortalService,
+  ShipmentFilters,
+  CityOption,
+} from "../../../core/services/driver-portal.service";
+import { Shipment, ShipmentStatus } from "../../../core/models/shipment.model";
+import { DeliveryAttempt } from "../../../core/models/delivery-attempt.model";
+import { ShipmentDetailModalComponent } from "./shipment-detail-modal.component";
+import {
+  DeliveryFailureModalComponent,
+  DeliveryFailureResult,
+} from "./delivery-failure-modal.component";
 
 @Component({
-  selector: 'app-driver-shipments',
+  selector: "app-driver-shipments",
   standalone: true,
-  imports: [CommonModule, FormsModule, ShipmentDetailModalComponent, DeliveryFailureModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ShipmentDetailModalComponent,
+    DeliveryFailureModalComponent,
+  ],
   template: `
     <div class="driver-shipments">
       <!-- Page Header -->
@@ -35,7 +48,11 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
         <div class="filters-row">
           <div class="filter-group">
             <label>Ville destination</label>
-            <select [(ngModel)]="filters.city" (ngModelChange)="onFilterChange()" class="filter-select">
+            <select
+              [(ngModel)]="filters.city"
+              (ngModelChange)="onFilterChange()"
+              class="filter-select"
+            >
               <option value="">Toutes les villes</option>
               <option *ngFor="let city of availableCities" [value]="city.value">
                 {{ city.label }}
@@ -45,16 +62,27 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
 
           <div class="filter-group">
             <label>Ville départ</label>
-            <select [(ngModel)]="filters.pickupCity" (ngModelChange)="onFilterChange()" class="filter-select">
+            <select
+              [(ngModel)]="filters.pickupCity"
+              (ngModelChange)="onFilterChange()"
+              class="filter-select"
+            >
               <option value="">Toutes les villes</option>
-              <option *ngFor="let city of availablePickupCities" [value]="city.value">
+              <option
+                *ngFor="let city of availablePickupCities"
+                [value]="city.value"
+              >
                 {{ city.label }}
               </option>
             </select>
           </div>
           <div class="filter-group">
             <label>Statut</label>
-            <select [(ngModel)]="filters.status" (ngModelChange)="onFilterChange()" class="filter-select">
+            <select
+              [(ngModel)]="filters.status"
+              (ngModelChange)="onFilterChange()"
+              class="filter-select"
+            >
               <option value="">Tous les statuts</option>
               <option value="assigned">Assigné</option>
               <option value="picked_up">Récupéré</option>
@@ -71,10 +99,9 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
               [(ngModel)]="filters.barcode"
               (ngModelChange)="onSearchChange($event)"
               placeholder="Rechercher par code-barres"
-              class="filter-input">
+              class="filter-input"
+            />
           </div>
-
-
 
           <div class="filter-group">
             <label>Client</label>
@@ -83,7 +110,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
               [(ngModel)]="filters.clientName"
               (ngModelChange)="onFilterChange()"
               placeholder="Nom du client"
-              class="filter-input">
+              class="filter-input"
+            />
           </div>
 
           <div class="filter-group">
@@ -92,7 +120,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
               type="date"
               [(ngModel)]="filters.dateFrom"
               (ngModelChange)="onFilterChange()"
-              class="filter-input">
+              class="filter-input"
+            />
           </div>
 
           <div class="filter-group">
@@ -101,10 +130,15 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
               type="date"
               [(ngModel)]="filters.dateTo"
               (ngModelChange)="onFilterChange()"
-              class="filter-input">
+              class="filter-input"
+            />
           </div>
 
-          <button class="clear-filters-btn" (click)="clearFilters()" type="button">
+          <button
+            class="clear-filters-btn"
+            (click)="clearFilters()"
+            type="button"
+          >
             <i class="fas fa-times"></i>
             Effacer
           </button>
@@ -115,8 +149,13 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
           <button
             class="toggle-btn"
             (click)="showAdvancedFilters = !showAdvancedFilters"
-            type="button">
-            <i class="fas" [class.fa-chevron-down]="!showAdvancedFilters" [class.fa-chevron-up]="showAdvancedFilters"></i>
+            type="button"
+          >
+            <i
+              class="fas"
+              [class.fa-chevron-down]="!showAdvancedFilters"
+              [class.fa-chevron-up]="showAdvancedFilters"
+            ></i>
             Filtres avancés
           </button>
         </div>
@@ -131,7 +170,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 [(ngModel)]="filters.amountFrom"
                 (ngModelChange)="onFilterChange()"
                 placeholder="0"
-                class="filter-input">
+                class="filter-input"
+              />
             </div>
 
             <div class="filter-group">
@@ -141,7 +181,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 [(ngModel)]="filters.amountTo"
                 (ngModelChange)="onFilterChange()"
                 placeholder="1000"
-                class="filter-input">
+                class="filter-input"
+              />
             </div>
 
             <div class="filter-group">
@@ -151,7 +192,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 [(ngModel)]="filters.delegation"
                 (ngModelChange)="onFilterChange()"
                 placeholder="Délégation"
-                class="filter-input">
+                class="filter-input"
+              />
             </div>
 
             <div class="filter-group">
@@ -161,7 +203,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 [(ngModel)]="filters.pickupDelegation"
                 (ngModelChange)="onFilterChange()"
                 placeholder="Délégation"
-                class="filter-input">
+                class="filter-input"
+              />
             </div>
           </div>
         </div>
@@ -175,15 +218,15 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
         </div>
         <div class="stat-item assigned">
           <span class="stat-label">Assignés:</span>
-          <span class="stat-value">{{ getStatusCount('assigned') }}</span>
+          <span class="stat-value">{{ getStatusCount("assigned") }}</span>
         </div>
         <div class="stat-item transit">
           <span class="stat-label">En transit:</span>
-          <span class="stat-value">{{ getStatusCount('in_transit') }}</span>
+          <span class="stat-value">{{ getStatusCount("in_transit") }}</span>
         </div>
         <div class="stat-item delivered">
           <span class="stat-label">Livrés:</span>
-          <span class="stat-value">{{ getStatusCount('delivered') }}</span>
+          <span class="stat-value">{{ getStatusCount("delivered") }}</span>
         </div>
       </div>
 
@@ -197,8 +240,15 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
 
       <!-- Shipments List -->
       <div class="shipments-container" *ngIf="!isLoading">
-        <div class="shipments-list" *ngIf="shipments.length > 0; else noShipments">
-          <div class="shipment-card" *ngFor="let shipment of shipments" [class]="shipment.status">
+        <div
+          class="shipments-list"
+          *ngIf="shipments.length > 0; else noShipments"
+        >
+          <div
+            class="shipment-card"
+            *ngFor="let shipment of shipments"
+            [class]="shipment.status"
+          >
             <div class="shipment-header">
               <div class="shipment-code">
                 <i class="fas fa-box"></i>
@@ -217,14 +267,18 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                   <i class="fas fa-user"></i>
                   <div class="detail-content">
                     <span class="detail-label">Destinataire</span>
-                    <span class="detail-value">{{ shipment.clientName || 'Non spécifié' }}</span>
+                    <span class="detail-value">{{
+                      shipment.clientName || "Non spécifié"
+                    }}</span>
                   </div>
                 </div>
                 <div class="detail-item">
                   <i class="fas fa-phone"></i>
                   <div class="detail-content">
                     <span class="detail-label">Téléphone</span>
-                    <span class="detail-value">{{ shipment.clientPhone || 'Non spécifié' }}</span>
+                    <span class="detail-value">{{
+                      shipment.clientPhone || "Non spécifié"
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -235,10 +289,12 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                   <div class="detail-content">
                     <span class="detail-label">Adresse destination</span>
                     <span class="detail-value">
-                      {{ shipment.address || 'Adresse non spécifiée' }}
+                      {{ shipment.address || "Adresse non spécifiée" }}
                       <span *ngIf="shipment.city" class="city-info">
                         - {{ shipment.city }}
-                        <span *ngIf="shipment.delegation">({{ shipment.delegation }})</span>
+                        <span *ngIf="shipment.delegation"
+                          >({{ shipment.delegation }})</span
+                        >
                       </span>
                     </span>
                   </div>
@@ -254,7 +310,9 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                       {{ shipment.pickupAddress }}
                       <span *ngIf="shipment.pickupCity" class="city-info">
                         - {{ shipment.pickupCity }}
-                        <span *ngIf="shipment.pickupDelegation">({{ shipment.pickupDelegation }})</span>
+                        <span *ngIf="shipment.pickupDelegation"
+                          >({{ shipment.pickupDelegation }})</span
+                        >
                       </span>
                     </span>
                   </div>
@@ -276,7 +334,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                   <button
                     class="map-btn"
                     (click)="openInMaps(shipment.geo!)"
-                    type="button">
+                    type="button"
+                  >
                     <i class="fas fa-external-link-alt"></i>
                     Ouvrir dans Maps
                   </button>
@@ -288,7 +347,9 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                   <i class="fas fa-money-bill"></i>
                   <div class="detail-content">
                     <span class="detail-label">Montant COD</span>
-                    <span class="detail-value amount">{{ formatCurrency(shipment.amount) }}</span>
+                    <span class="detail-value amount">{{
+                      formatCurrency(shipment.amount)
+                    }}</span>
                   </div>
                 </div>
                 <div class="detail-item" *ngIf="shipment.weight">
@@ -302,7 +363,9 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                   <i class="fas fa-calendar"></i>
                   <div class="detail-content">
                     <span class="detail-label">Créé le</span>
-                    <span class="detail-value">{{ formatDate(shipment.createdAt) }}</span>
+                    <span class="detail-value">{{
+                      formatDate(shipment.createdAt)
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -323,7 +386,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn pickup"
                 *ngIf="shipment.status === 'assigned'"
                 (click)="updateStatus(shipment.id!, 'picked_up')"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-hand-paper"></i>
                 Récupérer
               </button>
@@ -332,7 +396,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn transit"
                 *ngIf="shipment.status === 'picked_up'"
                 (click)="updateStatus(shipment.id!, 'in_transit')"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-truck"></i>
                 En transit
               </button>
@@ -341,7 +406,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn deliver"
                 *ngIf="shipment.status === 'in_transit'"
                 (click)="updateStatus(shipment.id!, 'delivered')"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-check"></i>
                 Livrer
               </button>
@@ -351,7 +417,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn failure"
                 *ngIf="['picked_up', 'in_transit'].includes(shipment.status)"
                 (click)="reportDeliveryFailure(shipment)"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-exclamation-triangle"></i>
                 Échec
               </button>
@@ -360,7 +427,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn return"
                 *ngIf="['picked_up', 'in_transit'].includes(shipment.status)"
                 (click)="updateStatus(shipment.id!, 'returned')"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-undo"></i>
                 Retourner
               </button>
@@ -370,7 +438,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
                 class="action-btn retry"
                 *ngIf="shipment.status === 'returned'"
                 (click)="scheduleRetry(shipment)"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-redo"></i>
                 Nouvelle tentative
               </button>
@@ -378,7 +447,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
               <button
                 class="action-btn details"
                 (click)="viewShipmentDetails(shipment)"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-info-circle"></i>
                 Détails
               </button>
@@ -391,7 +461,11 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
             <i class="fas fa-box-open"></i>
             <h2>Aucun colis trouvé</h2>
             <p>Aucun colis ne correspond à vos critères de recherche.</p>
-            <button class="clear-filters-btn" (click)="clearFilters()" type="button">
+            <button
+              class="clear-filters-btn"
+              (click)="clearFilters()"
+              type="button"
+            >
               Effacer les filtres
             </button>
           </div>
@@ -403,7 +477,8 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
     <app-shipment-detail-modal
       [shipment]="selectedShipment"
       [isVisible]="isDetailModalVisible"
-      (closeEvent)="closeDetailModal()">
+      (closeEvent)="closeDetailModal()"
+    >
     </app-shipment-detail-modal>
 
     <!-- Delivery Failure Modal -->
@@ -412,10 +487,11 @@ import { DeliveryFailureModalComponent, DeliveryFailureResult } from './delivery
       [driverId]="getCurrentDriverId()"
       [isVisible]="isFailureModalVisible"
       (closed)="closeFailureModal()"
-      (confirmed)="onFailureConfirmed($event)">
+      (confirmed)="onFailureConfirmed($event)"
+    >
     </app-delivery-failure-modal>
   `,
-  styleUrls: ['./driver-shipments.component.scss']
+  styleUrls: ["./driver-shipments.component.scss"],
 })
 export class DriverShipmentsComponent implements OnInit, OnDestroy {
   shipments: Shipment[] = [];
@@ -433,34 +509,33 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
   isFailureModalVisible = false;
 
   filters = {
-    status: '',
-    barcode: '',
-    dateFrom: '',
-    dateTo: '',
-    city: '',
-    delegation: '',
-    pickupCity: '',
-    pickupDelegation: '',
-    clientName: '',
+    status: "",
+    barcode: "",
+    dateFrom: "",
+    dateTo: "",
+    city: "",
+    delegation: "",
+    pickupCity: "",
+    pickupDelegation: "",
+    clientName: "",
     amountFrom: null as number | null,
-    amountTo: null as number | null
+    amountTo: null as number | null,
   };
 
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
 
   constructor(
-    private readonly driverService: DriverService
+    private readonly driverService: DriverPortalService,
+    private readonly toastr: ToastrService
   ) {
     // Setup search with debounce
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(searchTerm => {
-      this.filters.barcode = searchTerm;
-      this.loadShipments();
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((searchTerm) => {
+        this.filters.barcode = searchTerm;
+        this.loadShipments();
+      });
   }
 
   ngOnInit(): void {
@@ -474,17 +549,22 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
   }
 
   loadCities(): void {
-    this.driverService.getAvailableCities()
+    this.driverService
+      .getAvailableCities()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (cities) => {
           // Separate destination and pickup cities
-          this.availableCities = cities.filter(city => !city.label.includes('(départ)'));
-          this.availablePickupCities = cities.filter(city => city.label.includes('(départ)'));
+          this.availableCities = cities.filter(
+            (city) => !city.label.includes("(départ)")
+          );
+          this.availablePickupCities = cities.filter((city) =>
+            city.label.includes("(départ)")
+          );
         },
         error: (error) => {
-          console.error('Erreur lors du chargement des villes:', error);
-        }
+          console.error("Erreur lors du chargement des villes:", error);
+        },
       });
   }
 
@@ -494,7 +574,7 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
     // Convert form values to proper filter types
     const filterParams: ShipmentFilters = {};
 
-    if (this.filters.status && this.filters.status !== '') {
+    if (this.filters.status && this.filters.status !== "") {
       filterParams.status = this.filters.status as ShipmentStatus;
     }
     if (this.filters.barcode) {
@@ -528,7 +608,8 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
       filterParams.amountTo = this.filters.amountTo;
     }
 
-    this.driverService.getFilteredShipments(filterParams)
+    this.driverService
+      .getFilteredShipments(filterParams)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (shipments) => {
@@ -536,9 +617,9 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Erreur lors du chargement des colis:', error);
+          console.error("Erreur lors du chargement des colis:", error);
           this.isLoading = false;
-        }
+        },
       });
   }
 
@@ -552,63 +633,66 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.filters = {
-      status: '',
-      barcode: '',
-      dateFrom: '',
-      dateTo: '',
-      city: '',
-      delegation: '',
-      pickupCity: '',
-      pickupDelegation: '',
-      clientName: '',
+      status: "",
+      barcode: "",
+      dateFrom: "",
+      dateTo: "",
+      city: "",
+      delegation: "",
+      pickupCity: "",
+      pickupDelegation: "",
+      clientName: "",
       amountFrom: null,
-      amountTo: null
+      amountTo: null,
     };
     this.loadShipments();
   }
 
-  async updateStatus(shipmentId: string, newStatus: ShipmentStatus): Promise<void> {
+  async updateStatus(
+    shipmentId: string,
+    newStatus: ShipmentStatus
+  ): Promise<void> {
     try {
       await this.driverService.updateShipmentStatus(shipmentId, newStatus);
       this.loadShipments(); // Reload to get updated data
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut:', error);
+      console.error("Erreur lors de la mise à jour du statut:", error);
     }
   }
 
   getStatusCount(status: string): number {
-    return this.shipments.filter(s => s.status === status).length;
+    return this.shipments.filter((s) => s.status === status).length;
   }
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'pending': 'En attente',
-      'assigned': 'Assigné',
-      'picked_up': 'Récupéré',
-      'in_transit': 'En transit',
-      'delivered': 'Livré',
-      'returned': 'Retourné',
-      'cancelled': 'Annulé'
+      pending: "En attente",
+      assigned: "Assigné",
+      picked_up: "Récupéré",
+      in_transit: "En transit",
+      delivered: "Livré",
+      returned: "Retourné",
+      cancelled: "Annulé",
     };
     return labels[status] || status;
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
     }).format(amount);
   }
 
   formatDate(date: any): string {
-    if (!date) return '';
+    if (!date) return "";
     const d = date.toDate ? date.toDate() : new Date(date);
-    return d.toLocaleDateString('fr-FR');
+    return d.toLocaleDateString("fr-FR");
   }
 
   openInMaps(coordinates: { lat: number; lng: number }): void {
     const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   }
 
   viewShipmentDetails(shipment: Shipment): void {
@@ -645,27 +729,39 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
   onFailureConfirmed(result: DeliveryFailureResult): void {
     if (!this.selectedShipmentForFailure?.id) return;
 
-    console.log('Échec de livraison confirmé:', result);
+    const shipmentId = this.selectedShipmentForFailure.id;
 
-    // TODO: Intégrer avec le service pour enregistrer l'échec
-    // this.driverService.recordDeliveryFailure(this.selectedShipmentForFailure.id, result)
-    //   .then(() => {
-    //     // Mettre à jour le statut du colis
-    //     if (result.reschedule) {
-    //       this.updateStatus(this.selectedShipmentForFailure!.id!, 'assigned'); // Reprogrammé
-    //     } else {
-    //       this.updateStatus(this.selectedShipmentForFailure!.id!, 'returned'); // Retour dépôt
-    //     }
-    //   });
-
-    // Pour l'instant, mise à jour simple du statut
-    if (result.reschedule) {
-      this.updateStatus(this.selectedShipmentForFailure.id, 'assigned');
-      this.showToast('Nouvelle tentative programmée', 'success');
-    } else {
-      this.updateStatus(this.selectedShipmentForFailure.id, 'returned');
-      this.showToast('Échec enregistré, colis retourné au dépôt', 'warning');
-    }
+    // Enregistrer l'échec via le service
+    this.driverService
+      .recordDeliveryFailure(shipmentId, {
+        failureReason: result.failureReason,
+        failureNote: result.failureNote,
+        reschedule: result.reschedule,
+        rescheduledDate: result.rescheduledDate,
+        rescheduledWindow: result.rescheduledWindow,
+        clientNotified: result.clientNotified,
+        clientNotificationMethod: result.clientNotificationMethod,
+        proofPhotos: result.proofPhotos,
+      })
+      .then(() => {
+        if (result.reschedule) {
+          this.showToast(
+            "Nouvelle tentative programmée avec succès",
+            "success"
+          );
+        } else {
+          this.showToast(
+            "Échec enregistré, colis retourné au dépôt",
+            "warning"
+          );
+        }
+        // Recharger les colis pour refléter les changements
+        this.loadShipments();
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'enregistrement de l'échec:", error);
+        this.showToast("Erreur lors de l'enregistrement de l'échec", "error");
+      });
 
     this.closeFailureModal();
   }
@@ -677,24 +773,36 @@ export class DriverShipmentsComponent implements OnInit, OnDestroy {
     // Ouvre directement le modal de reprogrammation
     this.selectedShipmentForFailure = shipment;
     this.isFailureModalVisible = true;
-
-    // TODO: Pré-remplir le formulaire avec reschedule=true
-    this.showToast('Planifiez une nouvelle tentative de livraison', 'info');
+    this.showToast("Planifiez une nouvelle tentative de livraison", "info");
   }
 
   /**
    * Récupère l'ID du livreur actuel
    */
   getCurrentDriverId(): string {
-    // TODO: Récupérer l'ID du livreur connecté depuis le service d'authentification
-    return 'current-driver-id'; // Placeholder
+    return this.driverService.getCurrentDriverId() || "";
   }
 
   /**
-   * Affiche un message toast (placeholder)
+   * Affiche un message toast
    */
-  private showToast(message: string, type: 'success' | 'warning' | 'error' | 'info'): void {
-    // TODO: Intégrer avec ngx-toastr ou système de notification
-    console.log(`[${type.toUpperCase()}] ${message}`);
+  private showToast(
+    message: string,
+    type: "success" | "warning" | "error" | "info"
+  ): void {
+    switch (type) {
+      case "success":
+        this.toastr.success(message);
+        break;
+      case "warning":
+        this.toastr.warning(message);
+        break;
+      case "error":
+        this.toastr.error(message);
+        break;
+      case "info":
+        this.toastr.info(message);
+        break;
+    }
   }
 }

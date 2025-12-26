@@ -1,14 +1,21 @@
 /* eslint-disable @angular-eslint/prefer-inject */
-import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { CommonModule } from "@angular/common";
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnDestroy,
+} from "@angular/core";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
-import { DriverService } from '../../core/services/driver-portal.service';
-import { UserProfile } from '../../core/models/user-profile.model';
+import { DriverPortalService } from "../../core/services/driver-portal.service";
+import { UserProfile } from "../../core/models/user-profile.model";
 
 @Component({
-  selector: 'app-driver-topbar',
+  selector: "app-driver-topbar",
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -19,7 +26,8 @@ import { UserProfile } from '../../core/models/user-profile.model';
           class="menu-toggle"
           (click)="onMenuClick()"
           type="button"
-          aria-label="Basculer le menu">
+          aria-label="Basculer le menu"
+        >
           <i class="fas fa-bars"></i>
         </button>
 
@@ -52,7 +60,8 @@ import { UserProfile } from '../../core/models/user-profile.model';
           <button
             class="notification-btn"
             type="button"
-            aria-label="Notifications">
+            aria-label="Notifications"
+          >
             <i class="fas fa-bell"></i>
             <span class="notification-badge" *ngIf="notificationCount > 0">
               {{ notificationCount }}
@@ -66,21 +75,23 @@ import { UserProfile } from '../../core/models/user-profile.model';
             class="profile-btn"
             (click)="toggleUserMenu()"
             type="button"
-            aria-label="Menu utilisateur">
+            aria-label="Menu utilisateur"
+          >
             <div class="avatar">
               <img
                 *ngIf="userProfile?.photoURL"
                 [src]="userProfile.photoURL"
                 [alt]="userProfile?.name || 'Avatar'"
-                class="avatar-img">
-              <div
-                *ngIf="!userProfile?.photoURL"
-                class="avatar-placeholder">
-                {{ getInitials(userProfile?.name || '') }}
+                class="avatar-img"
+              />
+              <div *ngIf="!userProfile?.photoURL" class="avatar-placeholder">
+                {{ getInitials(userProfile?.name || "") }}
               </div>
             </div>
             <div class="user-info">
-              <span class="user-name">{{ userProfile?.name || 'Livreur' }}</span>
+              <span class="user-name">{{
+                userProfile?.name || "Livreur"
+              }}</span>
               <span class="user-role">{{ getUserRoleLabel() }}</span>
             </div>
             <i class="fas fa-chevron-down"></i>
@@ -90,8 +101,8 @@ import { UserProfile } from '../../core/models/user-profile.model';
           <div class="user-menu" [class.show]="isUserMenuOpen">
             <div class="menu-header">
               <div class="user-details">
-                <strong>{{ userProfile?.name || 'Livreur' }}</strong>
-                <span>{{ userProfile?.email || '' }}</span>
+                <strong>{{ userProfile?.name || "Livreur" }}</strong>
+                <span>{{ userProfile?.email || "" }}</span>
               </div>
             </div>
             <div class="menu-divider"></div>
@@ -108,7 +119,8 @@ import { UserProfile } from '../../core/models/user-profile.model';
               <button
                 class="menu-item logout"
                 (click)="onLogoutClick()"
-                type="button">
+                type="button"
+              >
                 <i class="fas fa-sign-out-alt"></i>
                 Déconnexion
               </button>
@@ -118,7 +130,7 @@ import { UserProfile } from '../../core/models/user-profile.model';
       </div>
     </div>
   `,
-  styleUrls: ['./driver-topbar.component.scss']
+  styleUrls: ["./driver-topbar.component.scss"],
 })
 export class DriverTopbarComponent implements OnInit, OnDestroy {
   @Input() userProfile: UserProfile | null = null;
@@ -131,9 +143,7 @@ export class DriverTopbarComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private readonly driverService: DriverService
-  ) {}
+  constructor(private readonly driverService: DriverPortalService) {}
 
   ngOnInit(): void {
     this.loadStats();
@@ -159,9 +169,9 @@ export class DriverTopbarComponent implements OnInit, OnDestroy {
   }
 
   getInitials(name: string): string {
-    if (!name) return 'U';
+    if (!name) return "U";
 
-    const parts = name.split(' ');
+    const parts = name.split(" ");
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
@@ -169,26 +179,27 @@ export class DriverTopbarComponent implements OnInit, OnDestroy {
   }
 
   getUserRoleLabel(): string {
-    return 'Livreur';
+    return "Livreur";
   }
 
   private loadStats(): void {
-    this.driverService.getDriverStats()
+    this.driverService
+      .getDriverStats()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (stats) => {
           this.stats = stats;
         },
         error: (error) => {
-          console.error('Erreur lors du chargement des statistiques:', error);
-        }
+          console.error("Erreur lors du chargement des statistiques:", error);
+        },
       });
   }
 
   private setupClickOutside(): void {
-    document.addEventListener('click', (event) => {
+    document.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
-      const dropdown = target.closest('.user-profile-dropdown');
+      const dropdown = target.closest(".user-profile-dropdown");
 
       if (!dropdown && this.isUserMenuOpen) {
         this.isUserMenuOpen = false;

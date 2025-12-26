@@ -1,31 +1,27 @@
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { inject } from "@angular/core";
+import { Router, CanActivateFn } from "@angular/router";
 
-// Auth Services
-import { AuthenticationService } from '../services/auth.service';
-import { environment } from '../../../environments/environment';
+import { AuthenticationService } from "../services/auth.service";
 
-@Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
-    constructor(
-        private router: Router,
-        private authenticationService: AuthenticationService
-    ) { }
+/**
+ * Functional guard that checks if user is authenticated
+ */
+export const AuthGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  const authService = inject(AuthenticationService);
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        const currentUser = this.authenticationService.currentUser();
-        if (currentUser) {
-            // logged in so return true
-            return true;
-        }
+  const currentUser = authService.currentUser();
+  if (currentUser) {
+    // logged in so return true
+    return true;
+  }
 
-        // check if user data is in storage as a fallback
-        if (localStorage.getItem('currentUser')) {
-            return true;
-        }
+  // check if user data is in storage as a fallback
+  if (localStorage.getItem("currentUser")) {
+    return true;
+  }
 
-        // not logged in so redirect to login page with the return url
-        this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
-        return false;
-    }
-}
+  // not logged in so redirect to login page with the return url
+  router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+  return false;
+};

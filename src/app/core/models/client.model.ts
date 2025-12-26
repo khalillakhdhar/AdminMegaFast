@@ -1,4 +1,4 @@
-import { GeolocationPosition } from '../services/geolocation.service';
+import { GeolocationPosition } from "../services/geolocation.service";
 
 export interface ClientAddress {
   id?: string;
@@ -20,13 +20,13 @@ export interface ClientAddress {
 }
 
 export interface ClientLocationPreferences {
-  allowTracking: boolean;          // Autoriser suivi des livraisons
+  allowTracking: boolean; // Autoriser suivi des livraisons
   shareLocationWithDrivers: boolean; // Partager localisation avec livreurs
   receiveLocationNotifications: boolean; // Notifications de géolocalisation
-  trackingRadius: number;          // Rayon de notification en mètres
+  trackingRadius: number; // Rayon de notification en mètres
   preferredDeliveryWindow?: {
     start: string; // HH:mm
-    end: string;   // HH:mm
+    end: string; // HH:mm
   };
 }
 
@@ -70,11 +70,11 @@ export interface Client {
   isActive?: boolean;
 
   // Extensions pour profil avancé
-  addresses?: ClientAddress[];       // Adresses multiples
-  primaryAddressId?: string;         // ID de l'adresse principale
-  profilePicture?: string;           // URL de la photo de profil
-  dateOfBirth?: any;                 // Date de naissance
-  gender?: 'male' | 'female' | 'other';
+  addresses?: ClientAddress[]; // Adresses multiples
+  primaryAddressId?: string; // ID de l'adresse principale
+  profilePicture?: string; // URL de la photo de profil
+  dateOfBirth?: any; // Date de naissance
+  gender?: "male" | "female" | "other";
 
   // Préférences de géolocalisation
   locationPreferences?: ClientLocationPreferences;
@@ -83,14 +83,14 @@ export interface Client {
   // Informations de contact étendues
   alternativePhone?: string;
   whatsappNumber?: string;
-  preferredContactMethod?: 'phone' | 'email' | 'sms' | 'whatsapp';
+  preferredContactMethod?: "phone" | "email" | "sms" | "whatsapp";
 
   // Statistiques et historique
   stats?: ClientStats;
-  memberSince?: any;                 // Date d'inscription
-  lastOrderDate?: any;               // Dernière commande
-  totalOrders?: number;              // Nombre total de commandes
-  totalSpent?: number;               // Montant total dépensé
+  memberSince?: any; // Date d'inscription
+  lastOrderDate?: any; // Dernière commande
+  totalOrders?: number; // Nombre total de commandes
+  totalSpent?: number; // Montant total dépensé
 
   // Paramètres de sécurité
   securitySettings?: {
@@ -103,10 +103,11 @@ export interface Client {
   hasAccount?: boolean;
   userId?: string; // Firebase User ID
   temporaryPassword?: string; // Used only during creation
+  passwordSetByAdmin?: boolean; // True if password was set by admin directly
   accountCreatedAt?: any; // Date when account was created
   lastLoginAt?: any; // Last login timestamp
 
-  createdAt?: any;  // Date | Firebase Timestamp
+  createdAt?: any; // Date | Firebase Timestamp
   updatedAt?: any;
 }
 
@@ -116,17 +117,17 @@ export interface ClientUser {
   password: string;
   displayName?: string;
   clientId?: string;
-  role: 'client';
+  role: "client";
   isActive?: boolean;
   createdAt?: any;
   updatedAt?: any;
   lastLoginAt?: any;
 
   // Extensions sécurité
-  loginAttempts?: number;            // Tentatives de connexion échouées
-  lockedUntil?: any;                 // Verrouillage temporaire du compte
-  passwordChangedAt?: any;           // Dernière modification du mot de passe
-  deviceTokens?: string[];           // Tokens pour notifications push
+  loginAttempts?: number; // Tentatives de connexion échouées
+  lockedUntil?: any; // Verrouillage temporaire du compte
+  passwordChangedAt?: any; // Dernière modification du mot de passe
+  deviceTokens?: string[]; // Tokens pour notifications push
   securityQuestions?: {
     question: string;
     answerHash: string; // Hash de la réponse
@@ -137,7 +138,7 @@ export interface ClientUser {
 export interface ClientLocationHistory {
   clientId: string;
   position: GeolocationPosition;
-  context: 'order_placed' | 'delivery_request' | 'manual_check';
+  context: "order_placed" | "delivery_request" | "manual_check";
   timestamp: any;
   accuracy?: number;
 }
