@@ -5,33 +5,57 @@ import { AuthenticationService } from "../services/auth.service";
 
 /**
  * Functional guard that checks if user is a client
+ * Verifies role via Firebase Custom Claims (secure, server-set)
  */
-export const ClientGuard: CanActivateFn = (route, state) => {
+export const ClientGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const authService = inject(AuthenticationService);
 
-  const currentUser = authService.currentUser();
+  try {
+    // Get claims from Firebase token (secure - set server-side)
+    const claims = await authService.getTokenClaims();
 
-  if (currentUser) {
-    // Check if user is a client
-    if (authService.isClient()) {
-      return true;
+    if (claims) {
+      // Check if user is client via custom claims
+      if (claims.client === true) {
+        return true;
+      }
+
+      // If admin, redirect to admin dashboard
+      if (claims.admin === true) {
+        router.navigate(["/megafast"]);
+        return false;
+      }
+
+      // If driver, redirect to driver portal
+      if (claims.driver === true) {
+        router.navigate(["/driver"]);
+        return false;
+      }
     }
 
-    // If admin, redirect to admin dashboard
-    if (authService.isAdmin()) {
-      router.navigate(["/megafast"]);
-      return false;
+    // Fallback: check sync methods (uses cache/localStorage)
+    const currentUser = authService.currentUser();
+    if (currentUser) {
+      if (authService.isClient()) {
+        return true;
+      }
+      if (authService.isAdmin()) {
+        router.navigate(["/megafast"]);
+        return false;
+      }
+      if (authService.isDriver()) {
+        router.navigate(["/driver"]);
+        return false;
+      }
     }
 
-    // If driver, redirect to driver portal
-    if (authService.isDriver()) {
-      router.navigate(["/driver"]);
-      return false;
-    }
+    // Not logged in or no role, redirect to login
+    router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+    return false;
+  } catch (error) {
+    console.error("ClientGuard error:", error);
+    router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+    return false;
   }
-
-  // not logged in or no role, redirect to login
-  router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
-  return false;
 };

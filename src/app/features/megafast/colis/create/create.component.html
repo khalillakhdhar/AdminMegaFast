@@ -461,8 +461,8 @@
 					</h5>
 					<div class="row g-3">
 						<div class="col-md-6">
-							<label class="form-label" for="assignedTo">Livreur (optionnel)</label>
-							<select formControlName="assignedTo" id="assignedTo" class="form-select">
+						<label class="form-label" for="driverId">Livreur (optionnel)</label>
+						<select formControlName="driverId" id="driverId" class="form-select">
 								<option value="">Assignation automatique</option>
 								<option *ngFor="let driver of drivers" [value]="driver.id">{{ driver.name }}</option>
 							</select>

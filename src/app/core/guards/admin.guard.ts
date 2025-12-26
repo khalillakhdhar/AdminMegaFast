@@ -5,33 +5,57 @@ import { AuthenticationService } from "../services/auth.service";
 
 /**
  * Functional guard that checks if user is an admin
+ * Verifies role via Firebase Custom Claims (secure, server-set)
  */
-export const AdminGuard: CanActivateFn = (route, state) => {
+export const AdminGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const authService = inject(AuthenticationService);
 
-  const currentUser = authService.currentUser();
+  try {
+    // Get claims from Firebase token (secure - set server-side)
+    const claims = await authService.getTokenClaims();
 
-  if (currentUser) {
-    // Check if user is admin
-    if (authService.isAdmin()) {
-      return true;
+    if (claims) {
+      // Check if user is admin via custom claims
+      if (claims.admin === true) {
+        return true;
+      }
+
+      // If client, redirect to client portal
+      if (claims.client === true) {
+        router.navigate(["/client"]);
+        return false;
+      }
+
+      // If driver, redirect to driver portal
+      if (claims.driver === true) {
+        router.navigate(["/driver"]);
+        return false;
+      }
     }
 
-    // If client, redirect to client portal
-    if (authService.isClient()) {
-      router.navigate(["/client"]);
-      return false;
+    // Fallback: check sync methods (uses cache/localStorage)
+    const currentUser = authService.currentUser();
+    if (currentUser) {
+      if (authService.isAdmin()) {
+        return true;
+      }
+      if (authService.isClient()) {
+        router.navigate(["/client"]);
+        return false;
+      }
+      if (authService.isDriver()) {
+        router.navigate(["/driver"]);
+        return false;
+      }
     }
 
-    // If driver, redirect to driver portal
-    if (authService.isDriver()) {
-      router.navigate(["/driver"]);
-      return false;
-    }
+    // Not logged in or no role, redirect to login
+    router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+    return false;
+  } catch (error) {
+    console.error("AdminGuard error:", error);
+    router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
+    return false;
   }
-
-  // not logged in, redirect to login
-  router.navigate(["/auth/login"], { queryParams: { returnUrl: state.url } });
-  return false;
 };

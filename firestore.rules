@@ -1,0 +1,204 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================================================
+    // HELPER FUNCTIONS
+    // ========================================================================
+
+    // Vérifie si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Vérifie si l'utilisateur a le rôle admin (via custom claims)
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // Vérifie si l'utilisateur a le rôle client (via custom claims)
+    function isClient() {
+      return isAuthenticated() && request.auth.token.client == true;
+    }
+
+    // Vérifie si l'utilisateur a le rôle driver (via custom claims)
+    function isDriver() {
+      return isAuthenticated() && request.auth.token.driver == true;
+    }
+
+    // Récupère le clientId depuis les claims
+    function getClientId() {
+      return request.auth.token.clientId;
+    }
+
+    // Récupère le driverId depuis les claims
+    function getDriverId() {
+      return request.auth.token.driverId;
+    }
+
+    // Vérifie si c'est le propriétaire du document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ========================================================================
+    // COLLECTION: users
+    // ========================================================================
+    match /users/{userId} {
+      // Lecture: admin peut tout lire, user peut lire son propre doc
+      allow read: if isAdmin() || isOwner(userId);
+
+      // Création: uniquement admin ou le user lui-même lors de l'inscription
+      allow create: if isAdmin() || isOwner(userId);
+
+      // Mise à jour: admin peut tout modifier, user peut modifier certains champs
+      allow update: if isAdmin() || (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive', 'admin']));
+
+      // Suppression: uniquement admin
+      allow delete: if isAdmin();
+    }
+
+    // ========================================================================
+    // COLLECTION: shipments
+    // ========================================================================
+    match /shipments/{shipmentId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+
+      // Client: lecture de ses propres colis uniquement
+      allow read: if isClient() && resource.data.clientId == getClientId();
+
+      // Client: création de colis (avec son clientId)
+      allow create: if isClient() && request.resource.data.clientId == getClientId();
+
+      // Driver: lecture des colis qui lui sont assignés
+      allow read: if isDriver() && resource.data.assignedTo == getDriverId();
+
+      // Driver: mise à jour limitée (statut, notes, geo, history)
+      allow update: if isDriver()
+        && resource.data.assignedTo == getDriverId()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'notes', 'geo', 'history', 'updatedAt', 'deliveredAt']);
+    }
+
+    // ========================================================================
+    // COLLECTION: clients
+    // ========================================================================
+    match /clients/{clientId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+
+      // Client: lecture de son propre profil uniquement
+      allow read: if isClient() && getClientId() == clientId;
+
+      // Client: mise à jour limitée de son profil (pas le statut, pas le compte)
+      allow update: if isClient()
+        && getClientId() == clientId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isActive', 'hasAccount', 'userId', 'role']);
+    }
+
+    // ========================================================================
+    // COLLECTION: drivers
+    // ========================================================================
+    match /drivers/{driverId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+
+      // Driver: lecture de son propre profil uniquement
+      allow read: if isDriver() && getDriverId() == driverId;
+
+      // Driver: mise à jour limitée de son profil
+      allow update: if isDriver()
+        && getDriverId() == driverId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isActive', 'active', 'hasAccount', 'userId', 'role', 'temporaryPassword']);
+    }
+
+    // ========================================================================
+    // COLLECTION: delivery_attempts
+    // ========================================================================
+    match /delivery_attempts/{attemptId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+
+      // Driver: lecture/création pour ses propres tentatives
+      allow read: if isDriver() && resource.data.driverId == getDriverId();
+      allow create: if isDriver() && request.resource.data.driverId == getDriverId();
+
+      // Driver: mise à jour de ses propres tentatives
+      allow update: if isDriver() && resource.data.driverId == getDriverId();
+    }
+
+    // ========================================================================
+    // COLLECTION: locations (tracking temps réel)
+    // ========================================================================
+    match /locations/{locationId} {
+      // Admin: lecture seule (monitoring)
+      allow read: if isAdmin();
+
+      // Driver: lecture/écriture de ses propres positions
+      allow read, write: if isDriver() && resource.data.userId == request.auth.uid;
+      allow create: if isDriver() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ========================================================================
+    // COLLECTION: tracking_sessions
+    // ========================================================================
+    match /tracking_sessions/{sessionId} {
+      // Admin: lecture seule
+      allow read: if isAdmin();
+
+      // Driver: gestion de ses propres sessions
+      allow read, write: if isDriver() && resource.data.userId == request.auth.uid;
+      allow create: if isDriver() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ========================================================================
+    // COLLECTION: location_history
+    // ========================================================================
+    match /location_history/{historyId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+
+      // Driver: lecture de son propre historique
+      allow read: if isDriver() && resource.data.userId == request.auth.uid;
+    }
+
+    // ========================================================================
+    // COLLECTIONS ADMIN-ONLY (facturation, comptabilité, paie, etc.)
+    // ========================================================================
+    match /invoices/{invoiceId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /payroll/{payrollId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /leave_categories/{categoryId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /leave_requests/{requestId} {
+      allow read, write: if isAdmin();
+      // Driver peut lire/créer ses propres demandes
+      allow read: if isDriver() && resource.data.driverId == getDriverId();
+      allow create: if isDriver() && request.resource.data.driverId == getDriverId();
+    }
+
+    match /batches/{batchId} {
+      allow read, write: if isAdmin();
+      // Driver peut lire les batches qui lui sont assignés
+      allow read: if isDriver() && resource.data.driverId == getDriverId();
+    }
+
+    // ========================================================================
+    // FALLBACK: refuser tout ce qui n'est pas explicitement autorisé
+    // ========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

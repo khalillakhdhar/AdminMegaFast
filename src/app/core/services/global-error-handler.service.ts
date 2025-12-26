@@ -1,13 +1,30 @@
-import { ErrorHandler, Injectable, inject } from "@angular/core";
+import { ErrorHandler, Injectable, Injector } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 
 /**
  * Global error handler that catches unhandled errors
  * and displays user-friendly notifications
+ *
+ * Uses Injector for lazy ToastrService injection to avoid
+ * circular dependency during bootstrap
  */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  private readonly toastr = inject(ToastrService);
+  private toastr?: ToastrService;
+
+  constructor(private injector: Injector) {}
+
+  private getToastr(): ToastrService | undefined {
+    if (!this.toastr) {
+      try {
+        this.toastr = this.injector.get(ToastrService);
+      } catch (e) {
+        // ToastrService not available during early bootstrap
+        console.warn("ToastrService not available yet");
+      }
+    }
+    return this.toastr;
+  }
 
   handleError(error: unknown): void {
     // Extract error message
@@ -55,13 +72,16 @@ export class GlobalErrorHandler implements ErrorHandler {
     // Log error to console for debugging
     console.error("Global Error Handler caught:", error);
 
-    // Show toast notification
-    this.toastr.error(message, title, {
-      timeOut: 5000,
-      closeButton: true,
-      progressBar: true,
-      positionClass: "toast-top-right",
-    });
+    // Show toast notification (only if ToastrService is available)
+    const toastr = this.getToastr();
+    if (toastr) {
+      toastr.error(message, title, {
+        timeOut: 5000,
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+      });
+    }
   }
 
   private getFirebaseAuthErrorMessage(errorMessage: string): string {
